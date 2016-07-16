@@ -78,6 +78,288 @@ to try to set the key mapping reasonably usably.
 (define-keyboard-mapping :xquartz-87-tenkeyless ()
 ```
 
+## Mapping Notes
+
+The only function that reads `*keyboard-mappings*` is
+`x-screen::layout-type-keyboard-mapping`, and that seems
+to be used in only three locations:
+
+* `x-screen::fill-keyboard-table-specific`
+* `x-screen::layout-type-leds`
+* `x-screen::x-console-describe-keyboard-mapping` - Handles `Show X Keyboard Mapping` display
+
+The `fill-keyboard-table-specific` is of great interest, as it seems to translate
+`code-keys` into the actual Symbolics key that Genera sees. Viz, from the function in `x-console.lisp`:
+
+```lisp
+             ;; key code specific key mappings have the highest priority
+             (loop for lshift below nlshifts
+                   for key = (or (nth lshift code-keys) (first code-keys))
+                   when (and key
+                             (= (aref table lshift (keycode->keynum code))
+                                null-mapping))
+                     do (setf (aref table lshift (keycode->keynum code))
+                              (sys:standardize-keyboard-mapping key t))))
+           ;; Next comes shift specific key mappings 
+           (loop with unshifted-keysym = (xlib:keycode->keysym display code 0)
+                 for xshift below nxshifts
+                 for lshift below nlshifts
+                 when (= (aref table lshift (keycode->keynum code)) null-mapping)
+                   do (loop with shifted-keysym = (xlib:keycode->keysym display code xshift)
+                            with shifted-keysym-names =
+                              (gethash shifted-keysym *keysym-name-table*)
+                            for shifted-keysym-name in shifted-keysym-names
+                            for shifted-key =
+                                (cadr (assoc shifted-keysym-name keyboard-mapping))
+                            when (and shifted-key
+                                      (not (= unshifted-keysym shifted-keysym))
+                                      (= (aref table lshift (keycode->keynum code))
+                                         null-mapping))
+                              do (setf (aref table lshift (keycode->keynum code))
+                                       (sys:standardize-keyboard-mapping shifted-key t))
+                              and return))
+           ;; finally mappings based on the unshifted keysym
+           (loop with unshifted-keysym = (xlib:keycode->keysym display code 0)
+                 with unshifted-keysym-names = (gethash unshifted-keysym *keysym-name-table*)
+                 for lshift below nlshifts
+                 do (loop for unshifted-keysym-name in unshifted-keysym-names
+                          for unshifted-keys =
+                              (cdr (assoc unshifted-keysym-name keyboard-mapping))
+                          for key = (or (nth lshift unshifted-keys) (first unshifted-keys))
+                          when (and key
+                                    (= (aref table lshift (keycode->keynum code))
+                                       null-mapping))
+                            do (setf (aref table lshift (keycode->keynum code))
+                                     (sys:standardize-keyboard-mapping key t))))))
+
+```  
+
+This is in turn called by `fill-keyboard-table` which calls all the `fill-keyboard-table-*` methods:
+
+```lisp
+(defun-in-flavor (fill-keyboard-table x-console) (table layout-type)
+  (clear-keyboard-table table)
+  (fill-keyboard-table-general table layout-type)
+  (fill-keyboard-table-specific table layout-type)
+  (fill-keyboard-table-symbol table layout-type)
+  (fill-keyboard-table-fixup table layout-type))
+```
+
+And `fill-keyboard-table` is itself called by `x-console-update-keyboard-mapping`:
+
+```lisp
+(defmethod (x-console-update-keyboard-mapping x-console) ()
+  (let ((table (sys:keyboard-keyboard-table cli::keyboard))
+        (layout-type (sys:keyboard-layout-type cli::keyboard)))
+    (fill-keyboard-table table layout-type)
+    (dolist (remapping cli::*keyboard-table-remappings*)
+      (destructuring-bind (value remapping-layout-type . rest) remapping
+        (when (eq remapping-layout-type layout-type)
+          (apply #'sys:set-keyboard-table-mapping value table rest))))
+    (setf (cli::keyboard-all-keys-up-shift-keys cli::keyboard)
+          (keyboard-table-all-keys-up-shift-keys table layout-type))
+    (setf (cli::keyboard-mouse-button-shift-keys cli::keyboard)
+          (keyboard-table-mouse-button-shift-keys table layout-type))
+    (setf (x-keyboard-leds cli::keyboard) (layout-type-leds layout-type)))
+  (cli::keyboard-initialize cli::keyboard)
+  (update-server-modifier-mapping))
+```
+
+This is hard to figure out, though, as I cannot seem to call these methods
+manually since `cli::keyboard` seems to be unbound. However, it seems that
+it is part of the `x-keyboard` flavor, from this:
+
+```lisp
+(defflavor x-keyboard
+        ((last-shifts nil)
+         (leds nil))
+        (cli::keyboard)
+  :initable-instance-variables
+  :readable-instance-variables
+  :writable-instance-variables)
+```
+
+
+## Desired & Achieved Mapping
+
+Here's the mapping. Note that some characters don't show up correctly
+because I don't have a conversion from Genera's character encoding to
+UTF-8 (yet).
+
+Also, note that the key codes shown below are off by 8, because the
+`:keycode-offset` was set to 8 above. That means the actual X-Windows
+keycodes are all 8 higher.
+
+The desired mapping of the bottom row is:
+
+```
+Genera:    Control   Super  Meta      SPACE    Meta    Control Symbol    Hyper
+Mac:       Control   Option Command   SPACE    Command Option  Menu      Control
+Keycode:   67        66     63        57       69      71      118       70
+Keysym+    Control-L Alt_L  Meta_L    space    Alt_R   Meta_R  NoSymbol  Control_R
+```
+
+An example mapping is:
+
+```lisp
+(define-keyboard-mapping :xquartz-87-tenkeyless ()
+
+  ; The below four don't work
+  (:backspace #\Rubout)
+  (:delete    #\back-space)
+  (#\back-space #\Rubout)
+  (#\rubout     #\back-space)
+
+  (:f1  #\Select #\Square)
+  (:f2  #\Network #\Circle)
+  (:f3  #\Function #\Triangle)
+  (:f4  #\Suspend (:mode-lock :locking t))
+  (:f5  #\Resume)
+  (:f6  #\Abort)
+  (:f7  :left-super)
+  (:f8  :left-hyper)
+  (:f9  #\Scroll #\Page)
+  (:f10 #\Clear-Input #\Refresh)
+  (:f11 #\Complete #\End)
+  (:f12 #\Help)
+
+  (:home     #\Keyboard:Home)
+  (:up       #\Keyboard:Up)
+  (:left     #\Keyboard:Left)
+  (:right    #\Keyboard:Right)
+  (:down     #\Keyboard:Down)
+  (:print    #\Keyboard:Print)
+  (:undo     #\Keyboard:Undo)
+  (:next     #\Scroll)
+  (:prior    #\Keyboard:Back-Scroll)
+
+  ; Remap the bottom modifier keys
+  ; Genera:    Control   Super  Meta      SPACE    Meta    Control Symbol    Hyper
+  ; Mac:       Control   Option Command   SPACE    Command Option  Menu      Control
+  ; Keycode:   67        66     63        57       69      71      118       70
+  ; Keysym+    Control-L Alt_L  Meta_L    space    Alt_R   Meta_R  NoSymbol  Control_R
+  ; BUT IS:                                                Meta              Control
+  (:left-alt :left-super)
+  (:right-alt :right-meta)
+  (110 :right-symbol) ; This has to be 110 = 118 - 8
+
+  ; These two don't work
+  (:right-meta :right-control)
+  (:right-control :right-hyper)
+  ; These two also don't work
+  (63 :right-control)
+  (62 :right-hyper)
+)
+
+```
+
+
+```
+
+The keyboard layout type is :XQUARTZ-87-TENKEYLESS.
+
+Key                    Shift                  Symbol                 Symbol-Shift           Console Key
+#\a                    #\A                                           #\                    000 Latin Small Letter A (000,097); Latin Capital Letter A (000,065);  (254,084);  (003,004)
+#\s                    #\S                                                                  001 Latin Small Letter S (000,115); Latin Capital Letter S (000,083); German Small Letter Sharp S (000,223); No Break Space (000,160)
+#\d                    #\D                                           #\?                    002 Latin Small Letter D (000,100); Latin Capital Letter D (000,068); Icelandic Small Letter Eth (000,240); Icelandic Capital Letter Eth (000,208)
+#\f                    #\F                                                                  003 Latin Small Letter F (000,102); Latin Capital Letter F (000,070); Function (008,246); No Break Space (000,160)
+#\h                    #\H                    #\                                           004 Latin Small Letter H (000,104); Latin Capital Letter H (000,072);  (002,205);  (003,049)
+#\g                    #\G                    #\
+                                                                    #\?                    005 Latin Small Letter G (000,103); Latin Capital Letter G (000,071); Copyright Sign (000,169); Caret (010,252)
+#\z                    #\Z                                                                  006 Latin Small Letter Z (000,122); Latin Capital Letter Z (000,090);  (002,192);  (003,009)
+#\x                    #\X                                                                  007 Latin Small Letter X (000,120); Latin Capital Letter X (000,088); Full Stop (000,046);  (003,035)
+#\c                    #\C                                                                  008 Latin Small Letter C (000,099); Latin Capital Letter C (000,067);  (254,091);  (003,039)
+#\v                    #\V                                                                  009 Latin Small Letter V (000,118); Latin Capital Letter V (000,086);  (254,090);  (003,012)
+                       #\?                                                                  010 Paragraph Sign, Section Sign (000,167); Plus Minus Sign (000,177)
+#\b                    #\B                                           #\                    011 Latin Small Letter B (000,098); Latin Capital Letter B (000,066);  (254,085);  (003,006)
+#\q                    #\Q                    #\                                           012 Latin Small Letter Q (000,113); Latin Capital Letter Q (000,081);  (019,189);  (019,188)
+#\w                    #\W                    #\                                           013 Latin Small Letter W (000,119); Latin Capital Letter W (000,087);  (254,086);  (003,007)
+#\e                    #\E                    #\                    #\                    014 Latin Small Letter E (000,101); Latin Capital Letter E (000,069);  (254,081);  (003,001)
+#\r                    #\R                    #\                                           015 Latin Small Letter R (000,114); Latin Capital Letter R (000,082); Registered Trade Mark Sign (000,174);  (032,048)
+#\y                    #\Y                    #\                                           016 Latin Small Letter Y (000,121); Latin Capital Letter Y (000,089); Yen Sign (000,165); No Break Space (000,160)
+#\t                    #\T                    #\                                           017 Latin Small Letter T (000,116); Latin Capital Letter T (000,084); Icelandic Small Letter Thorn (000,254); Icelandic Capital Letter Thorn (000,222)
+#\1                    #\!                                                                  018 Digit One (000,049); Exclamation Point (000,033); Inverted Exclamation Mark (000,161);  (032,068)
+#\2                    #\@                                                                  019 Digit Two (000,050); Commercial At (000,064); Trademark Sign (010,201);  (032,172)
+#\3                    #\#                                                                  020 Digit Three (000,051); Number Sign (000,035); Pound Sign (000,163);  (032,057)
+#\4                    #\$                                                                  021 Digit Four (000,052); Dollar Sign (000,036); Cent Sign (000,162);  (032,058)
+#\6                    #\^                                                                  022 Digit Six (000,054); Circumflex Accent (000,094);  (254,082);  (003,002)
+#\5                    #\%                                                                  023 Digit Five (000,053); Percent Sign (000,037); Paragraph Sign, Section Sign (000,167); Dagger (010,241)
+#\=                    #\+                    #\                    #\?                    024 Equals Sign (000,061); Plus Sign (000,043); Not Equal Sign (008,189); Plus Minus Sign (000,177)
+#\9                    #\(                                                                  025 Digit Nine (000,057); Left Parenthesis (000,040); Feminine Ordinal Indicator (000,170); Middle Dot (000,183)
+#\7                    #\&                                                                  026 Digit Seven (000,055); Ampersand (000,038); Pilcrow Sign (000,182); Double Dagger (010,242)
+#\-                    #\_                    #\                                           027 Hyphen, Minus Sign (000,045); Low Line (000,095); En Dash (010,170); Em Dash (010,169)
+#\8                    #\*                                           #\                    028 Digit Eight (000,056); Asterisk (000,042); En Filled Circle Bullet (010,230); Degree Sign, Ring Above (000,176)
+#\0                    #\)                                                                  029 Digit Zero (000,048); Right Parenthesis (000,041); Masculine Ordinal Indicator (000,186); Single Low Quotation Mark (010,253)
+#\]                    #\}                                                                  030 Right Square Bracket (000,093); Right Curly Bracket (000,125); Left Single Quotation Mark (010,208); Right Single Quotation Mark (010,209)
+#\o                    #\O                    #\                                           031 Latin Small Letter O (000,111); Latin Capital Letter O (000,079); Latin Small Letter O With Oblique Stroke (000,248); Latin Capital Letter O With Oblique Stroke (000,216)
+#\u                    #\U                    #\                                           032 Latin Small Letter U (000,117); Latin Capital Letter U (000,085);  (254,087);  (003,008)
+#\[                    #\{                                                                  033 Left Square Bracket (000,091); Left Curly Bracket (000,123); Left Double Quotation Mark (010,210); Right Double Quotation Mark (010,211)
+#\i                    #\I                    #\                                           034 Latin Small Letter I (000,105); Latin Capital Letter I (000,073);  (002,188);  (003,027)
+#\p                    #\P                    #\                    #\                    035 Latin Small Letter P (000,112); Latin Capital Letter P (000,080); Comma (000,044);  (003,038)
+#\Return               #\Return               #\Return               #\Return               036 Return, Enter (255,013)
+#\l                    #\L                    #\                    #\?                    037 Latin Small Letter L (000,108); Latin Capital Letter L (000,076); Hyphen, Minus Sign (000,045);  (003,053)
+#\j                    #\J                    #\                                           038 Latin Small Letter J (000,106); Latin Capital Letter J (000,074);  (254,089);  (003,011)
+#\'                    #\"                    #\                                           039 Apostrophe (000,039); Quotation Mark (000,034); Latin Small Diphthong Ae (000,230); Latin Capital Diphthong Ae (000,198)
+#\k                    #\K                    #\                                           040 Latin Small Letter K (000,107); Latin Capital Letter K (000,075);  (254,088);  (003,010)
+#\;                    #\:                                           #\?                    041 Semicolon (000,059); Colon (000,058); Ellipsis (010,174); Numero Sign (006,176)
+#\\                    #\|                                                                  042 Reverse Solidus (000,092); Vertical Line (000,124); Left Angle Quotation Mark (000,171); Right Angle Quotation Mark (000,187)
+#\,                    #\<                    #\                                           043 Comma (000,044); Less Than Sign (000,060); Less Than Or Equal Sign (008,188); Double Low Quotation Mark (010,254)
+#\/                    #\?                    #\?                                           044 Solidus (000,047); Question Mark (000,063); Division Sign (000,247); Inverted Question Mark (000,191)
+#\n                    #\N                                                                  045 Latin Small Letter N (000,110); Latin Capital Letter N (000,078);  (254,083);  (003,003)
+#\m                    #\M                                                                  046 Latin Small Letter M (000,109); Latin Capital Letter M (000,077);  (254,092);  (003,040)
+#\.                    #\>                    #\                                           047 Full Stop (000,046); Greater Than Sign (000,062); Greater Than Or Equal Sign (008,190);  (002,148)
+#\Tab                  #\Tab                  #\Tab                  #\Tab                  048 Tab (255,009)
+#\Space                #\Space                                                              049 Space (000,032); No Break Space (000,160)
+#\`                    #\~                    #\                                           050 Grave Accent (000,096); Tilde (000,126);  (254,080);  (003,000)
+#\Back-Space           #\Back-Space           #\Back-Space           #\Back-Space           051 Backspace, Back Space, Back Char (255,008)
+#\Escape               #\Escape               #\                   #\                   053 Escape (255,027)
+:LEFT-META             :LEFT-META             :LEFT-META             :LEFT-META             055 Left Meta (255,231)
+:LEFT-SHIFT            :LEFT-SHIFT            :LEFT-SHIFT            :LEFT-SHIFT            056 Left Shift (255,225)
+:CAPS-LOCK             :CAPS-LOCK             :CAPS-LOCK             :CAPS-LOCK             057 Caps Lock (255,229)
+:LEFT-SUPER            :LEFT-SUPER            :LEFT-SUPER            :LEFT-SUPER            058 Left Alt (255,233)
+:LEFT-CONTROL          :LEFT-CONTROL          :LEFT-CONTROL          :LEFT-CONTROL          059 Left Control (255,227)
+:RIGHT-SHIFT           :RIGHT-SHIFT           :RIGHT-SHIFT           :RIGHT-SHIFT           060 Right Shift (255,226)
+:RIGHT-META            :RIGHT-META            :RIGHT-META            :RIGHT-META            061 Right Alt (255,234)
+:RIGHT-CONTROL         :RIGHT-CONTROL         :RIGHT-CONTROL         :RIGHT-CONTROL         062 Right Control (255,228)
+:RIGHT-META            :RIGHT-META            :RIGHT-META            :RIGHT-META            063 Right Meta (255,232)
+#\Escape               #\Escape               #\                   #\                   071 Escape (255,027)
+#\Resume               #\Resume               #\Resume               #\Resume               096 F5 (255,194)
+#\Abort                #\Abort                #\Abort                #\Abort                097 F6 (255,195)
+:LEFT-SUPER            :LEFT-SUPER            :LEFT-SUPER            :LEFT-SUPER            098 F7 (255,196)
+#\Function             #\Triangle             #\Function             #\Triangle             099 F3 (255,192)
+:LEFT-HYPER            :LEFT-HYPER            :LEFT-HYPER            :LEFT-HYPER            100 F8 (255,197)
+#\Scroll               #\Page                 #\Scroll               #\Page                 101 F9 (255,198)
+#\Complete             #\End                  #\Complete             #\End                  103 F11, L1 (255,200)
+#\Clear-Input          #\Refresh              #\Clear-Input          #\Refresh              109 F10 (255,199)
+:RIGHT-SYMBOL          :RIGHT-SYMBOL          :RIGHT-SYMBOL          :RIGHT-SYMBOL          110 
+#\Help                 #\Help                 #\Symbol-Help          #\Symbol-Help          111 F12, L2 (255,201)
+#\Help                 #\Help                 #\Symbol-Help          #\Symbol-Help          114 Help (255,106)
+#\Keyboard:Home        #\Keyboard:Home        #\Keyboard:Home        #\Keyboard:Home        115 Home (255,080)
+#\Keyboard:Back-Scroll #\Keyboard:Back-Scroll #\Keyboard:Back-Scroll #\Keyboard:Back-Scroll 116 Prior, Previous (255,085)
+#\Rubout               #\Rubout               #\Rubout               #\Rubout               117 Delete, Rubout (255,255)
+#\Suspend              :MODE-LOCK             #\Suspend              :MODE-LOCK             118 F4 (255,193)
+#\End                  #\End                  #\End                  #\End                  119 End, Eol (255,087)
+#\Network              #\Circle               #\Network              #\Circle               120 F2 (255,191)
+#\Scroll               #\Scroll               #\Scroll               #\Scroll               121 Next (255,086)
+#\Select               #\Square               #\Select               #\Square               122 F1 (255,190)
+#\Keyboard:Left        #\Keyboard:Left        #\Keyboard:Left        #\Keyboard:Left        123 Left, Move Left (255,081)
+#\Keyboard:Right       #\Keyboard:Right       #\Keyboard:Right       #\Keyboard:Right       124 Right, Move Right (255,083)
+#\Keyboard:Down        #\Keyboard:Down        #\Keyboard:Down        #\Keyboard:Down        125 Down, Move Down, Down Arrow (255,084)
+#\Keyboard:Up          #\Keyboard:Up          #\Keyboard:Up          #\Keyboard:Up          126 Up, Move Up, Up Arrow (255,082)
+
+No console keys map to the Genera keys #\Line, :LEFT-SYMBOL, :RIGHT-SUPER, and :RIGHT-HYPER.
+
+No Genera keys map to the console keys [113 F15, L5 (255,204)], [107 F14, L4 (255,203)], [105 F13, L3 (255,202)],
+   [092 Keypad Digit Nine (255,185)], [091 Keypad Digit Eight (255,184)],
+   [089 Keypad Digit Seven (255,183)], [088 Keypad Digit Six (255,182)],
+   [087 Keypad Digit Five (255,181)], [086 Keypad Digit Four (255,180)],
+   [085 Keypad Digit Three (255,179)], [084 Keypad Digit Two (255,178)],
+   [083 Keypad Digit One (255,177)], [082 Keypad Digit Zero (255,176)],
+   [081 Keypad Equals Sign (255,189)], [078 Keypad Minus Sign (255,173)],
+   [076 Keypad Enter (255,141)], [075 Keypad Division Sign (255,175)],
+   [069 Keypad Plus Sign (255,171)],
+   [067 Keypad Multiplication Sign (255,170)], [065 Keypad Decimal Point (255,174)], and [052  (000,003)].
+```
 
  
 
