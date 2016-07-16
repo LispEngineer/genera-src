@@ -167,12 +167,8 @@
   (:down     #\Keyboard:Down)
   (:print    #\Keyboard:Print)
   (:undo     #\Keyboard:Undo)
-;  (:redo     #\Keyboard:Redo)
-;  (:find     #\Keyboard:Find)
   (:next     #\Scroll)
   (:prior    #\Keyboard:Back-Scroll)
-
-  ; (:num-lock (:num-lock :locking t))
 
   ; Remap the bottom modifier keys
   ; Genera:    Control   Super  Meta      SPACE    Meta    Control Symbol    Hyper
@@ -188,6 +184,6 @@
   (:right-meta :right-control)
   (:right-control :right-hyper)
   ; These two also don't work
-  (63 :right-control)
-  (62 :right-hyper)
+  (63 :right-control) ; 63 = 71 - 8
+  (62 :right-hyper)   ; 62 = 70 - 8
 )
