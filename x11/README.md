@@ -17,7 +17,7 @@ all the keynums and keysyms. If you change the xmodmap, it doesn't seem to
 pick up on that later.
 
 * `(x-screen::default-x-screen)` returns the default X-Windows screen. It seems to be the current one, as it will return a different value for each X-Windows connection, e.g.:
-  * `#<X-REAL-SCREEN X Screen INTERNET|192.168.1.106:0.0 0 (Genera on BERYLLIUM) 1004206265 exposed>
+  * `#<X-REAL-SCREEN X Screen INTERNET|192.168.1.106:0.0 0 (Genera on BERYLLIUM) 1004206265 exposed>`
 
 You can get a display by opening it, but I don't see how to get the current one
 out of Flavors yet.
@@ -25,7 +25,7 @@ out of Flavors yet.
 * `(xlib:open-display "INTERNET|192.168.1.106")`
   * This will give an error: `Error: INTERNET|192.168.1.106 does not support X-WINDOW-SYSTEM service.`
   * Simply respond `s-A: Use protocol X-WINDOW-SYSTEM on medium TCP.`
-* `(xlib:display-vendor-name \*)
+* `(xlib:display-vendor-name \*)`
   * `"The X.Org Foundation"`
 
 You can find out a lot of information with the various functions. Search for
