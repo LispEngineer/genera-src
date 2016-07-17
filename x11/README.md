@@ -4,7 +4,9 @@ Files related to X11 and keyboards.
 
 * `xquartz-87.lisp` - A keyboard for use with Xquartz that provides a sane
 mapping for an 87-key keyboard, extremely similar to the default X keyboard.
+[View Keyboard Layout](http://www.keyboard-layout-editor.com/#/gists/1bdd2184b15cfed700133f1aeba23f1c)
 * `xquartz-87-enh.lisp` - An improved keyboard with better mappings.
+[View Enhanced Layout](TODO)
 
 If you're using Xquartz, load those files
 and then start your X-Windows Screen. The keyboard will be picked
