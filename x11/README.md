@@ -1,6 +1,13 @@
 # x11
 
-Files related to X11.
+Files related to X11 and keyboards.
+
+Load these files in order, if you're using Xquartz, for a sane keyboard mapping,
+and then start your X-Windows Screen/session:
+
+* `dpf-x-kb-2.lisp`
+* `dpf-con-kb-2.lisp`
+* `final-mappings.lisp`
 
 # Notes
 
