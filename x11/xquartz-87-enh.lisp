@@ -463,12 +463,9 @@
 
 
 
-; When this keyboard is selected, for whatever reason,
-; it overwrites the mappings for Right Control and Right Meta (option/alt).
-
 ; Final mappings after setting up the :xquartz-87-enhanced keyboards in both
 ; X Mappings and Keyboard Layout. Necessary because for whatever reason, I cannot
-; get the X mappings to fully "stick" unless these commands are run.
+; get the mappings above to fully "stick" unless these commands are run.
 
 ; How this works:
 ; (sys:set-keyboard-table-mapping WHAT-TO-SEND KEYBOARD-LAYOUT-NAME KEYCODE-INPUT 
@@ -481,6 +478,8 @@
 ; 0x3F =  63 = Right Option = 71 in X-Windows Keycodes
 ;         51 = delete = 59 in X-Windows Keycodes and called BackSpace
 ;        117 = delete = 125 in X-Windows called Delete
+;         53 = esc
+;         96 = F5
 
 ; Right Option -> Control
 (sys:set-keyboard-table-mapping :right-hyper   :xquartz-87-enhanced #x3E :all-shifts t)
@@ -489,8 +488,16 @@
 ; Right Command -> Meta - already works
 ; Right Menu -> Symbol - already works
 
-; Swap backspace and rubout (which are delete and delete on Mac)
+; Keyboard  -> Genera
+; Backspace -> Rubout
+; Delete->  -> Line
+; Home      -> Backspace
 (sys:set-keyboard-table-mapping #\rubout     :xquartz-87-enhanced 51  :all-shifts t)
-(sys:set-keyboard-table-mapping #\back-space :xquartz-87-enhanced 117 :all-shifts t)
+(sys:set-keyboard-table-mapping #\back-space :xquartz-87-enhanced 115 :all-shifts t)
+(sys:set-keyboard-table-mapping #\line       :xquartz-87-enhanced 117 :all-shifts t)
 
+; Make esc key into Select
+(sys:set-keyboard-table-mapping #\select :xquartz-87-enhanced 53 :all-shifts t)
 
+; F5 is not working in the mapping; redo it here
+(sys:set-keyboard-table-mapping :left-symbol :xquartz-87-enhanced 96 :all-shifts t)
