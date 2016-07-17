@@ -83,10 +83,10 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.70710678"
-     inkscape:cx="667.79636"
-     inkscape:cy="350.3251"
+     inkscape:cx="653.65422"
+     inkscape:cy="258.75656"
      inkscape:document-units="px"
-     inkscape:current-layer="layer3"
+     inkscape:current-layer="svg2"
      showgrid="false"
      units="in"
      inkscape:window-width="1366"
@@ -7209,7 +7209,7 @@
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:7.82623816px;font-family:Bryant;-inkscape-font-specification:'Bryant Bold';letter-spacing:-0.5px;fill:#ff6600">SYM</tspan></text>
     <text
        xml:space="preserve"
-       style="display:inline;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15.65247631px;line-height:80.00000119%;font-family:Bryant;-inkscape-font-specification:'Bryant, Normal';text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#ff6600;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15.65247631px;line-height:80.00000119%;font-family:Bryant;-inkscape-font-specification:'Bryant, Normal';text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;display:inline;fill:#ff6600;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        x="1226.8304"
        y="211.21181"
        id="text4584"
@@ -7226,11 +7226,10 @@
      inkscape:groupmode="layer"
      id="layer7"
      inkscape:label="space bar"
-     style="display:inline"
-     sodipodi:insensitive="true">
+     style="display:inline">
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:17.5px;line-height:80.00000119%;font-family:Bryant;-inkscape-font-specification:'Bryant, Normal';text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:17.5px;line-height:80.00000119%;font-family:Bryant;-inkscape-font-specification:'Bryant, Normal';text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#575a5d;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;"
        x="305.12338"
        y="449.84003"
        id="text4589"
@@ -7239,10 +7238,10 @@
          id="tspan4591"
          x="305.12338"
          y="449.84003"
-         style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:10px;font-family:FrutigerNextLT;-inkscape-font-specification:'FrutigerNextLT Medium';text-align:start;text-anchor:start">https://symbolics.lisp.engineer/</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:10px;font-family:FrutigerNextLT;-inkscape-font-specification:'FrutigerNextLT Medium';text-align:start;text-anchor:start;fill:#575a5d;fill-opacity:1;">https://symbolics.lisp.engineer/</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:17.5px;line-height:80.00000119%;font-family:Bryant;-inkscape-font-specification:'Bryant, Normal';text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:17.5px;line-height:80.00000119%;font-family:Bryant;-inkscape-font-specification:'Bryant, Normal';text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#575a5d;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;"
        x="647.88208"
        y="449.84003"
        id="text4593"
@@ -7251,25 +7250,25 @@
          id="tspan4595"
          x="647.88208"
          y="449.84003"
-         style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:10px;font-family:FrutigerNextLT;-inkscape-font-specification:'FrutigerNextLT Medium'">Douglas P. Fields, Jr.</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:10px;font-family:FrutigerNextLT;-inkscape-font-specification:'FrutigerNextLT Medium';fill:#575a5d;fill-opacity:1;">Douglas P. Fields, Jr.</tspan></text>
   </g>
   <g
      inkscape:groupmode="layer"
      id="layer8"
      inkscape:label="logo"
-     sodipodi:insensitive="true"
-     style="display:inline">
+     style="display:inline"
+     sodipodi:insensitive="true">
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10px;line-height:80.00000119%;font-family:'Source Code Pro';-inkscape-font-specification:'Source Code Pro, Normal';text-align:center;letter-spacing:-2px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="497.38864"
-       y="440.21262"
+       x="506.07352"
+       y="72.566986"
        id="text4725"
        sodipodi:linespacing="80.000001%"><tspan
          sodipodi:role="line"
          id="tspan4727"
-         x="496.38864"
-         y="440.21262"
+         x="505.07352"
+         y="72.566986"
          dy="0 1 -2.5"
          style="font-size:25px;letter-spacing:-2px"
          dx="0"><tspan
