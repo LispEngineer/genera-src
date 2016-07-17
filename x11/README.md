@@ -10,6 +10,9 @@ mapping for an 87-key keyboard, extremely similar to the default X keyboard.
 * `xlib-patch.lisp` - A Genera patch file that fixes errors when Genera calls
 the `xlib:set-modifier-mapping` method by replacing it with a noop.
 See source code for details.
+* `set-x-kb-map.lisp` - Command processor command `Set X Keyboard Mapping`
+that lets Genera 8.3 switch keyboard mappings on the fly from the command line.
+I didn't write this; I cobbled it together from two files found on the Internet.
 
 If you're using Xquartz, load the patch and then the keyboards you want,
 then `Save World` (for ease of reuse). Then
