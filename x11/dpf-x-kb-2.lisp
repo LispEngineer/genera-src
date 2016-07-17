@@ -2,7 +2,8 @@
 ;;;
 ;;; Douglas Fields's 87-key Tenkeyless modern keyboard
 
-;; Douglas Fields
+;; Douglas Fields - Copyright 2016 - See LICENSE.txt for CC BY-NC-SA details
+;; https://symbolics.lisp.engineer/
 ;; Mac with an 87-Key Tenkeyless keyboard
 ;; Used under Xquartz 2.7.10_beta2
 
@@ -130,23 +131,10 @@
                                                ;     (2 :caps-lock)
                                                ;     (3 :num-lock)))
 
-  ; We can't seem to force any mapping of the ESCAPE key
-  ; #\Select and the others are special Genera-defined character names
-;  (:f1  #\Escape #\Square)
-  ; :escape doesn't seem to allow us to remap...
-;  (:escape #\Select #\Select)
-;  (#\Escape #\Select)
-;  (:f35 #\Select)
+  ; We can't seem to force any mapping of some keys using this
+  ; mechanism, such as :backspace, :escape, :delete, etc.
+  ; We can address these issues elsewhere.
   
-  ; Set the "delete" key to actaully delete backwards, i.e., rubout
-  ; Now the delete key can do something else (but what?)
-  ; The below two don't work
-  (:backspace #\Rubout)
-  (:delete    #\back-space)
-
-  (#\back-space #\Rubout)
-  (#\rubout     #\back-space)
-
   (:f1  #\Select #\Square)
   (:f2  #\Network #\Circle)
   (:f3  #\Function #\Triangle)
