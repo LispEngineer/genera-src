@@ -105,7 +105,7 @@
   (113 :f13                 :print                  ) ; F13 is PRINT SCREEN on Windows
   (115 :f14                 :pause                  ) ; F14 is SCROLL LOCK on Windows
   (117 :f10                 :f10                    ) ; Checked
-  ;118 MENU KEY             MENU  ; Right MENU key
+  ;118 MENU KEY             MENU  ; Right MENU key - Note, this key auto-repeats(!)
   (119 :f12                 :f12                    ) ; Checked
   (121 :f15                 :pause                  ) ; F15 is PAUSE on Windows
   (122 :help                :insert                 ) ; HELP is INSERT on Windows
@@ -165,8 +165,6 @@
   (:left     #\Keyboard:Left)
   (:right    #\Keyboard:Right)
   (:down     #\Keyboard:Down)
-  (:print    #\Keyboard:Print)
-  (:undo     #\Keyboard:Undo)
   (:next     #\Scroll)
   (:prior    #\Keyboard:Back-Scroll)
 
