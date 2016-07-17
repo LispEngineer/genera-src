@@ -1,7 +1,19 @@
-;;; -*- Base: 10; Mode: LISP; Syntax: Common-lisp; Lowercase: T -*-
+;;; -*- Base: 10; Mode: LISP; Syntax: Common-lisp; Lowercase: T; Patch-File: T -*-
 ;;;
 ;;; Douglas Fields
 ;;; https://symbolics.lisp.engineer/
+
+; Begin Genera Patch Verbiage =====
+(sct:files-patched-in-this-patch-file
+  "SYS:X11;CLX;DOC.LISP.5003") ; on MacIvory III Genera 8.3
+
+(sct:note-private-patch "XLib set-modifier-mapping noop patch")
+
+(sct:begin-patch-section)
+(sct:patch-section-source-file "SYS:X11;CLX;DOC.LISP.5003")
+(sct:patch-section-attributes
+  "-*- Base: 10; Mode: LISP; Syntax: Common-lisp; Lowercase: T -*-")
+; End Genera Patch Verbiage =====
 
 ; Patches to XLIB to make it work on a Modern X Server (e.g., Xquartz 2.7.10_beta2).
 ; After loading these patches, you should probably save your world and restart for
@@ -30,7 +42,7 @@
 
 ;;; (defun xlib:close-display (display &key abort))
 
-: Of course, the proper fix to these problems is to look into the
+; Of course, the proper fix to these problems is to look into the
 ; underlying source code and fix it to work with a modern X server.
 ; For example, the original set-modifier-mapping is at clx>doc.lisp
 ; and seems to be a very simple function. close-display is even

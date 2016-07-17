@@ -7,13 +7,23 @@ mapping for an 87-key keyboard, extremely similar to the default X keyboard.
 [View Keyboard Layout](http://www.keyboard-layout-editor.com/#/gists/1bdd2184b15cfed700133f1aeba23f1c)
 * `xquartz-87-enh.lisp` - An improved keyboard with better mappings.
 [View Enhanced Layout](TODO)
+* `xlib-patch.lisp` - A Genera patch file that fixes errors when Genera calls
+the `xlib:set-modifier-mapping` method by replacing it with a noop.
+See source code for details.
 
-If you're using Xquartz, load those files
-and then start your X-Windows Screen. The keyboard will be picked
-up automatically and configured properly.
+If you're using Xquartz, load the patch and then the keyboards you want,
+then `Save World` (for ease of reuse). Then
+`Start X Screen`. The keyboard type will be picked
+up automatically (from the server signature) and configured properly.
 
 This was designed for Xquartz 2.7.0_beta10 running on
 macOS 10.11.5 while using an 87-key Tenkeyless standard keyboard.
+
+You can see details of the mappings with these commands (and appropriate parameters):
+
+* `Show X Keyboard Mapping`
+* `Show Keyboard Layout`
+* `Select Activity Keyboard Control`
 
 # `xquartz-default-xmodmap.txt`
 
