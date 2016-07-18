@@ -21,10 +21,24 @@ Files:
   
 # Keyswitch Type
 
-In testing the various Cherry MX keys offered by WASD alongside
+In testing the various [Cherry MX keys offered by WASD](http://www.wasdkeyboards.com/mechanical-keyboard-guide) alongside
 the 3600, the linear keys are clearly the most similar. Indeed,
 the linear key with the higher actuation force seems to be the
-closest match 
+closest match Cherry MX Black.
+
+I also tested WASDs two "O-Ring Sound Dampeners" (which I would
+probably have just called "dampers"). The blue ones are slightly
+larger. They make the key travel lower and do slightly cushion
+the bottoming out.
+
+Overall, I think undamped MX Black is most similar. I think,
+for my own purposes, blue-ring damped MX Red would be preferred
+and still very similar to the original.
+
+(I'm typing this on MX Brown switches which I find to be
+unpleasantly firm with long travel. I actually prefer short
+travel keyboards such as those on Apple's aluminum keyboards
+and laptops but _not_ the new MacBook 12" non-Air non-Pro.)
 
 # Keycap Color
 
@@ -35,6 +49,17 @@ The color is somewhere between Beige (#D0CCC0) and Slate (#96938E)
 from WASD, but also has a browner/tanner cast. Beige is probably
 the closest of the two, but I feel Slate will make a better looking
 analogue.
+
+# Key Writing Color
+
+I added a new color (a bright orange) for the `SYMBOL` key and
+put the symbols onto the keycaps.
+
+The dark key writing color should be the same color as the dark
+keycaps, as that color is only used on lighter keycaps. The light
+color is the Beige mentioned above. However, the real Symbolics
+keyboard has a slightly more yellow/brown cast to the lighter
+color.
 
 # Keycap Type
 
