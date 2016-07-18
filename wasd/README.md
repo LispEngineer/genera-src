@@ -7,7 +7,7 @@ Created by Douglas Fields
 Copyright 2016 - CC BY-NC-SA 4.0  
 https://symbolics.lisp.engineer/
 
-Files:
+# Files
 
 * `xquartz-87-enh`
   * Genera keyboard layout :xquartz-87-enhanced
@@ -18,6 +18,8 @@ Files:
   * Hypothetical keyboard closely similar to Symbolics 3600
   * Almost 1-1 correspondence to 3600 keyboard (88 vs 87 keys)
   * A few keys changed for ease of use (e.g., colon and backtick swapped)
+ 
+`.svg` files created with [Inkscape](https://inkscape.org/en/) on macOS under Xquartz.
   
 # Keyswitch Type
 
