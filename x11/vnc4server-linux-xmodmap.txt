@@ -1,0 +1,264 @@
+There are 2 KeySyms per KeyCode; KeyCodes range from 8 to 255.
+
+    KeyCode	Keysym (Keysym)	...
+    Value  	Value   (Name) 	...
+
+      8    	
+      9    	0xff1b (Escape)	
+     10    	0x0031 (1)	0x0021 (exclam)	
+     11    	0x0032 (2)	0x0040 (at)	
+     12    	0x0033 (3)	0x0023 (numbersign)	
+     13    	0x0034 (4)	0x0024 (dollar)	
+     14    	0x0035 (5)	0x0025 (percent)	
+     15    	0x0036 (6)	0x005e (asciicircum)	
+     16    	0x0037 (7)	0x0026 (ampersand)	
+     17    	0x0038 (8)	0x002a (asterisk)	
+     18    	0x0039 (9)	0x0028 (parenleft)	
+     19    	0x0030 (0)	0x0029 (parenright)	
+     20    	0x002d (minus)	0x005f (underscore)	
+     21    	0x003d (equal)	0x002b (plus)	
+     22    	0xff08 (BackSpace)	
+     23    	0xff09 (Tab)	
+     24    	0x0071 (q)	0x0051 (Q)	
+     25    	0x0077 (w)	0x0057 (W)	
+     26    	0x0065 (e)	0x0045 (E)	
+     27    	0x0072 (r)	0x0052 (R)	
+     28    	0x0074 (t)	0x0054 (T)	
+     29    	0x0079 (y)	0x0059 (Y)	
+     30    	0x0075 (u)	0x0055 (U)	
+     31    	0x0069 (i)	0x0049 (I)	
+     32    	0x006f (o)	0x004f (O)	
+     33    	0x0070 (p)	0x0050 (P)	
+     34    	0x005b (bracketleft)	0x007b (braceleft)	
+     35    	0x005d (bracketright)	0x007d (braceright)	
+     36    	0xff0d (Return)	
+     37    	0xffe3 (Control_L)	
+     38    	0x0061 (a)	0x0041 (A)	
+     39    	0x0073 (s)	0x0053 (S)	
+     40    	0x0064 (d)	0x0044 (D)	
+     41    	0x0066 (f)	0x0046 (F)	
+     42    	0x0067 (g)	0x0047 (G)	
+     43    	0x0068 (h)	0x0048 (H)	
+     44    	0x006a (j)	0x004a (J)	
+     45    	0x006b (k)	0x004b (K)	
+     46    	0x006c (l)	0x004c (L)	
+     47    	0x003b (semicolon)	0x003a (colon)	
+     48    	0x0027 (apostrophe)	0x0022 (quotedbl)	
+     49    	0x0060 (grave)	0x007e (asciitilde)	
+     50    	0xffe1 (Shift_L)	
+     51    	0x005c (backslash)	0x007c (bar)	
+     52    	0x007a (z)	0x005a (Z)	
+     53    	0x0078 (x)	0x0058 (X)	
+     54    	0x0063 (c)	0x0043 (C)	
+     55    	0x0076 (v)	0x0056 (V)	
+     56    	0x0062 (b)	0x0042 (B)	
+     57    	0x006e (n)	0x004e (N)	
+     58    	0x006d (m)	0x004d (M)	
+     59    	0x002c (comma)	0x003c (less)	
+     60    	0x002e (period)	0x003e (greater)	
+     61    	0x002f (slash)	0x003f (question)	
+     62    	0xffe2 (Shift_R)	
+     63    	0xffaa (KP_Multiply)	
+     64    	0xffe9 (Alt_L)	0xffe7 (Meta_L)	
+     65    	0x0020 (space)	
+     66    	
+     67    	0xffbe (F1)	
+     68    	0xffbf (F2)	
+     69    	0xffc0 (F3)	
+     70    	0xffc1 (F4)	
+     71    	0xffc2 (F5)	
+     72    	0xffc3 (F6)	
+     73    	0xffc4 (F7)	
+     74    	0xffc5 (F8)	
+     75    	0xffc6 (F9)	
+     76    	0xffc7 (F10)	
+     77    	0xff7f (Num_Lock)	0xfef9 (Pointer_EnableKeys)	
+     78    	0xff14 (Scroll_Lock)	
+     79    	0xff95 (KP_Home)	0xffb7 (KP_7)	
+     80    	0xff97 (KP_Up)	0xffb8 (KP_8)	
+     81    	0xff9a (KP_Prior)	0xffb9 (KP_9)	
+     82    	0xffad (KP_Subtract)	
+     83    	0xff96 (KP_Left)	0xffb4 (KP_4)	
+     84    	0xff9d (KP_Begin)	0xffb5 (KP_5)	
+     85    	0xff98 (KP_Right)	0xffb6 (KP_6)	
+     86    	0xffab (KP_Add)	
+     87    	0xff9c (KP_End)	0xffb1 (KP_1)	
+     88    	0xff99 (KP_Down)	0xffb2 (KP_2)	
+     89    	0xff9b (KP_Next)	0xffb3 (KP_3)	
+     90    	0xff9e (KP_Insert)	0xffb0 (KP_0)	
+     91    	0xff9f (KP_Delete)	0xffae (KP_Decimal)	
+     92    	
+     93    	
+     94    	
+     95    	0xffc8 (F11)	
+     96    	0xffc9 (F12)	
+     97    	0xff50 (Home)	
+     98    	0xff52 (Up)	
+     99    	0xff55 (Prior)	
+    100    	0xff51 (Left)	
+    101    	
+    102    	0xff53 (Right)	
+    103    	0xff57 (End)	
+    104    	0xff54 (Down)	
+    105    	0xff56 (Next)	
+    106    	0xff63 (Insert)	
+    107    	0xffff (Delete)	
+    108    	0xff8d (KP_Enter)	
+    109    	0xffe4 (Control_R)	
+    110    	0xff13 (Pause)	0xff6b (Break)	
+    111    	0xff61 (Print)	0xff62 (Execute)	
+    112    	0xffaf (KP_Divide)	
+    113    	0xffea (Alt_R)	0xffe8 (Meta_R)	
+    114    	
+    115    	
+    116    	
+    117    	
+    118    	
+    119    	
+    120    	
+    121    	
+    122    	
+    123    	
+    124    	
+    125    	
+    126    	
+    127    	
+    128    	
+    129    	
+    130    	
+    131    	
+    132    	
+    133    	
+    134    	
+    135    	
+    136    	
+    137    	
+    138    	
+    139    	
+    140    	
+    141    	
+    142    	
+    143    	
+    144    	
+    145    	
+    146    	
+    147    	
+    148    	
+    149    	
+    150    	
+    151    	
+    152    	
+    153    	
+    154    	
+    155    	
+    156    	
+    157    	
+    158    	
+    159    	
+    160    	
+    161    	
+    162    	
+    163    	
+    164    	
+    165    	
+    166    	
+    167    	
+    168    	
+    169    	
+    170    	
+    171    	
+    172    	
+    173    	
+    174    	
+    175    	
+    176    	
+    177    	
+    178    	
+    179    	
+    180    	
+    181    	
+    182    	
+    183    	
+    184    	
+    185    	
+    186    	
+    187    	
+    188    	
+    189    	
+    190    	
+    191    	
+    192    	
+    193    	
+    194    	
+    195    	
+    196    	
+    197    	
+    198    	
+    199    	
+    200    	
+    201    	
+    202    	
+    203    	
+    204    	
+    205    	
+    206    	
+    207    	
+    208    	
+    209    	
+    210    	
+    211    	
+    212    	
+    213    	
+    214    	
+    215    	
+    216    	
+    217    	
+    218    	
+    219    	
+    220    	
+    221    	
+    222    	
+    223    	
+    224    	
+    225    	
+    226    	
+    227    	
+    228    	
+    229    	
+    230    	
+    231    	
+    232    	
+    233    	
+    234    	
+    235    	
+    236    	
+    237    	
+    238    	
+    239    	
+    240    	
+    241    	
+    242    	
+    243    	
+    244    	
+    245    	
+    246    	
+    247    	
+    248    	
+    249    	
+    250    	
+    251    	
+    252    	
+    253    	
+    254    	
+    255    	0xff6a (Help)	
+xmodmap:  up to 2 keys per modifier, (keycodes in parentheses):
+
+shift       Shift_L (0x32),  Shift_R (0x3e)
+lock        Down (0x68)
+control     Control_L (0x25),  Control_R (0x6d)
+mod1        Alt_L (0x40),  Alt_R (0x71)
+mod2        Left (0x64)
+mod3      
+mod4      
+mod5      
+
