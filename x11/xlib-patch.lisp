@@ -44,6 +44,9 @@
 
 ; Of course, the proper fix to these problems is to look into the
 ; underlying source code and fix it to work with a modern X server.
-; For example, the original set-modifier-mapping is at clx>doc.lisp
-; and seems to be a very simple function. close-display is even
-; simpler.
+; For example, the original set-modifier-mapping is at clx>text.lisp.
+; There's another version, however, that has almost nothing in it, at
+; clx>doc.lisp. Not sure why the code appears twice, but it seems that
+; the code in doc.lisp isn't used. This was determined by doing a
+; "Edit Definition XLIB:SET-MODIFIER-MAPPING Function" at the Genera
+; command prompt...
