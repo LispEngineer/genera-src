@@ -1,0 +1,28 @@
+! xmodmap settings to make Genera run against vncserver
+! work well with an 87 key keyboard on a Mac using RealVNC VNC Viewer.
+keycode 200 = F13
+keycode 201 = F14
+keycode 202 = F15
+keycode 203 = Super_L
+keycode 204 = Super_R
+keycode 205 = Caps_Lock
+keycode 206 = Help
+
+! For whatever reason, the modmap gets messed up when Genera uses
+! x, so let's put it back to default.
+! For whatever reason, this isn't being "taken" regardless of how
+! many times we run it. The big challenge is a random key being
+! added to "lock"
+clear Shift
+clear Lock
+clear Control
+clear Mod1
+clear Mod2
+clear Mod3
+clear Mod4
+clear Mod5
+add Shift = Shift_L Shift_R
+add control = Control_L Control_R
+add mod1 = Alt_L Alt_R
+add mod2 = Super_L Super_R
+add mod3 = Meta_L Meta_R
