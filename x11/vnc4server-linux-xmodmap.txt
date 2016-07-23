@@ -1,3 +1,4 @@
+$ xmodmap -pk
 There are 2 KeySyms per KeyCode; KeyCodes range from 8 to 255.
 
     KeyCode	Keysym (Keysym)	...
@@ -250,14 +251,17 @@ There are 2 KeySyms per KeyCode; KeyCodes range from 8 to 255.
     252    	
     253    	
     254    	
-    255    	0xff6a (Help)	
+    255    	
+
+
+$ xmodmap
 xmodmap:  up to 2 keys per modifier, (keycodes in parentheses):
 
 shift       Shift_L (0x32),  Shift_R (0x3e)
-lock        Down (0x68)
+lock      
 control     Control_L (0x25),  Control_R (0x6d)
 mod1        Alt_L (0x40),  Alt_R (0x71)
-mod2        Left (0x64)
+mod2      
 mod3      
 mod4      
 mod5      
