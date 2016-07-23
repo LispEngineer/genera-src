@@ -6,7 +6,12 @@ Files related to X11 and keyboards.
 mapping for an 87-key keyboard, extremely similar to the default X keyboard.
 [View Keyboard Layout](http://www.keyboard-layout-editor.com/#/gists/1bdd2184b15cfed700133f1aeba23f1c)
 * `xquartz-87-enh.lisp` - An improved keyboard with better mappings.
-[View Enhanced Layout](TODO)
+[View Enhanced Layout](http://www.keyboard-layout-editor.com/#/gists/cd74f5906d3b62298d3169b808dd7ad0). I use a physical keyboard with this layout over X11 from Xquartz.
+* `vncserver-87-enh.lisp` - A version of the above layout that works if you want
+to run Genera on vnc4server so you can access the desktop through an SSH tunnel
+and VNC when you're not home. Doesn't work nearly as well, but at least it mostly
+works. Use RealVNC VNC Viewer and the provided `vncserver.xmodmap` to map some
+additional keys (like Super, F13-15, etc.).
 * `xlib-patch.lisp` - A Genera patch file that fixes errors when Genera calls
 the `xlib:set-modifier-mapping` method by replacing it with a noop.
 See source code for details.
