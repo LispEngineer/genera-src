@@ -8,7 +8,7 @@
 ;; Mac with an 87-Key Tenkeyless keyboard
 ;; Used under Xquartz 2.7.10_beta2
 
-;; This was cloned from xquartz-87.lisp and modified form there.
+;; This was cloned from xquartz-87.lisp and modified from there.
 
 ; Key mappings differing from xquartz-87.lisp:
 ; esc      Select

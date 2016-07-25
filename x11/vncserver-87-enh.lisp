@@ -9,7 +9,7 @@
 ;; Mac via VNC to Linux vnc4server, with an 87-Key Tenkeyless keyboard
 ;; Used under Chicken of the VNC and Real VNC to vnc4server
 
-;; This was cloned from xquartz-87-enh.lisp and modified form there.
+;; This was cloned from xquartz-87-enh.lisp and modified from there.
 
 ;; NOTE: If you load this file and immediately do "Show Keyboard Layout" on this
 ;; keyboard format, it won't display correctly (for whatever reason). However, if

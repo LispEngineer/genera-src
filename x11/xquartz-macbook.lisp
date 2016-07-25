@@ -6,7 +6,7 @@
 ;; https://symbolics.lisp.engineer/
 ;; Used under Xquartz 2.7.10_beta2
 
-;; This was cloned from xquartz-87-enh.lisp and modified form there.
+;; This was cloned from xquartz-87-enh.lisp and modified from there.
 
 ; Modifiers are different:
 ;   Genera:    Control   Super  Meta      SPACE    Symbol    Hyper
@@ -95,9 +95,9 @@
   (67  :left-control         :left-control          ) ; Checked
 
   (68  :right-shift          :right-shift           )
-  (69  :right-alt            :right-alt             ) ; RIGHT alt/option (right WIN on Windows) - ADDED
-  (70  :right-control        :right-control         ) ; RIGHT CTRL - ADDED 
-  (71  :right-meta           :right-meta            ) ; RIGHT COMMAND (ALT on Windows) - ADDED
+  (69  :right-alt            :right-alt             ) ; RIGHT alt/option (right WIN on Windows) 
+  (70  :right-control        :right-control         ) ; RIGHT CTRL - Not present on this keyboard
+  (71  :right-meta           :right-meta            ) ; RIGHT COMMAND (ALT on Windows)
 
   (104 :f5                  :f5                     ) ; Checked
   (105 :f6                  :f6                     ) ; Checked
@@ -330,28 +330,22 @@
   ; and the F-keys, so I mimic that here.
 
   (:row :left 0 :top 0
-        :keys ((:legend "esc" :code 53 :keysym (#xff #x1b) :height 1/2)))
-  (:row :left 2 :top 0
-        :keys ((:legend "F1" :code 122 :keysym (#xff #xbe))
-               (:legend "F2" :code 120 :keysym (#xff #xbf))
-               (:legend "F3" :code 99  :keysym (#xff #xc0))
-               (:legend "F4" :code 118 :keysym (#xff #xc1))))
-  (:row :left 13/2 :top 0
-        :keys ((:legend "F5" :code 96 :keysym (#xff #xc2))
-               (:legend "F6" :code 97 :keysym (#xff #xc3))
-               (:legend "F7" :code 98 :keysym (#xff #xc4))
-               (:legend "F8" :code 100 :keysym (#xff #xc5))))
-  (:row :left 11 :top 0
-        :keys ((:legend "F9"  :code 101 :keysym (#xff #xc6))
-               (:legend "F10" :code 109 :keysym (#xff #xc7))
-               (:legend "F11" :code 103 :keysym (#xff #xc8))
-               (:legend "F12" :code 111 :keysym (#xff #xc9))))
-  (:row :left 61/4 :top 0
-        :keys ((:legend ("F13" "PrtSc") :code 105 :keysym (#xff #xca))
-               (:legend ("F14" "ScrLk") :code 107 :keysym (#xff #xcb))
-               (:legend ("F15" "Pause") :code 113 :keysym (#xff #xcc))))
+        :keys ((:legend "esc" :code 53  :keysym (#xff #x1b) :height 1/2 :width 29/28)
+               (:legend "F1"  :code 122 :keysym (#xff #xbe) :height 1/2 :width 29/28)
+               (:legend "F2"  :code 120 :keysym (#xff #xbf) :height 1/2 :width 29/28)
+               (:legend "F3"  :code 99  :keysym (#xff #xc0) :height 1/2 :width 29/28)
+               (:legend "F4"  :code 118 :keysym (#xff #xc1) :height 1/2 :width 29/28)
+               (:legend "F5"  :code 96  :keysym (#xff #xc2) :height 1/2 :width 29/28)
+               (:legend "F6"  :code 97  :keysym (#xff #xc3) :height 1/2 :width 29/28)
+               (:legend "F7"  :code 98  :keysym (#xff #xc4) :height 1/2 :width 29/28)
+               (:legend "F8"  :code 100 :keysym (#xff #xc5) :height 1/2 :width 29/28)
+               (:legend "F9"  :code 101 :keysym (#xff #xc6) :height 1/2 :width 29/28)
+               (:legend "F10" :code 109 :keysym (#xff #xc7) :height 1/2 :width 29/28)
+               (:legend "F11" :code 103 :keysym (#xff #xc8) :height 1/2 :width 29/28)
+               (:legend "F12" :code 111 :keysym (#xff #xc9) :height 1/2 :width 29/28)
+               (:legend "pwr" :code 200                     :height 1/2 :width 29/28)))
 
-  (:row :left 0 :top 3/2
+  (:row :left 0 :top 1/2
         :keys ((:legend ("~" "`")      :code 50 :keysym (#x00 #x60))
                (:legend ("!" "1")      :code 18 :keysym (#x00 #x31))
                (:legend ("@" "2")      :code 19 :keysym (#x00 #x32))
@@ -365,9 +359,9 @@
                (:legend (")" "0")      :code 29 :keysym (#x00 #x30))
                (:legend ("_" "-")      :code 27 :keysym (#x00 #x2d))
                (:legend ("+" "=")      :code 24 :keysym (#x00 #x3d))
-               (:legend ("delete")     :code 51 :keysym (#xff #x08) :width 2)))
+               (:legend ("delete")     :code 51 :keysym (#xff #x08) :width 3/2)))
 
-  (:row :left 0 :top 5/2
+  (:row :left 0 :top 3/2
         :keys ((:legend "tab"      :code 48 :keysym (#xff #x09) :width 3/2)
                (:legend "Q"        :code 12 :keysym (#x00 #x71))
                (:legend "W"        :code 13 :keysym (#x00 #x77))
@@ -381,9 +375,9 @@
                (:legend "P"        :code 35 :keysym (#x00 #x70))
                (:legend ("{" "[")  :code 33 :keysym (#x00 #x5b))
                (:legend ("}" "]")  :code 30 :keysym (#x00 #x5d))
-               (:legend ("|" "\\") :code 42 :keysym (#x00 #x5c) :width 3/2)))
+               (:legend ("|" "\\") :code 42 :keysym (#x00 #x5c))))
 
-  (:row :left 0 :top 7/2
+  (:row :left 0 :top 5/2
         :keys ((:legend "caps lock" :code 57 :keysym (#xff #xe5) :width 7/4)
                (:legend "A"         :code  0 :keysym (#x00 #x41))
                (:legend "S"         :code  1 :keysym (#x00 #x53))
@@ -396,9 +390,9 @@
                (:legend "L"         :code 37 :keysym (#x00 #x4c))
                (:legend (":" ";")   :code 41 :keysym (#x00 #x3b))
                (:legend ("\"" "'")  :code 39 :keysym (#x00 #x27))
-               (:legend "return"     :code 36 :keysym (#xff #x0d) :width 9/4)))
+               (:legend ("enter" "return") :code 36 :keysym (#xff #x0d) :width 7/4)))
 
-  (:row :left 0 :top 9/2
+  (:row :left 0 :top 7/2
         :keys ((:name "Left Shift" :legend "shift"  :code 56 :keysym (#xff #xe1) :width 9/4)
                (:legend "Z"                         :code  6 :keysym (#x00 #x7a))
                (:legend "X"                         :code  7 :keysym (#x00 #x78))
@@ -410,33 +404,35 @@
                (:legend ("<" ",")                   :code 43 :keysym (#x00 #x2c))
                (:legend (">" ".")                   :code 47 :keysym (#x00 #x2e))
                (:legend ("?" "/")                   :code 44 :keysym (#x00 #x2f))
-               (:name "Right Shift" :legend "shift" :code 60 :keysym (#xff #xe2) :width 11/4)))
+               (:name "Right Shift" :legend "shift" :code 60 :keysym (#xff #xe2) :width 9/4)))
 
-  (:row :left 0 :top 11/2
-        :keys ((:name "Left Control"  :legend "control"    :code 59  :keysym (#xff #xe3) :width 5/4)
-               (:name "Left Option"   :legend ("alt" "option")   :code 58  :keysym (#xff #xe9) :width 5/4)
+  (:row :left 0 :top 9/2
+        :keys ((:name "Fn"            :legend "fn" :code 201)
+               (:name "Left Control"  :legend "control"    :code 59  :keysym (#xff #xe3))
+               (:name "Left Option"   :legend ("alt" "option")   :code 58  :keysym (#xff #xe9))
                (:name "Left Command"  :legend "command" :code 55  :keysym (#xff #xe7) :width 5/4)
-               (:name "Space"         :legend nil       :code 49  :keysym (#x00 #x20) :width 25/4)
+               (:name "Space"         :legend nil       :code 49  :keysym (#x00 #x20) :width 5)
                (:name "Right Command" :legend "command" :code 61  :keysym (#xff #xea) :width 5/4)
-               (:name "Right Option"  :legend ("alt" "option")  :code 63  :keysym (#xff #xe8) :width 5/4)
-               (:name "Menu"          :legend "menu"    :code 110 :keysym (#x00 #x00) :width 5/4)
-               (:name "Right Control" :legend "control"    :code 62  :keysym (#xff #xe4) :width 5/4)))
+               (:name "Right Option"  :legend ("alt" "option")  :code 63  :keysym (#xff #xe8))))
 
-  (:row :left 61/4 :top 3/2
-        :keys ((:legend "help"          :code 114 :keysym (#xff #x6a)) ; Insert on Windows
-               (:legend "home"          :code 115 :keysym (#xff #x50))
-               (:legend ("page" "up")   :code 116 :keysym (#xff #x55))))
-  (:row :left 61/4 :top 5/2
-        :keys ((:legend "del"         :code 117 :keysym (#xff #xff)) ; Forward delete
-               (:legend "end"           :code 119 :keysym (#xff #x57))
-               (:legend ("page" "down") :code 121 :keysym (#xff #x56))))
+  (:row :left 25/2 :top 9/2
+        :keys ((:legend "" :code 126 :keysym (#xff #x52) :height 1/2))) ; Up arrow
+  (:row :left 23/2 :top 10/2
+        :keys ((:legend "" :code 123 :keysym (#xff #x51) :height 1/2)   ; Left arrow
+               (:legend "" :code 125 :keysym (#xff #x54) :height 1/2)   ; Down arrow
+               (:legend "" :code 124 :keysym (#xff #x53) :height 1/2))) ; Right arrow
 
-  (:row :left 65/4 :top 9/2
-        :keys ((:legend "" :code 126 :keysym (#xff #x52)))) ; Up arrow
-  (:row :left 61/4 :top 11/2
-        :keys ((:legend "" :code 123 :keysym (#xff #x51))   ; Left arrow
-               (:legend "" :code 125 :keysym (#xff #x54))   ; Down arrow
-               (:legend "" :code 124 :keysym (#xff #x53)))) ; Right arrow
+  ; Home, End, Page Up and Page Down are fn-arrow keys
+  (:row :left 25/2 :top 23/4
+        :keys ((:legend "fn " :code 116 :keysym (#xff #x55) :height 1/2))) ; Page Up
+  (:row :left 23/2 :top 25/4
+        :keys ((:legend "fn " :code 115 :keysym (#xff #x50) :height 1/2)   ; Home
+               (:legend "fn " :code 121 :keysym (#xff #x56) :height 1/2)   ; Page Down
+               (:legend "fn " :code 119 :keysym (#xff #x57) :height 1/2))) ; End
+
+  ; del is fn-delete
+  (:row :left 15/2 :top 23/4
+        :keys ((:legend "fn delete" :code 117 :keysym (#xff #xff) :width 3/2)))
 )
 
 
@@ -451,31 +447,26 @@
 ;  :shift t
 ;  :all-shifts t)
 ;
-; KEYCODES:
-; 0x3E =  62 = Right Control = 70 in X-Windows Keycodes
+; KEYCODES here are the ones above MINUS 8 (from the X offset)
 ; 0x3F =  63 = Right Option = 71 in X-Windows Keycodes
 ;         51 = delete = 59 in X-Windows Keycodes and called BackSpace
 ;        117 = delete = 125 in X-Windows called Delete
 ;         53 = esc
 ;         96 = F5
 
-; Right Option -> Control
-(sys:set-keyboard-table-mapping :right-hyper   :xquartz-87-enhanced #x3E :all-shifts t)
-; Right Control -> Hyper
-(sys:set-keyboard-table-mapping :right-control :xquartz-87-enhanced #x3F :all-shifts t)
-; Right Command -> Meta - already works
-; Right Menu -> Symbol - already works
+; Right Option -> Hyper
+(sys:set-keyboard-table-mapping :right-symbol :xquartz-macbook #x3E :all-shifts t)
+; Right Command -> Symbol
+(sys:set-keyboard-table-mapping :right-hyper  :xquartz-macbook #x3F :all-shifts t)
+; There is no Right Control on this keyboard
 
 ; Keyboard  -> Genera
-; Backspace -> Rubout
-; Delete->  -> Line
-; Home      -> Backspace
-(sys:set-keyboard-table-mapping #\rubout     :xquartz-87-enhanced 51  :all-shifts t)
-(sys:set-keyboard-table-mapping #\back-space :xquartz-87-enhanced 115 :all-shifts t)
-(sys:set-keyboard-table-mapping #\line       :xquartz-87-enhanced 117 :all-shifts t)
+; delete    -> Rubout
+; sh-delete -> Backspace 
+; Delete->  -> Backspace
+(sys:set-keyboard-table-mapping #\rubout     :xquartz-macbook 51               )
+(sys:set-keyboard-table-mapping #\back-space :xquartz-macbook 51  :shift t     )
+(sys:set-keyboard-table-mapping #\back-space :xquartz-macbook 117 :all-shifts t)
 
 ; Make esc key into Select
-(sys:set-keyboard-table-mapping #\select :xquartz-87-enhanced 53 :all-shifts t)
-
-; F5 is not working in the mapping; redo it here
-(sys:set-keyboard-table-mapping :left-symbol :xquartz-87-enhanced 96 :all-shifts t)
+(sys:set-keyboard-table-mapping #\select :xquartz-macbook 53 :all-shifts t)
