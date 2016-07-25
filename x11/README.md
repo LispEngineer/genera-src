@@ -12,6 +12,16 @@ to run Genera on vnc4server so you can access the desktop through an SSH tunnel
 and VNC when you're not home. Doesn't work nearly as well, but at least it mostly
 works. Use RealVNC VNC Viewer and the provided `vncserver.xmodmap` to map some
 additional keys (like Super, F13-15, etc.).
+* `xquartz-macbook.lisp` - Similar to :xquartz-87-enhanced above, but with a
+few changes to make it suitable for a MacBook Pro/Air keyboard.
+  * F5 -> Help
+  * Right Command -> Right Symbol
+  * Right Option -> Right 
+  * Shift Return -> Line
+  * Shift F6/7/8 -> Square/Circle/Triangle
+  * Shift Delete -> Backspace
+  * Fn Delete -> Backspace
+  * Home -> (noop)
 * `xlib-patch.lisp` - A Genera patch file that fixes errors when Genera calls
 the `xlib:set-modifier-mapping` method by replacing it with a noop.
 See source code for details.
