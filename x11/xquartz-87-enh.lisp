@@ -104,13 +104,19 @@
   (63  :left-meta            :left-meta             ) ; LEFT COMMAND (left ALT on Windows)
   (64  :left-shift           :left-shift            ) ; Checked
   (65  :caps-lock            :caps-lock             ) ; Sends two keycode 65 events in a row
-  (66  :left-alt             :left-alt              ) ; This is LEFT alt/option (left WIN on Windows) -
+  ; xmodmap reports this as Meta_L Alt_L, but we want this to be only Alt
+  (66  :left-meta            :left-alt              ) ; This is LEFT alt/option (left WIN on Windows) -
   (67  :left-control         :left-control          ) ; Checked
 
   (68  :right-shift          :right-shift           )
-  (69  :right-alt            :right-alt             ) ; RIGHT alt/option (right WIN on Windows) - ADDED
-  (70  :right-control        :right-control         ) ; RIGHT CTRL - ADDED 
-  (71  :right-meta           :right-meta            ) ; RIGHT COMMAND (ALT on Windows) - ADDED
+  ; What xmodmap says these are
+  (69  :right-alt                                   )
+  (70  :right-control                               )
+  (71  :right-meta                                  )
+  ; What we want these to be mapped as...
+  ; (69  :right-meta           :right-meta            ) ; RIGHT COMMAND
+  ; (70  :right-control        :right-control         ) ; RIGHT CTRL - ADDED 
+  ; (71  :right-alt            :right-alt             ) ; RIGHT OPTION/ALT
 
   (104 :f5                  :f5                     ) ; Checked
   (105 :f6                  :f6                     ) ; Checked
@@ -485,8 +491,11 @@
 (sys:set-keyboard-table-mapping :right-hyper   :xquartz-87-enhanced #x3E :all-shifts t)
 ; Right Control -> Hyper
 (sys:set-keyboard-table-mapping :right-control :xquartz-87-enhanced #x3F :all-shifts t)
-; Right Command -> Meta - already works
+; Right Command -> Meta
+(sys:set-keyboard-table-mapping :right-meta    :xquartz-87-enhanced 61 :all-shifts t)
 ; Right Menu -> Symbol - already works
+; Left option/alt -> Super
+(sys:set-keyboard-table-mapping :left-super    :xquartz-87-enhanced 58 :all-shifts t)
 
 ; Keyboard  -> Genera
 ; Backspace -> Rubout
