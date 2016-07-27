@@ -88,11 +88,11 @@
      inkscape:cx="722.34804"
      inkscape:cy="410.37297"
      inkscape:document-units="px"
-     inkscape:current-layer="layer32"
+     inkscape:current-layer="svg2"
      showgrid="false"
      units="in"
-     inkscape:window-width="1734"
-     inkscape:window-height="1019"
+     inkscape:window-width="1769"
+     inkscape:window-height="1040"
      inkscape:window-x="98"
      inkscape:window-y="0"
      inkscape:window-maximized="0"
@@ -855,7 +855,8 @@
      inkscape:groupmode="layer"
      id="layer32"
      inkscape:label="Template Background (Not Printed)"
-     style="display:inline">
+     style="display:inline"
+     sodipodi:insensitive="true">
     <rect
        style="fill:#e6e6e6;stroke:none"
        id="rect8044"
@@ -6705,7 +6706,7 @@
      sodipodi:insensitive="true">
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15.65247631px;line-height:80.00000119%;font-family:Bryant;-inkscape-font-specification:'Bryant, Normal';text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#373534;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15.65247631px;line-height:80.00000119%;font-family:Bryant;-inkscape-font-specification:'Bryant, Normal';text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#575a5d;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        x="103.5049"
        y="271.50443"
        id="text4562"
@@ -6715,7 +6716,7 @@
          x="103.5049"
          y="271.50443"
          id="tspan4566"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:12.29837418px;font-family:Bryant;-inkscape-font-specification:'Bryant Bold';fill:#373534;fill-opacity:1">CAPS LOCK</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:12.29837418px;font-family:Bryant;-inkscape-font-specification:'Bryant Bold';fill:#575a5d;fill-opacity:1">CAPS LOCK</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15.65247631px;line-height:80.00000119%;font-family:Bryant;-inkscape-font-specification:'Bryant, Normal';text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#575a5d;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
@@ -6736,7 +6737,7 @@
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:12.29837418px;font-family:Bryant;-inkscape-font-specification:'Bryant Bold';fill:#575a5d;fill-opacity:1">LOCK</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15.65247631px;line-height:80.00000119%;font-family:Bryant;-inkscape-font-specification:'Bryant, Normal';text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#373534;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15.65247631px;line-height:80.00000119%;font-family:Bryant;-inkscape-font-specification:'Bryant, Normal';text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#575a5d;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        x="122.05939"
        y="331.39456"
        id="text4526"
@@ -6746,10 +6747,10 @@
          id="tspan4528"
          x="122.05939"
          y="331.39456"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:12.29837418px;font-family:Bryant;-inkscape-font-specification:'Bryant Bold';fill:#373534;fill-opacity:1">SHIFT</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:12.29837418px;font-family:Bryant;-inkscape-font-specification:'Bryant Bold';fill:#575a5d;fill-opacity:1">SHIFT</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15.65247631px;line-height:80.00000119%;font-family:Bryant;-inkscape-font-specification:'Bryant, Normal';text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#373534;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15.65247631px;line-height:80.00000119%;font-family:Bryant;-inkscape-font-specification:'Bryant, Normal';text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#575a5d;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        x="178.98633"
        y="391.76767"
        id="text4530"
@@ -6759,10 +6760,10 @@
          id="tspan4532"
          x="178.98633"
          y="391.76767"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:12.29837418px;font-family:Bryant;-inkscape-font-specification:'Bryant Bold';fill:#373534;fill-opacity:1">SUPER</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:12.29837418px;font-family:Bryant;-inkscape-font-specification:'Bryant Bold';fill:#575a5d;fill-opacity:1">SUPER</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15.65247631px;line-height:80.00000119%;font-family:Bryant;-inkscape-font-specification:'Bryant, Normal';text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#373534;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15.65247631px;line-height:80.00000119%;font-family:Bryant;-inkscape-font-specification:'Bryant, Normal';text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#575a5d;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        x="272.68259"
        y="391.78"
        id="text4534"
@@ -6772,10 +6773,10 @@
          id="tspan4536"
          x="272.68259"
          y="391.78"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:12.29837418px;font-family:Bryant;-inkscape-font-specification:'Bryant Bold';fill:#373534;fill-opacity:1">META</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:12.29837418px;font-family:Bryant;-inkscape-font-specification:'Bryant Bold';fill:#575a5d;fill-opacity:1">META</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15.65247631px;line-height:80.00000119%;font-family:Bryant;-inkscape-font-specification:'Bryant, Normal';text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#373534;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15.65247631px;line-height:80.00000119%;font-family:Bryant;-inkscape-font-specification:'Bryant, Normal';text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#575a5d;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        x="84.481659"
        y="391.7677"
        id="text4538"
@@ -6785,10 +6786,10 @@
          id="tspan4540"
          x="84.481659"
          y="391.7677"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:12.29837418px;font-family:Bryant;-inkscape-font-specification:'Bryant Bold';fill:#373534;fill-opacity:1">CONTROL</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:12.29837418px;font-family:Bryant;-inkscape-font-specification:'Bryant Bold';fill:#575a5d;fill-opacity:1">CONTROL</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15.65247631px;line-height:80.00000119%;font-family:Bryant;-inkscape-font-specification:'Bryant, Normal';text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#373534;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15.65247631px;line-height:80.00000119%;font-family:Bryant;-inkscape-font-specification:'Bryant, Normal';text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#575a5d;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        x="933.17676"
        y="391.76767"
        id="text4542"
@@ -6798,10 +6799,10 @@
          id="tspan4544"
          x="933.17676"
          y="391.76767"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:12.29837418px;font-family:Bryant;-inkscape-font-specification:'Bryant Bold';fill:#373534;fill-opacity:1">CONTROL</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:12.29837418px;font-family:Bryant;-inkscape-font-specification:'Bryant Bold';fill:#575a5d;fill-opacity:1">CONTROL</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15.65247631px;line-height:80.00000119%;font-family:Bryant;-inkscape-font-specification:'Bryant, Normal';text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#373534;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15.65247631px;line-height:80.00000119%;font-family:Bryant;-inkscape-font-specification:'Bryant, Normal';text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#575a5d;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        x="838.47931"
        y="391.78"
        id="text4546"
@@ -6811,10 +6812,10 @@
          id="tspan4548"
          x="838.47931"
          y="391.78"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:12.29837418px;font-family:Bryant;-inkscape-font-specification:'Bryant Bold';fill:#373534;fill-opacity:1">META</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:12.29837418px;font-family:Bryant;-inkscape-font-specification:'Bryant Bold';fill:#575a5d;fill-opacity:1">META</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15.65247631px;line-height:80.00000119%;font-family:Bryant;-inkscape-font-specification:'Bryant, Normal';text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#373534;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15.65247631px;line-height:80.00000119%;font-family:Bryant;-inkscape-font-specification:'Bryant, Normal';text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#575a5d;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        x="1121.7573"
        y="391.78"
        id="text4554"
@@ -6824,10 +6825,10 @@
          id="tspan4556"
          x="1121.7573"
          y="391.78"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:12.29837418px;font-family:Bryant;-inkscape-font-specification:'Bryant Bold';fill:#373534;fill-opacity:1">HYPER</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:12.29837418px;font-family:Bryant;-inkscape-font-specification:'Bryant Bold';fill:#575a5d;fill-opacity:1">HYPER</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15.65247631px;line-height:80.00000119%;font-family:Bryant;-inkscape-font-specification:'Bryant, Normal';text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#373534;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15.65247631px;line-height:80.00000119%;font-family:Bryant;-inkscape-font-specification:'Bryant, Normal';text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#575a5d;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        x="1064.9868"
        y="331.47507"
        id="text4558"
@@ -6837,7 +6838,7 @@
          id="tspan4560"
          x="1064.9868"
          y="331.47507"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:12.29837418px;font-family:Bryant;-inkscape-font-specification:'Bryant Bold';fill:#373534;fill-opacity:1">SHIFT</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:12.29837418px;font-family:Bryant;-inkscape-font-specification:'Bryant Bold';fill:#575a5d;fill-opacity:1">SHIFT</tspan></text>
   </g>
   <g
      inkscape:groupmode="layer"
