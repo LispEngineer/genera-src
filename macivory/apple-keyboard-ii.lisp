@@ -6,7 +6,7 @@
 ; complete  clear inp   square     mode lock           59 5B 5C 4E
 ; function  network     circle     back scroll         56 57 58 45
 ; refresh   escape      triangle   scroll              53 54 55 4C
-; (nothing...........)  page       ......              52 52 41 4C
+; end..............     page       ......              52 52 41 4C
 ;
 ; Delete: Rubout, Shift-Delete: Backspace              33
 ; Return: Return, Shift-Return: Line                   24
@@ -14,13 +14,14 @@
 ; Unmapped Genera/Symbolics keys
 ; alt (previously F14)
 
-; Unused Mac Keyboard keys
-; Keypad 0
+; Shift-arrow keys send movement commands
 
 ; TODO:
-; Figure out how to remap the arrow keys to be:
-; hyper symbol mouse-m mouse-r       
-; Figure out how to remap the SHIFT arrow-keys to be arrow keys
+; 1. Figure out how to remap the arrow keys to be:
+;      hyper symbol mouse-m mouse-r       
+;      (see notes at end)
+; 2. How to tell the system to use the :elmer AKII keyboard, and modify
+;    that mapping rather than the AEKII mapping
 
 (sys:set-keyboard-table-mapping #\Help        :apple-extended #x47)
 (sys:set-keyboard-table-mapping #\Help        :apple-extended #x47 :shift t)
@@ -35,7 +36,7 @@
 (sys:set-keyboard-table-mapping #\Square      :apple-extended #x5C :all-shifts t)
 ; Mode Lock can't be set this way
 ;(sys:set-keyboard-table-mapping #\Mode-Lock   :apple-extended #x4E :all-shifts t)
-(sys:set-keyboard-table-mapping '(:mode-lock :locking t)   :apple-extended #x4E :all-shifts t)
+(sys:set-keyboard-table-mapping '(:mode-lock :locking t) :apple-extended #x4E :all-shifts t)
 
 (sys:set-keyboard-table-mapping #\Function    :apple-extended #x56 :all-shifts t)
 (sys:set-keyboard-table-mapping #\Network     :apple-extended #x57 :all-shifts t)
@@ -49,7 +50,7 @@
 (sys:set-keyboard-table-mapping #\Triangle    :apple-extended #x55 :all-shifts t)
 (sys:set-keyboard-table-mapping #\Scroll      :apple-extended #x4C :all-shifts t)
 
-;(sys:set-keyboard-table-mapping #\           :apple-extended #x :all-shifts t)
+(sys:set-keyboard-table-mapping #\End         :apple-extended #x52 :all-shifts t)
 (sys:set-keyboard-table-mapping #\Page        :apple-extended #x41 :all-shifts t)
 
 (sys:set-keyboard-table-mapping #\Backspace   :apple-extended #x33 :shift t)
@@ -77,3 +78,4 @@
 ; would allow one of the following:
 ; 1. Changing the Keyboard to :elmer (Apple Keyboard II) and reprogram that from scratch
 ; 2. Add flavor function to set the keyboard mouse button mapping and use it
+
