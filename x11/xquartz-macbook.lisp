@@ -11,7 +11,7 @@
 ; Modifiers are different:
 ;   Genera:    Control   Super  Meta      SPACE    Symbol    Hyper
 ;   MBA/P:     Control   Option Command   SPACE    Command   Option
-;   Keycode:   67        66     63        57       69        71
+;   Keycode:   67        66     63        57       71        69
 ;   Keysym+    Control-L Alt_L  Meta_L    space    Meta_R    Alt_R
 
 
@@ -164,12 +164,6 @@
   (:right    #\Keyboard:Right)
   (:down     #\Keyboard:Down)
 
-  ; Remap the bottom modifier keys
-  ; Genera:    Control   Super  Meta      SPACE    Meta    Control Symbol    Hyper
-  ; Mac:       Control   Option Command   SPACE    Command Option  Menu      Control
-  ; Keycode:   67        66     63        57       69      71      118       70
-  ; Keysym+    Control-L Alt_L  Meta_L    space    Alt_R   Meta_R  NoSymbol  Control_R
-  ; BUT IS:                                                Meta              Control
   ; These three don't work
   (:left-alt :left-super)
   (:right-alt :right-hyper)
@@ -244,9 +238,9 @@
       :left-super ; 66 - Left Option/Alt
       :left-control ; 67
       :right-shift ; 68
-      :right-symbol ; 69 - Right Command
+      :right-symbol ; 69 - Right Option/Alt
       :right-control ; 70 - Right Control (not on MacBook keyboards)
-      :right-hyper ; 71 - Right Option/Alt
+      :right-hyper ; 71 - Right Command
       nil ; 72
       ;; Keypad is 73-100
       nil ; 73 - KP .
@@ -412,8 +406,8 @@
                (:name "Left Option"   :legend ("alt" "option")   :code 58  :keysym (#xff #xe9))
                (:name "Left Command"  :legend "command" :code 55  :keysym (#xff #xe7) :width 5/4)
                (:name "Space"         :legend nil       :code 49  :keysym (#x00 #x20) :width 5)
-               (:name "Right Command" :legend "command" :code 61  :keysym (#xff #xea) :width 5/4)
-               (:name "Right Option"  :legend ("alt" "option")  :code 63  :keysym (#xff #xe8))))
+               (:name "Right Command" :legend "command" :code 63  :keysym (#xff #xe8) :width 5/4)
+               (:name "Right Option"  :legend ("alt" "option")  :code 61  :keysym (#xff #xea))))
 
   (:row :left 25/2 :top 9/2
         :keys ((:legend "" :code 126 :keysym (#xff #x52) :height 1/2))) ; Up arrow
@@ -448,16 +442,17 @@
 ;  :all-shifts t)
 ;
 ; KEYCODES here are the ones above MINUS 8 (from the X offset)
-; 0x3F =  63 = Right Option = 71 in X-Windows Keycodes
-;         51 = delete = 59 in X-Windows Keycodes and called BackSpace
-;        117 = delete = 125 in X-Windows called Delete
+; 0x3F =  63 = Right Command = 71 in X-Windows Keycodes
+;         61 = Right Option  = 69 in X-Windows Keycodes
+;         51 = delete        = 59 in X-Windows Keycodes and called BackSpace
+;        117 = delete      = 125 in X-Windows called Delete
 ;         53 = esc
 ;         96 = F5
 
-; Right Option -> Hyper
-(sys:set-keyboard-table-mapping :right-symbol :xquartz-macbook #x3E :all-shifts t)
-; Right Command -> Symbol
-(sys:set-keyboard-table-mapping :right-hyper  :xquartz-macbook #x3F :all-shifts t)
+; Right Command -> Hyper
+(sys:set-keyboard-table-mapping :right-hyper  :xquartz-macbook 63 :all-shifts t)
+; Right Option -> Symbol
+(sys:set-keyboard-table-mapping :right-symbol :xquartz-macbook 61 :all-shifts t)
 ; There is no Right Control on this keyboard
 
 ; Keyboard  -> Genera
