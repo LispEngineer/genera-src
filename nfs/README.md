@@ -8,3 +8,9 @@ correct. This is useful as modern Linux distributions don't even store
 passwords in `/etc/passwd` (although the password is generally not
 blank, but rather `x` or some placeholder.
 
+Use:
+
+* `Load File pw-disable-patch.lisp`
+* `Save World` ...
+* Restart Genera with the newly saved world
+
