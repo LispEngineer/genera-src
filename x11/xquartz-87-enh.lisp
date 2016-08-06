@@ -110,13 +110,9 @@
 
   (68  :right-shift          :right-shift           )
   ; What xmodmap says these are
-  (69  :right-alt                                   )
+  (69  :right-alt                                   ) ; Right option/alt
   (70  :right-control                               )
-  (71  :right-meta                                  )
-  ; What we want these to be mapped as...
-  ; (69  :right-meta           :right-meta            ) ; RIGHT COMMAND
-  ; (70  :right-control        :right-control         ) ; RIGHT CTRL - ADDED 
-  ; (71  :right-alt            :right-alt             ) ; RIGHT OPTION/ALT
+  (71  :right-meta                                  ) ; Right command
 
   (104 :f5                  :f5                     ) ; Checked
   (105 :f6                  :f6                     ) ; Checked
@@ -445,8 +441,8 @@
                (:name "Left Option"   :legend ("alt" "option")   :code 58  :keysym (#xff #xe9) :width 5/4)
                (:name "Left Command"  :legend "command" :code 55  :keysym (#xff #xe7) :width 5/4)
                (:name "Space"         :legend nil       :code 49  :keysym (#x00 #x20) :width 25/4)
-               (:name "Right Command" :legend "command" :code 61  :keysym (#xff #xea) :width 5/4)
-               (:name "Right Option"  :legend ("alt" "option")  :code 63  :keysym (#xff #xe8) :width 5/4)
+               (:name "Right Command" :legend "command" :code 63  :keysym (#xff #xea) :width 5/4)
+               (:name "Right Option"  :legend ("alt" "option")  :code 61  :keysym (#xff #xe8) :width 5/4)
                (:name "Menu"          :legend "menu"    :code 110 :keysym (#x00 #x00) :width 5/4)
                (:name "Right Control" :legend "control"    :code 62  :keysym (#xff #xe4) :width 5/4)))
 
@@ -480,19 +476,20 @@
 ;  :all-shifts t)
 ;
 ; KEYCODES:
-; 0x3E =  62 = Right Control = 70 in X-Windows Keycodes
-; 0x3F =  63 = Right Option = 71 in X-Windows Keycodes
+;         63 = Right Command = 71 in Xquartz Keycodes
+;         62 = Right Control = 70 in X-Windows Keycodes
+;         61 = Right Option = 69 in X-Windows Keycodes
 ;         51 = delete = 59 in X-Windows Keycodes and called BackSpace
 ;        117 = delete = 125 in X-Windows called Delete
 ;         53 = esc
 ;         96 = F5
 
 ; Right Option -> Control
-(sys:set-keyboard-table-mapping :right-hyper   :xquartz-87-enhanced #x3E :all-shifts t)
+(sys:set-keyboard-table-mapping :right-hyper   :xquartz-87-enhanced 62 :all-shifts t)
 ; Right Control -> Hyper
-(sys:set-keyboard-table-mapping :right-control :xquartz-87-enhanced #x3F :all-shifts t)
+(sys:set-keyboard-table-mapping :right-control :xquartz-87-enhanced 61 :all-shifts t)
 ; Right Command -> Meta
-(sys:set-keyboard-table-mapping :right-meta    :xquartz-87-enhanced 61 :all-shifts t)
+(sys:set-keyboard-table-mapping :right-meta    :xquartz-87-enhanced 63 :all-shifts t)
 ; Right Menu -> Symbol - already works
 ; Left option/alt -> Super
 (sys:set-keyboard-table-mapping :left-super    :xquartz-87-enhanced 58 :all-shifts t)
