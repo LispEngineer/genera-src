@@ -23,52 +23,52 @@
 ; 2. How to tell the system to use the :elmer AKII keyboard, and modify
 ;    that mapping rather than the AEKII mapping
 
-(sys:set-keyboard-table-mapping #\Help        :apple-extended #x47)
-(sys:set-keyboard-table-mapping #\Help        :apple-extended #x47 :shift t)
-(sys:set-keyboard-table-mapping #\Symbol-Help :apple-extended #x47 :symbol t)
-(sys:set-keyboard-table-mapping #\Symbol-Help :apple-extended #x47 :shift t :symbol t)
-(sys:set-keyboard-table-mapping #\Suspend     :apple-extended #x51 :all-shifts t)
-(sys:set-keyboard-table-mapping #\Resume      :apple-extended #x4B :all-shifts t)
-(sys:set-keyboard-table-mapping #\Abort       :apple-extended #x43 :all-shifts t)
+(sys:set-keyboard-table-mapping #\Help           :elmer #x47)
+(sys:set-keyboard-table-mapping #\Help           :elmer #x47 :shift t)
+(sys:set-keyboard-table-mapping #\Symbol-Help    :elmer #x47 :symbol t)
+(sys:set-keyboard-table-mapping #\Symbol-Help    :elmer #x47 :shift t :symbol t)
+(sys:set-keyboard-table-mapping #\Suspend        :elmer #x51 :all-shifts t)
+(sys:set-keyboard-table-mapping #\Resume         :elmer #x4B :all-shifts t)
+(sys:set-keyboard-table-mapping #\Abort          :elmer #x43 :all-shifts t)
 
-(sys:set-keyboard-table-mapping #\Complete    :apple-extended #x59 :all-shifts t)
-(sys:set-keyboard-table-mapping #\Clear-Input :apple-extended #x5B :all-shifts t)
-(sys:set-keyboard-table-mapping #\Square      :apple-extended #x5C :all-shifts t)
+(sys:set-keyboard-table-mapping #\Complete       :elmer #x59 :all-shifts t)
+(sys:set-keyboard-table-mapping #\Clear-Input    :elmer #x5B :all-shifts t)
+(sys:set-keyboard-table-mapping #\Square         :elmer #x5C :all-shifts t)
 ; Mode Lock can't be set this way
-;(sys:set-keyboard-table-mapping #\Mode-Lock   :apple-extended #x4E :all-shifts t)
-(sys:set-keyboard-table-mapping '(:mode-lock :locking t) :apple-extended #x4E :all-shifts t)
+;(sys:set-keyboard-table-mapping #\Mode-Lock     :elmer #x4E :all-shifts t)
+(sys:set-keyboard-table-mapping '(:mode-lock :locking t) :elmer #x4E :all-shifts t)
 
-(sys:set-keyboard-table-mapping #\Function    :apple-extended #x56 :all-shifts t)
-(sys:set-keyboard-table-mapping #\Network     :apple-extended #x57 :all-shifts t)
-(sys:set-keyboard-table-mapping #\Circle      :apple-extended #x58 :all-shifts t)
+(sys:set-keyboard-table-mapping #\Function       :elmer #x56 :all-shifts t)
+(sys:set-keyboard-table-mapping #\Network        :elmer #x57 :all-shifts t)
+(sys:set-keyboard-table-mapping #\Circle         :elmer #x58 :all-shifts t)
 ; Back-Scroll isn't a character
-;(sys:set-keyboard-table-mapping #\Back-Scroll :apple-extended #x45 :all-shifts t)
-(sys:set-keyboard-table-mapping #\Keyboard:Back-Scroll :apple-extended #x45 :all-shifts t)
+;(sys:set-keyboard-table-mapping #\Back-Scroll   :elmer #x45 :all-shifts t)
+(sys:set-keyboard-table-mapping #\Keyboard:Back-Scroll :elmer #x45 :all-shifts t)
 
-(sys:set-keyboard-table-mapping #\Refresh     :apple-extended #x53 :all-shifts t)
-(sys:set-keyboard-table-mapping #\Escape      :apple-extended #x54 :all-shifts t)
-(sys:set-keyboard-table-mapping #\Triangle    :apple-extended #x55 :all-shifts t)
-(sys:set-keyboard-table-mapping #\Scroll      :apple-extended #x4C :all-shifts t)
+(sys:set-keyboard-table-mapping #\Refresh        :elmer #x53 :all-shifts t)
+(sys:set-keyboard-table-mapping #\Escape         :elmer #x54 :all-shifts t)
+(sys:set-keyboard-table-mapping #\Triangle       :elmer #x55 :all-shifts t)
+(sys:set-keyboard-table-mapping #\Scroll         :elmer #x4C :all-shifts t)
 
-(sys:set-keyboard-table-mapping #\End         :apple-extended #x52 :all-shifts t)
-(sys:set-keyboard-table-mapping #\Page        :apple-extended #x41 :all-shifts t)
+(sys:set-keyboard-table-mapping #\End            :elmer #x52 :all-shifts t)
+(sys:set-keyboard-table-mapping #\Page           :elmer #x41 :all-shifts t)
 
-(sys:set-keyboard-table-mapping #\Backspace   :apple-extended #x33 :shift t)
-(sys:set-keyboard-table-mapping #\Line        :apple-extended #x24 :shift t)
+(sys:set-keyboard-table-mapping #\Backspace      :elmer #x33 :shift t)
+(sys:set-keyboard-table-mapping #\Line           :elmer #x24 :shift t)
 
 ; Remap shift arrow keys
-(sys:set-keyboard-table-mapping #\Keyboard:Up    :apple-extended #x7E :shift t)
-(sys:set-keyboard-table-mapping #\Keyboard:Down  :apple-extended #x7D :shift t)
-(sys:set-keyboard-table-mapping #\Keyboard:Left  :apple-extended #x7B :shift t)
-(sys:set-keyboard-table-mapping #\Keyboard:Right :apple-extended #x7C :shift t)
+(sys:set-keyboard-table-mapping #\Keyboard:Up    :elmer #x7E :shift t)
+(sys:set-keyboard-table-mapping #\Keyboard:Down  :elmer #x7D :shift t)
+(sys:set-keyboard-table-mapping #\Keyboard:Left  :elmer #x7B :shift t)
+(sys:set-keyboard-table-mapping #\Keyboard:Right :elmer #x7C :shift t)
 
 ; Try making a mouse button key on Numpad 0 (52)
 ; This works and makes the key an instant mouse click.
 ; How do we make this into a "mouse shift"?
-;(sys:set-keyboard-table-mapping :mouse-r :apple-extended #x52)
+;(sys:set-keyboard-table-mapping :mouse-r :elmer #x52)
 ; The answer is in the system-applications:keyboard-layout flavor,
 ; in the default-mouse-button-shift-keys field,
-; which for the :apple-extended keyboard is:
+; which for the :apple-extended (and probably also :elmer) keyboard is:
 ;  SYSTEM-APPLICATIONS:DEFAULT-MOUSE-BUTTON-SHIFT-KEYS:   ((1 125) (2 124))
 ; All keyboards are kept in the system-applications:*keyboard-layouts* variable.
 ; View one by clicking on it with SUPER-MOUSE-M (describe).
