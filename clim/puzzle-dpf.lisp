@@ -90,6 +90,8 @@
 ; The X-windows display to use
 (setq xport (clim:find-port :server-path
   '(:clx :host "NEON" :screen nil :display-number 0)))
+; If you want to run on Genera host then do this
+(setq xport (clim:find-port))
 
 ; Make the application run on X
 (setq fpdpf (make-application-frame 'fifteen-puzzle-dpf
