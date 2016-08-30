@@ -90,8 +90,23 @@
 ; The X-windows display to use
 (setq xport (clim:find-port :server-path
   '(:clx :host "NEON" :screen nil :display-number 0)))
-; If you want to run on Genera host then do this
+
+; OR If you want to run on Genera host then do this (or leave the :parent off entirely)
 (setq xport (clim:find-port))
+
+; OR If you want to try to use Genera on an X screen? (Genera 8.3 on MacIvory III)
+; This doesn't work: It gets an error:
+;; (:GENERA :SCREEN #<X-SCREEN::X-CONSOLE NEON:0.0 0 (Genera on ARGON) 140001107>)
+;; Command: (car sys:*consoles*)
+;; #<X-SCREEN::X-CONSOLE NEON:0.0 0 (Genera on ARGON) 1153535402>
+;; Command: (clim:find-port :server-path `(:genera :screen ,(car sys:*consoles*)))
+;; D,#TD1PsT[Begin using 006 escapes](1 0 (NIL 0) (:FIX :BOLD :NORMAL) "CPTFONTCB")Error: The number, 1200, was called as a function
+0;;
+;; 1SI:INVALID-FUNCTION-TYPE
+0;;    Arg 0 (FUNCTION): 1200
+;;    Rest Arg: (:CONSOLE)
+(setq xport (clim:find-port 
+             :server-path (list :genera :screen (car sys:*consoles*))))
 
 ; Make the application run on X
 (setq fpdpf (make-application-frame 'fifteen-puzzle-dpf
