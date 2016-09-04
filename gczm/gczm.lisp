@@ -44,6 +44,9 @@
 ;   which has command parsers, unparsers, partial parsers, and a prompt
 
 ; To have command accelerators work, you need to specialize clim:read-frame-command.
+; See below.
+
+; Read documentation "Output Recording in CLIM".
 
 ; Initial implementation:
 ; 1. Show some random text
@@ -66,7 +69,8 @@
                :initial-cursor-visibility :on)
     (statusbar :application
                :display-function 'draw-the-statusbar
-               ; TODO: Set the height to one line of characters
+               ; TODO: Set the height to one line of characters - clim:text-size,
+	       ;       clim:stream-line-height
 	       ; TODO: Set the color to be opposite from main display
                :scroll-bars nil))
 
@@ -79,6 +83,8 @@
       (vertically () commands display statusbar))))
 
 ; Enable Keystroke Accelerators (hotkeys) - per Genera CLIM 2.0 Docs
+; clim:read-command-using-keystrokes could have overrides for the
+; :command-parser, :command-unparser and :partial-command-parser
 (defmethod clim:read-frame-command ((frame gc-z-machine) &key)
   (let ((command-table (clim:find-command-table 'gc-z-machine)))
     (clim:with-command-table-keystrokes (keystrokes command-table)
