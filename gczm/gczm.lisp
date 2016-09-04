@@ -53,11 +53,14 @@
 
   (:panes
     (commands  :command-menu) ; This is supplied automatically unless :menu-bar nil
-    (display   :interactor ; :application
+    (display   :application
 	       ; :text-style '(:fix :bold :very-large)
 	       :display-function 'draw-the-display
                :scroll-bars :vertical
-               :initial-cursor-visibility :on)
+               :initial-cursor-visibility nil)
+    (reader    :accept-values
+               :display-function '(clim:accept-values-pane-displayer 
+                                       :displayer display-reader))
     (statusbar :application
                :display-function 'draw-the-statusbar
                ; TODO: Set the height to one line of characters
@@ -65,7 +68,7 @@
                :scroll-bars nil))
   (:layouts
     (main 
-      (vertically () commands display statusbar))))
+      (vertically () commands display reader statusbar))))
 
 (defmethod draw-the-display ((application gc-z-machine) stream)
   (fresh-line stream)
@@ -73,6 +76,9 @@
 
 (defmethod draw-the-statusbar ((application gc-z-machine) stream)
   (write-string "West of House          Turn 3         Score 73" stream))
+
+(defmethod display-reader ((frame gc-z-machine) stream)
+  (clim:accept 'string :prompt "> " :stream stream))
 
 (define-gc-z-machine-command (exit :menu t) ()
   (frame-exit *application-frame*))
