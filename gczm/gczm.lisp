@@ -66,6 +66,7 @@
                ; TODO: Set the height to one line of characters
 	       ; TODO: Set the color to be opposite from main display
                :scroll-bars nil))
+  (:command-table (gc-z-machine :inherit-from (clim:accept-values-pane)))
   (:layouts
     (main 
       (vertically () commands display reader statusbar))))
