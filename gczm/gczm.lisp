@@ -35,7 +35,9 @@
 
 ; Implementation notes:
 ; (clim:accept 'string)
-; If you want 
+; If you want to accept any string.
+; See docs on :accept-values pane which might be used with the above?
+; To make a Genera activity: clim:define-genera-application
 
 ; Initial implementation:
 ; 1. Show some random text
@@ -66,18 +68,19 @@
       (vertically () commands display statusbar))))
 
 (defmethod draw-the-display ((application gc-z-machine) stream)
-  stream)
+  (fresh-line stream)
+  (write-string "Genera CLIM Z-Machine Interpreter v0.01" stream))
 
 (defmethod draw-the-statusbar ((application gc-z-machine) stream)
-  stream)
+  (write-string "West of House          Turn 3         Score 73" stream))
 
 (define-gc-z-machine-command (exit :menu t) ()
   (frame-exit *application-frame*))
 
 
 #||
+() ; Necessary so we can do c-sh-E to execute the below
 (run-frame-top-level 
   (setq gczm1 (make-application-frame 'gc-z-machine
                :left 100 :right 600 :top 100 :bottom 500)))
-(run-frame-top-level gczm1)
 ||#
