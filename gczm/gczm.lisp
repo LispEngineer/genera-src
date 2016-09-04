@@ -12,6 +12,8 @@
 ; Intended to play Version 3 Z-machine games.
 ; Written in Symbolics ANSI-Common-Lisp, which is actually not a fully
 ; ANSI-compliant Common Lisp implementation.
+;
+; We have our own package, GCZM, to avoid naming conflicts with our (CLIM) commands.
 
 ; Our application looks like the following:
 ;
@@ -38,6 +40,10 @@
 ; If you want to accept any string.
 ; See docs on :accept-values pane which might be used with the above?
 ; To make a Genera activity: clim:define-genera-application
+; To control the application frame REPL, try: clim:default-frame-top-level
+;   which has command parsers, unparsers, partial parsers, and a prompt
+
+; To have command accelerators work, you need to specialize clim:read-frame-command.
 
 ; Initial implementation:
 ; 1. Show some random text
@@ -53,23 +59,30 @@
 
   (:panes
     (commands  :command-menu) ; This is supplied automatically unless :menu-bar nil
-    (display   :application
+    (display   :interactor
 	       ; :text-style '(:fix :bold :very-large)
 	       :display-function 'draw-the-display
                :scroll-bars :vertical
-               :initial-cursor-visibility nil)
-    (reader    :accept-values
-               :display-function '(clim:accept-values-pane-displayer 
-                                       :displayer display-reader))
+               :initial-cursor-visibility :on)
     (statusbar :application
                :display-function 'draw-the-statusbar
                ; TODO: Set the height to one line of characters
 	       ; TODO: Set the color to be opposite from main display
                :scroll-bars nil))
-  (:command-table (gc-z-machine :inherit-from (clim:accept-values-pane)))
+
+  ; Default command table will be named gc-z-machine-command-table
+  ; Commands are symbols, conventionally starting with com-
+  ; (:command-table (gc-z-machine :inherit-from (clim:accept-values-pane)))
+
   (:layouts
     (main 
-      (vertically () commands display reader statusbar))))
+      (vertically () commands display statusbar))))
+
+; Enable Keystroke Accelerators (hotkeys) - per Genera CLIM 2.0 Docs
+(defmethod clim:read-frame-command ((frame gc-z-machine) &key)
+  (let ((command-table (clim:find-command-table 'gc-z-machine)))
+    (clim:with-command-table-keystrokes (keystrokes command-table)
+      (clim:read-command-using-keystrokes command-table keystrokes))))
 
 (defmethod draw-the-display ((application gc-z-machine) stream)
   (fresh-line stream)
@@ -78,10 +91,10 @@
 (defmethod draw-the-statusbar ((application gc-z-machine) stream)
   (write-string "West of House          Turn 3         Score 73" stream))
 
-(defmethod display-reader ((frame gc-z-machine) stream)
-  (clim:accept 'string :prompt "> " :stream stream))
-
-(define-gc-z-machine-command (exit :menu t) ()
+(define-gc-z-machine-command (com-exit :menu t       ; Show in menu
+                                       :keystroke (:q :meta)
+                                       :name "Exit") ; Type "Exit" to quit application
+                             ()
   (frame-exit *application-frame*))
 
 
