@@ -47,17 +47,28 @@
 (define-application-frame gc-z-machine ()
   ((z-machine :initform nil))
 
+  (:menu-bar nil) ; disable default menu bar and show it in pane explicitly
+
   (:panes
-    (display :application
-	     :text-style '(:fix :bold :very-large)
-	     :display-function 'draw-the-display
-	     :scroll-bars t
-	     :initial-cursor-visibility nil))
+    (commands  :command-menu) ; This is supplied automatically unless :menu-bar nil
+    (display   :interactor ; :application
+	       ; :text-style '(:fix :bold :very-large)
+	       :display-function 'draw-the-display
+               :scroll-bars :vertical
+               :initial-cursor-visibility :on)
+    (statusbar :application
+               :display-function 'draw-the-statusbar
+               ; TODO: Set the height to one line of characters
+	       ; TODO: Set the color to be opposite from main display
+               :scroll-bars nil))
   (:layouts
     (main 
-      (vertically () display))))
+      (vertically () commands display statusbar))))
 
 (defmethod draw-the-display ((application gc-z-machine) stream)
+  stream)
+
+(defmethod draw-the-statusbar ((application gc-z-machine) stream)
   stream)
 
 (define-gc-z-machine-command (exit :menu t) ()
@@ -65,8 +76,8 @@
 
 
 #||
-()
-(setq gczm1 (make-application-frame 'gc-z-machine
-	    :left 100 :right 600 :top 100 :bottom 500))
+(run-frame-top-level 
+  (setq gczm1 (make-application-frame 'gc-z-machine
+               :left 100 :right 600 :top 100 :bottom 500)))
 (run-frame-top-level gczm1)
 ||#
