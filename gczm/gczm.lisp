@@ -114,7 +114,10 @@
 
 (defmethod draw-the-display ((application gc-z-machine) stream)
   (fresh-line stream)
-  (write-string "Genera CLIM Z-Machine Interpreter v0.01" stream))
+  (write-string "Genera CLIM Z-Machine Interpreter v0.01" stream)
+  (dolist (ll (reverse *log*))
+    (fresh-line stream)
+    (format stream "~A" ll)))
 
 (defmethod draw-the-statusbar ((application gc-z-machine) stream)
   (write-string "West of House          Turn 3         Score 73" stream))
