@@ -55,8 +55,28 @@
 ; 4. Go to 1
 ; 5. Allow user to click "exit" button
 
+; Functions so we can see what's going on afterwards or in the Lisp Listener
+(defparameter *log* ())
+(defun addlog (message)
+  (setf *log* (cons message *log*)))
+
+; Custom command parser
+; For now, just call the default one and log what is going on.
+; It appears this doesn't ever return until it gets a full command,
+; so it's running some sort of processing loop within it.
+(defun gczm-cl-command-parser (command-table stream)
+  (let ((result (clim:command-line-command-parser command-table stream)))
+    (addlog (list "Parsed" result))
+    result))
+				    
+
+; Main application frame
 (define-application-frame gc-z-machine ()
   ((z-machine :initform nil))
+
+  (:top-level (clim:default-frame-top-level :prompt "> "
+		:command-parser gczm-cl-command-parser))
+
 
   (:menu-bar nil) ; disable default menu bar and show it in pane explicitly
 
