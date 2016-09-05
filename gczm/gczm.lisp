@@ -65,10 +65,13 @@
 ; It appears this doesn't ever return until it gets a full command,
 ; so it's running some sort of processing loop within it.
 (defun gczm-cl-command-parser (command-table stream)
-  (let ((result (clim:command-line-command-parser command-table stream)))
-    (addlog (list "Parsed" result))
-    result))
-				    
+;  (let ((result (clim:command-line-command-parser command-table stream)))
+;    (addlog (list "Parsed" result))
+;    result))
+  (declare (ignore command-table stream))
+  (let ((result (accept 'string)))
+    (addlog (list "Got" result))
+    (list 'com-input result)))
 
 ; Main application frame
 (define-application-frame gc-z-machine ()
@@ -76,7 +79,6 @@
 
   (:top-level (clim:default-frame-top-level :prompt "> "
 		:command-parser gczm-cl-command-parser))
-
 
   (:menu-bar nil) ; disable default menu bar and show it in pane explicitly
 
@@ -123,6 +125,10 @@
                              ()
   (frame-exit *application-frame*))
 
+; If we get input from the command line processor, this is it...
+(define-gc-z-machine-command (com-input) ((astring 'string))
+  (addlog (list "Called com-input with" astring))
+  astring)
 
 #||
 () ; Necessary so we can do c-sh-E to execute the below
