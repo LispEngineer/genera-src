@@ -61,13 +61,8 @@
   (setf *log* (cons message *log*)))
 
 ; Custom command parser
-; For now, just call the default one and log what is going on.
-; It appears this doesn't ever return until it gets a full command,
-; so it's running some sort of processing loop within it.
+; Just accept a string, and return the "Got an input" command
 (defun gczm-cl-command-parser (command-table stream)
-;  (let ((result (clim:command-line-command-parser command-table stream)))
-;    (addlog (list "Parsed" result))
-;    result))
   (declare (ignore command-table stream))
   (let ((result (accept 'string)))
     (addlog (list "Got" result))
@@ -112,6 +107,8 @@
     (clim:with-command-table-keystrokes (keystrokes command-table)
       (clim:read-command-using-keystrokes command-table keystrokes))))
 
+; We need to figure out how to just append stuff to this each time
+; rather than constantly redrawing the whole thing.
 (defmethod draw-the-display ((application gc-z-machine) stream)
   (fresh-line stream)
   (write-string "Genera CLIM Z-Machine Interpreter v0.01" stream)
