@@ -2,7 +2,7 @@
 
 (defpackage gczm
   (:use clim-lisp clim))
-
+				    
 (in-package :gczm)
 
 ; Douglas P. Fields, Jr. - https://symbolics.lisp.engineer/
@@ -26,14 +26,13 @@
 ; | | > User Commands echoed     |
 ; | | ...                        |
 ; +-+----------------------------+
-; | > User commands entered      |
-; +------------------------------+
 ; | Status line                  |
 ; +------------------------------+
 ;
 ; In addition,if possible, we will try to update the Genera
 ; status line as well. Not sure if that's possible in Genera
-; CLIM yet.
+; CLIM yet. (Later note: There are CLIM panes that mimic the
+; Genera description pane and such that can be used.)
 
 ; Implementation notes:
 ; (clim:accept 'string)
@@ -69,11 +68,14 @@
     (list 'com-input result)))
 
 ; Main application frame
+; TODO: Figure out how to send initial output to the interactor prior to
+; accepting the first command
 (define-application-frame gc-z-machine ()
   ((z-machine :initform nil))
 
-  (:top-level (clim:default-frame-top-level :prompt "> "
-		:command-parser gczm-cl-command-parser))
+  ; Instead of a custom top-level, let's just have a custom read-frame-command
+  ;(:top-level (clim:default-frame-top-level :prompt "> "
+  ;		:command-parser gczm-cl-command-parser))
 
   (:menu-bar nil) ; disable default menu bar and show it in pane explicitly
 
@@ -81,7 +83,6 @@
     (commands  :command-menu) ; This is supplied automatically unless :menu-bar nil
     (display   :interactor
 	       ; :text-style '(:fix :bold :very-large)
-	       :display-function 'draw-the-display
                :scroll-bars :vertical
                :initial-cursor-visibility :on)
     (statusbar :application
@@ -107,6 +108,17 @@
     (clim:with-command-table-keystrokes (keystrokes command-table)
       (clim:read-command-using-keystrokes command-table keystrokes))))
 
+; Custom command reader which accepts any string
+(defmethod read-frame-command ((frame gc-z-machine) &key (stream *standard-input*))
+  "Specialized for GCZM, just reads a string and returns it with com-input"
+  (multiple-value-bind (astring thetype)
+      ; Accept returns the object and the type
+      (accept 'string :stream stream :prompt nil
+                      :default "" :default-type 'string)
+    (declare (ignore thetype))
+    ; Now that we have astring & thetype, return our command
+    (list 'com-input astring)))   
+
 ; We need to figure out how to just append stuff to this each time
 ; rather than constantly redrawing the whole thing.
 (defmethod draw-the-display ((application gc-z-machine) stream)
@@ -127,6 +139,12 @@
 
 ; If we get input from the command line processor, this is it...
 (define-gc-z-machine-command (com-input) ((astring 'string))
+  ; First, write to our interactor
+  (fresh-line *standard-output*)
+  (write-string "Got: " *standard-output*)
+  (write-string astring *standard-output*)
+  (fresh-line *standard-output*)
+  ; Then store this permanently for debugging
   (addlog (list "Called com-input with" astring))
   astring)
 
