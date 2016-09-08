@@ -121,17 +121,21 @@
 (defmethod read-frame-command ((frame gc-z-machine) &key (stream *standard-input*))
   "Specialized for GCZM, just reads a string and returns it with com-input"
   (multiple-value-bind (retval thetype)
-      ; Accept returns the object and the type.
-      ; It does some parsing on the input, for example, removing surrounding
-      ; doublequotes.
-      ; TODO: To fix this, we probably need to make our own presentation type
-      ; that's exactly a string without any parsing.
+      ; Accept returns the object and the type. The regular string type, however,
+      ; does some parsing on the input, for example, removing surrounding
+      ; doublequotes. To fix this, we made our own presentation type
+      ; that's exactly a string without any parsing, called string-raw.
       (let ((command-table (clim:find-command-table 'gc-z-machine)))
-	; This with-command-table-keystrokes addition doesn't seem to do anything much
+	; This with-command-table-keystrokes addition doesn't seem to do anything useful
+	; for us right now.
 	(clim:with-command-table-keystrokes (keystrokes command-table)
 	  (declare (ignore keystrokes))
-	  (with-accept-help ((:subhelp "Enter a game command or comma and a meta-command"))
+	  (with-accept-help ((:subhelp "Enter a game command or click menu bar command"))
 	    ; The below enables typing strings and clicking on the menu bar,
+	    ; and if no commands have :name entries, they won't be invoked by any
+	    ; typed input. The order of the ('or ...) is extraordinarily sensitive,
+	    ; and you can't do a sub-list (e.g., (command :command-table command-table)).
+	    ; Command accelerators (hotkeys/keyboard shortcuts) still don't work.
 	    (accept `(or command string-raw)
 		    :stream stream :prompt nil
 		    :default "" :default-type 'string))))
@@ -141,9 +145,20 @@
     (cond
       ; If we got a string, return that we got input
       ((eq thetype 'string-raw)   (list 'com-input retval))
+
+      ; If we get a command, return that
+      ; FIXME: If the user just enters a blank line, it gets parsed as the NIL
+      ; command and that should probably be treated as (com-input "").
+      ; If the first keypress is a SPACE, it's also treated as the NIL command.
       ((eq thetype 'clim:command) retval)
-      ; Otherwise, return the command from the command processor
-      (t retval))))
+
+      ; Hitting three tab characters causes this to have ("" STRING) ...???
+      ; In a Lisp Listener, it turns out (DESCRIBE 'STRING) makes it a symbol in
+      ; the lisp package.
+      ((eq thetype 'lisp:string)  (list 'com-input retval))
+
+      ; Otherwise, return the command from the command processor with ugliness
+      (t (list 'com-input (write-to-string (list "Unknown" retval thetype)))))))
 
 ; See ftp://ftp.ai.sri.com/pub/mailing-lists/clim/921231/msg00434.html
 
@@ -164,8 +179,7 @@
 
 ; Quit the application/game
 (define-gc-z-machine-command (com-exit :menu t       ; Show in menu
-                                       :keystroke (:q :meta)
-                                       ) ; Type "Exit" to quit application
+                                       :keystroke (:q :meta))
                              ()
   (addlog (list "Called com-exit"))
   ; TODO: Add a pop-up confirmation dialog
@@ -173,8 +187,7 @@
 
 ; Testing menu command
 (define-gc-z-machine-command (com-hello :menu t       ; Show in menu
-                                        :keystroke (:h :meta)
-                                        ) ; Type "Hello"
+                                        :keystroke (:h :meta))
                              ()
   (addlog (list "Called com-hello"))
   (fresh-line *standard-input*)
@@ -259,7 +272,8 @@
   "Runs a new application frame that is saved in gczm1"
   (run-frame-top-level 
     (setq *gczm1* (make-application-frame 'gc-z-machine
-		    :left 100 :right 600 :top 100 :bottom 500))))
+		    :left 100 :right 600 :top 100 :bottom 500)))
+  (reverse *log*))
 
 #||
 () ; Necessary so we can do c-sh-E to execute the below
@@ -272,60 +286,3 @@
 
 
 
-; Genera 8.3 CLIM Source ----------------------------------------------------
-
-; clim/command_processor.lisp
-
-#|
-;; Read a command.
-;; If USE-KEYSTROKES is T, allow the command to be input via keystroke accelerators.
-(defun read-command (command-table
-		     &key (stream *standard-input*)
-			  (command-parser *command-parser*)
-			  (command-unparser *command-unparser*)
-			  (partial-command-parser *partial-command-parser*)
-			  (use-keystrokes nil))
-  (if use-keystrokes
-      (with-command-table-keystrokes (keystrokes command-table)
-	(read-command-using-keystrokes command-table keystrokes
-				       :stream stream
-				       :command-parser command-parser
-				       :command-unparser command-unparser
-				       :partial-command-parser partial-command-parser))
-      (let ((*command-parser* command-parser)
-	    (*command-unparser* command-unparser)
-	    (*partial-command-parser* partial-command-parser))
-        (values (accept `(command :command-table ,command-table)
-			:stream stream :prompt nil)))))
-
-;; Read a command, allowing keystroke accelerators.  If we get a keystroke
-;; with no corresponding command, just return the keystroke itself.
-(defun read-command-using-keystrokes (command-table keystrokes
-				      &key (stream *standard-input*)
-					   (command-parser *command-parser*)
-					   (command-unparser *command-unparser*)
-					   (partial-command-parser *partial-command-parser*))
-  (let ((*command-parser* command-parser)
-	(*command-unparser* command-unparser)
-	(*partial-command-parser* partial-command-parser))
-    ;; NUMERIC-ARG only applies when we read a keystroke accelerator
-    (multiple-value-bind (command numeric-arg)
-	(block keystroke
-	  (handler-bind ((accelerator-gesture
-			   #'(lambda (c)
-			       (return-from keystroke
-				(values
-				  (accelerator-gesture-event c)
-				  (accelerator-gesture-numeric-argument c))))))
-	    (let ((*accelerator-gestures* keystrokes))
-	      (accept `(command :command-table ,command-table)
-		      :stream stream :prompt nil))))
-      (if (keyboard-event-p command)
-	  (let ((command (lookup-keystroke-command-item command command-table
-							:numeric-argument numeric-arg)))
-	    (if (partial-command-p command)
-		(funcall *partial-command-parser*
-			 command command-table stream nil :for-accelerator t)
-	        command))
-	  command))))
-|#
