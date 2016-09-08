@@ -100,10 +100,12 @@
 ; Enable Keystroke Accelerators (hotkeys) - per Genera CLIM 2.0 Docs
 ; clim:read-command-using-keystrokes could have overrides for the
 ; :command-parser, :command-unparser and :partial-command-parser
+#| ; Not used right now
 (defmethod clim:read-frame-command ((frame gc-z-machine) &key)
   (let ((command-table (clim:find-command-table 'gc-z-machine)))
     (clim:with-command-table-keystrokes (keystrokes command-table)
       (clim:read-command-using-keystrokes command-table keystrokes))))
+|#
 
 ; Custom command reader which accepts any string.
 ; Note that this seems to prevent clicking on the menu bar and
@@ -117,8 +119,12 @@
       ; doublequotes.
       ; TODO: To fix this, we probably need to make our own presentation type
       ; that's exactly a string without any parsing.
-      (accept 'string :stream stream :prompt nil
-                      :default "" :default-type 'string)
+      (let ((command-table (clim:find-command-table 'gc-z-machine)))
+	(clim:with-command-table-keystrokes (keystrokes command-table)
+	  (declare (ignore keystrokes))
+	  (with-accept-help ((:subhelp "Enter a game command or comma and a meta-command"))
+	    (accept 'string :stream stream :prompt nil
+  		            :default "" :default-type 'string))))
     ; (declare (ignore thetype))
     (addlog (list "read-frame-command" astring thetype))
     ; Now that we have astring & thetype, return our command
@@ -134,6 +140,7 @@
                                        :name "Exit") ; Type "Exit" to quit application
                              ()
   (addlog (list "Called com-exit"))
+  ; TODO: Add a pop-up confirmation dialog
   (frame-exit *application-frame*))
 
 ; If we get input from the command line processor, this is it...
@@ -145,6 +152,7 @@
   (fresh-line *standard-input*)
   ; Then store this permanently for debugging
   (addlog (list "Called com-input with" astring))
+  ; TODO: If the command is ",exit" then quit
   astring)
 
 ; Testing -------------------------------------------------------------------
