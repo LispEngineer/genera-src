@@ -126,12 +126,18 @@
 	  ; Doing a clim:accepting-values doesn't seem to help
 	  ; Maybe use clim:read-gesture?
 	  (with-accept-help ((:subhelp "Enter a game command or comma and a meta-command"))
-	    (accept 'command :stream stream :prompt nil
+	    (accept 'string-raw :stream stream :prompt nil
     		            :default "" :default-type 'string))))
     ; (declare (ignore thetype))
     (addlog (list "read-frame-command" astring thetype))
     ; Now that we have astring & thetype, return our command
     (list 'com-input astring)))   
+
+; See ftp://ftp.ai.sri.com/pub/mailing-lists/clim/921231/msg00434.html
+
+; Modified version from CLIM source for read-command-using-keystrokes
+; that instead of reading commands, reads strings (accepts strings)
+; TODO: CODE ME
 
 (defmethod draw-the-statusbar ((application gc-z-machine) stream)
   (write-string "West of House          Turn 3         Score 73" stream))
@@ -163,6 +169,58 @@
   ; TODO: If the command is ",exit" then quit
   astring)
 
+; string-raw presentation type ----------------------------------------------
+
+; The string-raw presentation type is exactly like the string presentation
+; type except that it is always done "unacceptably" so it should never have
+; double-quotes if you click the presentation type (or so the theory goes).
+; In other words, the usual "(accept 'string ...)" leaves a record in the
+; interactor window that is clickable, but when clicked, enters the string
+; into the current input with double quotes. We don't want that.
+; Modified from Genera 8.3 CLIM sources.
+
+;; :INHERIT-FROM T is to avoid inheriting from ARRAY, which is not a presentation type
+(define-presentation-type string-raw (&optional length)		;max length
+  :inherit-from t			;enforce CL definition
+  :history t)
+
+(define-presentation-method presentation-type-specifier-p ((type string-raw))
+  (or (eq length '*)
+      (typep length '(integer 0 *))))
+
+(define-presentation-method presentation-typep (object (type string-raw))
+  (or (eq length '*)
+      (<= (length object) length)))
+
+(define-presentation-method presentation-subtypep ((subtype string-raw) supertype)
+  (let ((length1 (with-presentation-type-parameters (string-raw subtype) length))
+	(length2 (with-presentation-type-parameters (string-raw supertype) length)))
+    (values (or (eq length2 '*) (eql length1 length2)) t)))
+
+(define-presentation-method describe-presentation-type ((type string-raw) stream plural-count)
+  (default-describe-presentation-type "string-raw" stream plural-count)
+  (unless (eq length '*)
+    (format stream " max length ~D" length)))
+
+(define-presentation-method present (object (type string-raw) stream (view textual-view)
+				     &key)
+  (if (stringp object)
+      (write-string object stream)
+      (print-object object stream)))
+
+(define-presentation-method present (object (type string-raw) stream (view textual-dialog-view)
+				     &key)
+  (if (stringp object)
+      (write-string object stream)
+      (print-object object stream)))
+
+(define-presentation-method accept ((type string-raw) stream (view textual-view) &key)
+  (let ((token (read-token stream)))
+    (unless (or (eq length '*) (> (length token) length))
+      (input-not-of-required-type token type))
+    token))
+
+
 ; Testing -------------------------------------------------------------------
 
 #||
@@ -172,3 +230,64 @@
   (setq gczm1 (make-application-frame 'gc-z-machine
                :left 100 :right 600 :top 100 :bottom 500)))
 ||#
+
+
+
+
+; Genera 8.3 CLIM Source ----------------------------------------------------
+
+; clim/command_processor.lisp
+
+#|
+;; Read a command.
+;; If USE-KEYSTROKES is T, allow the command to be input via keystroke accelerators.
+(defun read-command (command-table
+		     &key (stream *standard-input*)
+			  (command-parser *command-parser*)
+			  (command-unparser *command-unparser*)
+			  (partial-command-parser *partial-command-parser*)
+			  (use-keystrokes nil))
+  (if use-keystrokes
+      (with-command-table-keystrokes (keystrokes command-table)
+	(read-command-using-keystrokes command-table keystrokes
+				       :stream stream
+				       :command-parser command-parser
+				       :command-unparser command-unparser
+				       :partial-command-parser partial-command-parser))
+      (let ((*command-parser* command-parser)
+	    (*command-unparser* command-unparser)
+	    (*partial-command-parser* partial-command-parser))
+        (values (accept `(command :command-table ,command-table)
+			:stream stream :prompt nil)))))
+
+;; Read a command, allowing keystroke accelerators.  If we get a keystroke
+;; with no corresponding command, just return the keystroke itself.
+(defun read-command-using-keystrokes (command-table keystrokes
+				      &key (stream *standard-input*)
+					   (command-parser *command-parser*)
+					   (command-unparser *command-unparser*)
+					   (partial-command-parser *partial-command-parser*))
+  (let ((*command-parser* command-parser)
+	(*command-unparser* command-unparser)
+	(*partial-command-parser* partial-command-parser))
+    ;; NUMERIC-ARG only applies when we read a keystroke accelerator
+    (multiple-value-bind (command numeric-arg)
+	(block keystroke
+	  (handler-bind ((accelerator-gesture
+			   #'(lambda (c)
+			       (return-from keystroke
+				(values
+				  (accelerator-gesture-event c)
+				  (accelerator-gesture-numeric-argument c))))))
+	    (let ((*accelerator-gestures* keystrokes))
+	      (accept `(command :command-table ,command-table)
+		      :stream stream :prompt nil))))
+      (if (keyboard-event-p command)
+	  (let ((command (lookup-keystroke-command-item command command-table
+							:numeric-argument numeric-arg)))
+	    (if (partial-command-p command)
+		(funcall *partial-command-parser*
+			 command command-table stream nil :for-accelerator t)
+	        command))
+	  command))))
+|#
