@@ -120,7 +120,7 @@
 ; are definitely causing the accept to terminate.
 (defmethod read-frame-command ((frame gc-z-machine) &key (stream *standard-input*))
   "Specialized for GCZM, just reads a string and returns it with com-input"
-  (multiple-value-bind (astring thetype)
+  (multiple-value-bind (retval thetype)
       ; Accept returns the object and the type.
       ; It does some parsing on the input, for example, removing surrounding
       ; doublequotes.
@@ -130,14 +130,20 @@
 	; This with-command-table-keystrokes addition doesn't seem to do anything much
 	(clim:with-command-table-keystrokes (keystrokes command-table)
 	  (declare (ignore keystrokes))
-	  ; Doing a clim:accepting-values doesn't seem to help
-	  ; Maybe use clim:read-gesture?
 	  (with-accept-help ((:subhelp "Enter a game command or comma and a meta-command"))
-	    (accept 'string-raw :stream stream :prompt nil
-    		            :default "" :default-type 'string))))
-    (addlog (list "read-frame-command" astring thetype))
-    ; Now that we have astring & thetype, return our command
-    (list 'com-input astring)))   
+	    ; The below enables typing strings and clicking on the menu bar,
+	    ; but clicking on the menu bar causes a crash...
+	    (accept `(or string-raw (command :command-table ,command-table))
+		    :stream stream :prompt nil
+		    :default "" :default-type 'string))))
+
+    (addlog (list "read-frame-command" retval thetype))
+    ; Now that we have retval & thetype, return our command
+    (cond
+      ; If we got a string, return that we got input
+      ((eq thetype 'string-raw) (list 'com-input retval))
+      ; Otherwise, return the command from the command processor
+      (t retval))))
 
 ; See ftp://ftp.ai.sri.com/pub/mailing-lists/clim/921231/msg00434.html
 
@@ -236,6 +242,13 @@
 
 
 ; Testing -------------------------------------------------------------------
+
+(defparameter *gczm1* nil)
+(defun run-new ()
+  "Runs a new application frame that is saved in gczm1"
+  (run-frame-top-level 
+    (setq *gczm1* (make-application-frame 'gc-z-machine
+		    :left 100 :right 600 :top 100 :bottom 500))))
 
 #||
 () ; Necessary so we can do c-sh-E to execute the below
