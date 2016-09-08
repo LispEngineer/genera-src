@@ -130,7 +130,7 @@
 	; for us right now.
 	(clim:with-command-table-keystrokes (keystrokes command-table)
 	  (declare (ignore keystrokes))
-	  (with-accept-help ((:subhelp "Enter a game command or click menu bar command"))
+	  (with-accept-help ((:subhelp "Enter a game command or click menu bar"))
 	    ; The below enables typing strings and clicking on the menu bar,
 	    ; and if no commands have :name entries, they won't be invoked by any
 	    ; typed input. The order of the ('or ...) is extraordinarily sensitive,
