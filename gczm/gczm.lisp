@@ -133,7 +133,8 @@
 	  (with-accept-help ((:subhelp "Enter a game command or comma and a meta-command"))
 	    ; The below enables typing strings and clicking on the menu bar,
 	    ; but clicking on the menu bar causes a crash...
-	    (accept `(or string-raw (command :command-table ,command-table))
+	    (accept `(or string-raw command)
+		    ; :command-table command-table
 		    :stream stream :prompt nil
 		    :default "" :default-type 'string))))
 
