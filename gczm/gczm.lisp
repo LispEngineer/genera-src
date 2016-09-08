@@ -165,7 +165,7 @@
 ; Quit the application/game
 (define-gc-z-machine-command (com-exit :menu t       ; Show in menu
                                        :keystroke (:q :meta)
-                                       :name "Exit") ; Type "Exit" to quit application
+                                       ) ; Type "Exit" to quit application
                              ()
   (addlog (list "Called com-exit"))
   ; TODO: Add a pop-up confirmation dialog
@@ -174,7 +174,7 @@
 ; Testing menu command
 (define-gc-z-machine-command (com-hello :menu t       ; Show in menu
                                         :keystroke (:h :meta)
-                                        :name "Hello") ; Type "Hello"
+                                        ) ; Type "Hello"
                              ()
   (addlog (list "Called com-hello"))
   (fresh-line *standard-input*)
