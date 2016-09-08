@@ -120,11 +120,14 @@
       ; TODO: To fix this, we probably need to make our own presentation type
       ; that's exactly a string without any parsing.
       (let ((command-table (clim:find-command-table 'gc-z-machine)))
+	; This with-command-table-keystrokes addition doesn't seem to do anything much
 	(clim:with-command-table-keystrokes (keystrokes command-table)
 	  (declare (ignore keystrokes))
+	  ; Doing a clim:accepting-values doesn't seem to help
+	  ; Maybe use clim:read-gesture?
 	  (with-accept-help ((:subhelp "Enter a game command or comma and a meta-command"))
-	    (accept 'string :stream stream :prompt nil
-  		            :default "" :default-type 'string))))
+	    (accept 'command :stream stream :prompt nil
+    		            :default "" :default-type 'string))))
     ; (declare (ignore thetype))
     (addlog (list "read-frame-command" astring thetype))
     ; Now that we have astring & thetype, return our command
@@ -147,8 +150,13 @@
 (define-gc-z-machine-command (com-input) ((astring 'string))
   ; First, write to our interactor
   (fresh-line *standard-input*)
-  (write-string "Got: " *standard-input*)
-  (write-string astring *standard-input*)
+  (if (stringp astring)
+      (progn
+	(write-string "Got: " *standard-input*)
+	(write-string astring *standard-input*))
+      (progn
+	(write-string "Got non-string: " *standard-input*)
+	(print-object astring *standard-input*)))
   (fresh-line *standard-input*)
   ; Then store this permanently for debugging
   (addlog (list "Called com-input with" astring))
