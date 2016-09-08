@@ -132,9 +132,7 @@
 	  (declare (ignore keystrokes))
 	  (with-accept-help ((:subhelp "Enter a game command or comma and a meta-command"))
 	    ; The below enables typing strings and clicking on the menu bar,
-	    ; but clicking on the menu bar causes a crash...
-	    (accept `(or string-raw command)
-		    ; :command-table command-table
+	    (accept `(or command string-raw)
 		    :stream stream :prompt nil
 		    :default "" :default-type 'string))))
 
@@ -142,7 +140,8 @@
     ; Now that we have retval & thetype, return our command
     (cond
       ; If we got a string, return that we got input
-      ((eq thetype 'string-raw) (list 'com-input retval))
+      ((eq thetype 'string-raw)   (list 'com-input retval))
+      ((eq thetype 'clim:command) retval)
       ; Otherwise, return the command from the command processor
       (t retval))))
 
@@ -163,6 +162,7 @@
 
 ; Commands ---------------------------------------------------------------
 
+; Quit the application/game
 (define-gc-z-machine-command (com-exit :menu t       ; Show in menu
                                        :keystroke (:q :meta)
                                        :name "Exit") ; Type "Exit" to quit application
@@ -170,6 +170,16 @@
   (addlog (list "Called com-exit"))
   ; TODO: Add a pop-up confirmation dialog
   (frame-exit *application-frame*))
+
+; Testing menu command
+(define-gc-z-machine-command (com-hello :menu t       ; Show in menu
+                                        :keystroke (:h :meta)
+                                        :name "Hello") ; Type "Hello"
+                             ()
+  (addlog (list "Called com-hello"))
+  (fresh-line *standard-input*)
+  (write-string "And hello to you, too!" *standard-input*)
+  (fresh-line *standard-input*))
 
 ; If we get input from the command line processor, this is it...
 (define-gc-z-machine-command (com-input) ((astring 'string))
