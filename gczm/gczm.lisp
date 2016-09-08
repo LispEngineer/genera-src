@@ -1,19 +1,22 @@
 ;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Package: GCZM; Base: 10; Lowercase: Yes -*-
 
+; GCZM - (Symbolics) Genera CLIM Z-Machine Interpreter
+; Douglas P. Fields, Jr. - https://symbolics.lisp.engineer/
+;
+; Intended to play Version 3 Z-machine games.
+; Written in Symbolics ANSI-Common-Lisp, which is actually not a fully
+; compliant ANSI Common Lisp implementation.
+
+; We have our own package, GCZM, to avoid naming conflicts with our (CLIM) commands.
+; Loading this file into the Zwei editor if you don't already have a GCZM package will
+; result in package errors that are hard to abort; try Load File first!
+
 (defpackage gczm
   (:use clim-lisp clim))
 				    
 (in-package :gczm)
 
-; Douglas P. Fields, Jr. - https://symbolics.lisp.engineer/
-;
-; GCZM - (Symbolics) Genera CLIM Z-Machine Interpreter
-;
-; Intended to play Version 3 Z-machine games.
-; Written in Symbolics ANSI-Common-Lisp, which is actually not a fully
-; ANSI-compliant Common Lisp implementation.
-;
-; We have our own package, GCZM, to avoid naming conflicts with our (CLIM) commands.
+
 
 ; Our application looks like the following:
 ;
@@ -31,13 +34,10 @@
 ;
 ; In addition,if possible, we will try to update the Genera
 ; status line as well. Not sure if that's possible in Genera
-; CLIM yet. (Later note: There are CLIM panes that mimic the
+; CLIM yet. (Later note: There are supposedly CLIM panes that mimic the
 ; Genera description pane and such that can be used.)
 
 ; Implementation notes:
-; (clim:accept 'string)
-; If you want to accept any string.
-; See docs on :accept-values pane which might be used with the above?
 ; To make a Genera activity: clim:define-genera-application
 ; To control the application frame REPL, try: clim:default-frame-top-level
 ;   which has command parsers, unparsers, partial parsers, and a prompt
@@ -50,9 +50,12 @@
 ; Initial implementation:
 ; 1. Show some random text
 ; 2. Accept text
-; 3. Put the text in the scrollback
+; 3. Repeat the text in the scrollback
 ; 4. Go to 1
-; 5. Allow user to click "exit" button
+; 5. Allow user to click "exit" menu button (not working)
+; 6. Allow user to type m-Q to exit (not working)
+
+
 
 ; Functions so we can see what's going on afterwards or in the Lisp Listener
 (defparameter *log* ())
@@ -61,7 +64,8 @@
   (setf *log* (cons message *log*)))
 
 
-; Main application frame
+; Main application frame ---------------------------------------------------------
+
 ; TODO: Figure out how to send initial output to the interactor prior to
 ; accepting the first command
 (define-application-frame gc-z-machine ()
@@ -97,6 +101,9 @@
     (main 
       (vertically () title commands display statusbar #-Genera pointerd))))
 
+
+; top level or command reader ------------------------------------------------------
+
 ; Enable Keystroke Accelerators (hotkeys) - per Genera CLIM 2.0 Docs
 ; clim:read-command-using-keystrokes could have overrides for the
 ; :command-parser, :command-unparser and :partial-command-parser
@@ -128,7 +135,6 @@
 	  (with-accept-help ((:subhelp "Enter a game command or comma and a meta-command"))
 	    (accept 'string-raw :stream stream :prompt nil
     		            :default "" :default-type 'string))))
-    ; (declare (ignore thetype))
     (addlog (list "read-frame-command" astring thetype))
     ; Now that we have astring & thetype, return our command
     (list 'com-input astring)))   
@@ -139,8 +145,14 @@
 ; that instead of reading commands, reads strings (accepts strings)
 ; TODO: CODE ME
 
+
+; Drawing methods --------------------------------------------------------
+
 (defmethod draw-the-statusbar ((application gc-z-machine) stream)
   (write-string "West of House          Turn 3         Score 73" stream))
+
+
+
 
 ; Commands ---------------------------------------------------------------
 
@@ -168,6 +180,8 @@
   (addlog (list "Called com-input with" astring))
   ; TODO: If the command is ",exit" then quit
   astring)
+
+
 
 ; string-raw presentation type ----------------------------------------------
 
