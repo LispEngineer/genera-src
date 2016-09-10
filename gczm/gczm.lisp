@@ -11,7 +11,7 @@
 ; Loading this file into the Zwei editor if you don't already have a GCZM package will
 ; result in package errors that are hard to abort; try Load File first!
 
-(defpackage gczm
+(defpackage :gczm
   (:use clim-lisp clim))
 				    
 (in-package :gczm)
