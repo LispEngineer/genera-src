@@ -271,14 +271,21 @@
 (defparameter +op-type-const-small+ #b01)
 (defparameter +op-type-variable+    #b10) ; Variable by value (Spec 4.2.3)
 (defparameter +op-type-omitted+     #b11)
+;; Give names to all the above possibilities as an indexed array
+(defparameter +op-type-list+
+  #(const-large const-small variable omitted))
 
-;; Opcode forms (Spec 4.3)
+;; Instruction opcode forms (Spec 4.3)
 ;; These are "top two" bits of the opcode,
 ;; (except v5+ opcode 0xBE is always "extended" form - ignore for v3)
 (defparameter +op-form-variable+    #b11)
 (defparameter +op-form-short+       #b10)
 (defparameter +op-form-long+        #b00) ; LSB in here is an operand type
 (defparameter +op-form-long-2+      #b01)
+;; Which opcode bit decides if we're not a long bit?
+(defparameter +op-form-bit-not-long+ 7)
+;; Which opcode bit decides if we're variable (and not short)?
+(defparameter +op-form-bit-variable-not-short+ 6)
 
 ;; --- Operand Counts (0OP, 1OP, 2OP, VAR) ---
 ;; - Short form operand type (Spec 4.3.1)
@@ -309,6 +316,10 @@
 ;; but those are not supported in v3
 
 
+;; NOTE: The initial version of this full Z-Machine will not be optimized for
+;; performance in any way, shape, or form, but instead for correctness and
+;; ease of reading/understanding the code.
+
 
 ;; Instruction decoding algorithm:
 ;; First byte:
@@ -317,14 +328,25 @@
 ;;     Bit 6 = 0 -> Short Form Decoder
 ;;     Bit 6 = 1 -> Variable Form Decoder
 
+;; Example:
+;; E0 = 1110_0000 = call
+;;      11        = Variable instruction form decoder (4.3)
+;;        1       = VAR number of arguments (4.3.3)
+;;         0_0000 = Opcode ("call") (14 page 73)
+;; BB = 1011_1011 = new_line (0OP:187)
+;;      10        = Short instruction form decoder
+;;        11      = Operand type - omitted -> 0OP
+;;           1011 = Opcode ("new_line") 
+
 
 (defstruct decoded-instruction
   memory-location   ; Where this instruction starts
   first-byte        ; What the first byte of the instruction is
-  instruction-form  ; 'long, 'short, 'variable (Spec 4.3)
+  form              ; 'long, 'short, 'variable (Spec 4.3)
   operand-count     ; '0OP, 1OP, 2OP, VAR (Spec 4.3)
   operand-types     ; list of 'const-large, 'const-small, 'variable
   opcode            ; The actual opcode (within the operand-count)
+  opcode-name       ; The name of the opcode (for human consumption)
   operands          ; list of bytes or words
   ;; TODO: CODE ME
   )
@@ -342,11 +364,185 @@
   (let ((shiftamt  (- bitnum (1- numbits))) ; We shift off unneeded bits
         (andtarget (1- (ash 1 numbits))))
     (boole boole-and (ash byte (- shiftamt)) andtarget)))
-    ; (values byte shiftamt andtarget)))
-  
+
+(defun nonzerop (num)
+  (not (zerop num)))
+
+;; Top level instruction decoder: returns decoded-instruction
+;; Determines if it's a long, short or variable form instruction
 (defun decode-instruction (mloc)
   (let ((retval (make-decoded-instruction))
         (first  (mem-byte mloc)))
     (setf (decoded-instruction-memory-location retval) mloc)
-    first))
-    
+    (setf (decoded-instruction-first-byte      retval) first)
+    ;; First determine instruction form, and then handle that form
+    (cond
+      ((zerop (get-bit first +op-form-bit-not-long+)) ; Not long bit is clear?
+       (setf (decoded-instruction-form retval) 'long)
+       (di-decode-long retval))
+      ((zerop (get-bit first +op-form-bit-variable-not-short+))
+       (setf (decoded-instruction-form retval) 'short)
+       (di-decode-short retval))
+      (t ; For V3, if it's not long and not short, it's variable
+       (setf (decoded-instruction-form retval) 'variable)
+       (di-decode-variable retval)))
+    ;; Decode the opcode number to a name for ease of debugging
+    (setf (decoded-instruction-opcode-name retval)
+          (aref (cdr (assoc (decoded-instruction-operand-count retval) +opcode-names+))
+                (decoded-instruction-opcode retval)))
+    retval))
+           
+
+;; Decode a long form instruction (Spec 4.3.2, 4.4.2)
+(defun di-decode-long (retval)
+  (let ()
+    ;; Long form is always 2OP
+    (setf (decoded-instruction-operand-count retval)
+          '2OP)
+    ;; Bits 6 & 5 give the operand types (Spec 4.4.2)
+    ;; 0 = small constant, 1 = variable
+    (setf (decoded-instruction-operand-types retval)
+          (list
+           (aref #(const-small variable)
+                 (get-bit (decoded-instruction-first-byte retval) 6))
+           (aref #(const-small variable)
+                 (get-bit (decoded-instruction-first-byte retval) 5))))
+    ;; Opcode is given in bottom 5 bits
+    (setf (decoded-instruction-opcode retval)
+          (get-bits (decoded-instruction-first-byte retval) 4 5)) ;; FIXME: Magic numbers
+    retval))
+
+;; Decode a short form instruction (Spec 4.3.1, 4.4.1)
+(defun di-decode-short (retval)
+  ;; Bits 4 and 5 give an operand type
+  ;; FIXME: Magic numbers
+  (let ((op-type (aref +op-type-list+
+                       (get-bits (decoded-instruction-first-byte retval) 5 2))))
+    ;; If the operand type is omitted then this is a 0OP, otherwise it's a 1OP
+    (cond
+      ((eq op-type 'omitted)
+       (setf (decoded-instruction-operand-count retval) '0OP) ; Section 4.3.1
+       (setf (decoded-instruction-operand-types retval) '())) ; Section 4.4.1
+      (t
+       (setf (decoded-instruction-operand-count retval) '1OP) ; Section 4.3.1
+       (setf (decoded-instruction-operand-types retval) (list op-type)))) ; Section 4.4.1
+    ;; Opcode is given in bottom 4 bits
+    (setf (decoded-instruction-opcode retval)
+          (get-bits (decoded-instruction-first-byte retval) 3 4)) ;; FIXME: Magic numbers
+    retval))
+
+;; Decode a variable form instruction (Spec 4.3.3, 4.4.3)
+(defun di-decode-variable (retval)
+  (let ()
+    ;; If bit 5 is 0, then 2OP, otherwise VAR (Spec 4.3.3)
+    (setf (decoded-instruction-operand-count retval)
+          (if (zerop (get-bit (decoded-instruction-first-byte retval) 5))
+              '2OP
+              'VAR))
+    ;; Get the operand types
+    ;; Does this differ based upon 'VAR or '2OP?
+    ;; XXX: CODE ME
+    ;; Opcode number in bottom 5 bits
+    (setf (decoded-instruction-opcode retval)
+          (get-bits (decoded-instruction-first-byte retval) 4 5)) ;; FIXME: Magic numbers
+    retval))
+
+;; Opcode to name mappings - Spec 14
+;; These are for human readability
+;; anything that is nil is an invalid opcode in v3
+
+(defparameter +2op-opcode-names+
+  #(nil         ; 0
+    je          ; 1
+    jl          ; 2
+    jg          ; 3
+    dec_chk     ; 4
+    inc_chk     ; 5
+    jin         ; 6
+    test        ; 7
+    or          ; 8
+    and         ; 9
+    test_attr   ; A
+    set_attr    ; B
+    clear_attr  ; C
+    store       ; D
+    insert_obj  ; E
+    loadw       ; F
+    loadb       ; 10
+    get_prop    ; 11
+    get_prop_addr ; 12
+    get_next_prop ; 13
+    add           ; 14
+    sub           ; 15
+    mul           ; 16
+    div           ; 17
+    mod           ; 18
+    nil nil nil nil nil nil nil))
+
+(defparameter +1op-opcode-names+
+  #(jz             ; 0
+    get_sibling    ; 1
+    get_child      ; 2
+    get_parent     ; 3
+    get_prop_len   ; 4
+    inc            ; 5
+    dec            ; 6
+    print_addr     ; 7
+    nil            ; 8
+    remove_obj     ; 9
+    print_obj      ; A
+    ret            ; B
+    jump           ; C
+    print_paddr    ; D
+    load           ; E
+    not))          ; F
+
+(defparameter +0op-opcode-names+
+  #(rtrue        ; 0
+    rfalse       ; 1
+    print        ; 2
+    print_ret    ; 3
+    nop          ; 4
+    save         ; 5
+    restore      ; 6
+    restart      ; 7
+    ret_popped   ; 8
+    pop          ; 9
+    quit         ; A 
+    new_line     ; B
+    show_status  ; C
+    verify       ; D
+    nil          ; E
+    nil))        ; F
+
+(defparameter +var-opcode-names+
+  #(call          ; 0
+    storew        ; 1
+    storeb        ; 2
+    put_prop      ; 3
+    sread         ; 4
+    print_char    ; 5
+    print_num     ; 6
+    random        ; 7
+    push          ; 8
+    pull          ; 9
+    split_window  ; A
+    set_window    ; B
+    nil           ; C
+    nil nil nil   ; D-F
+    nil nil nil   ; 10-12
+    output_stream ; 13
+    input_stream  ; 14
+    sound_effect  ; 15 (only used in one v3 game)
+    nil nil nil   ; 16-18
+    nil nil nil   ; 19-1B
+    nil nil nil   ; 1C-1E
+    nil))         ; 1F
+
+;; Association list of ____ to names for the opcode number
+(defparameter +opcode-names+
+  (list
+   (cons '2OP +2op-opcode-names+)
+   (cons '1OP +1op-opcode-names+)
+   (cons '0OP +0op-opcode-names+)
+   (cons 'VAR +var-opcode-names+)))
