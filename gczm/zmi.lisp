@@ -94,10 +94,20 @@
 (defparameter +ml-rel-num+       #x02) ; 2 Release number (word)
 (defparameter +ml-serial-num+    #x12) ; 6 Serial number (six ASCII chars)
 
+;; What the file length header needs to be multiplied by in order to
+;; get the actual file length (Spec 11.1.6).
+;; v1-3: 2
+;; v4-5: 4
+;; v6+: 8
+(defparameter +file-length-divider+ 2)
+
+;; Memory header length (Spec 1.1.1.1)
+(defparameter +header-length+ #x40)
+
 
 ;; Memory map per the above (Spec 1.1)
 ;; +----------------+
-;; | Dynamic memory | 0x00000 - (- +ml-loc-static+ 1)
+;; | Dynamic memory | 0x00000 - (- +ml-loc-static+ 1) including header
 ;; +----------------+
 ;; | Static memory  | +ml-loc-static+ - lower of last byte of story or 0x0ffff
 ;; +----------------+
@@ -129,10 +139,12 @@
     (not (not in)))) ; Convert result to t or nil
       
 ;; Load a byte from memory
+;; TODO: Make this safe for the actual memory size
 (defun mem-byte (loc)
   (aref *z-mem* loc))
 
 ;; Load a word from memory - MSB first
+;; TODO: Make this safe for the actual memory size
 (defun mem-word (loc)
   (+ (ash (aref *z-mem* loc) 8)
      (aref *z-mem* (1+ loc))))
@@ -157,6 +169,24 @@
 ;; mh = memory header
 (defun mh-serial-num ()
   (mem-ascii +ml-serial-num+ 6))
+
+;; Gets the file length from the header and adjusts
+;; it to be a number in bytes.
+;; TODO: Make this version sensitive
+(defun mh-file-len ()
+  (* +file-length-divider+ (mem-word +ml-file-len+)))
+
+;; Calculates the checksum of the file per the
+;; verify opcode/instruction (Spec page 103):
+;; Sum all bytes unsigned from the header (0x40) onwards and take
+;; the result modulo 0x10000 (i.e., lower 16 bits).
+;; We need to stop at the header-specified file length.
+;; TODO: Make this safe for memory size
+(defun mem-calc-checksum ()
+  (let* ((summed-area (mem-slice +header-length+ (- (mh-file-len) +header-length+)))
+         (sum (reduce #'+ summed-area)))
+    (mod sum #x10000)))
+        
   
 ;; Routine Frames ---------------------------------------------------------
 
@@ -204,7 +234,8 @@
     (return-from load-story-file
       (values nil (format nil "Could not load file: ~A" filename))))
   (let ((ver     (mem-byte +ml-version+))
-        ; (cksum   (mem-word +ml-file-cksum+))
+        (hcksum  (mem-word +ml-file-cksum+))  ; Checksum from header
+        (acksum  (mem-calc-checksum))         ; Actual checksum
         (init-pc (mem-word +ml-initial-pc+))
         (rel     (mem-word +ml-rel-num+))
         (serial  (mh-serial-num)))
@@ -212,11 +243,14 @@
     (unless (equalp ver +zm-version+)
       (return-from load-story-file
         (values nil (format nil "Wrong version ~D in file: ~A" ver filename))))
-    ;; TODO: Check the checksum
+    ;; Check the checksum (the game will do it itself, though)
+    (unless (equalp hcksum acksum)
+      (return-from load-story-file
+        (values nil (format nil "Wrong checksum ~x (desired ~x) in file: ~A"
+                            acksum hcksum filename))))
     ;; Create an empty call stack
     (initialize-call-stack)
     ;; Set the initial Program Counter (Spec 5.5)
     (setf *z-pc* init-pc)
-    ;; ...done...?
-    ;; TODO: Read serial number
+    ;; Success
     (values t (format nil "Loaded ~A release ~D serial ~A" filename rel serial))))
