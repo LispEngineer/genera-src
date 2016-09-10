@@ -68,7 +68,7 @@
 (defparameter +ml-file-len+      #x1A) ;   Length of file /2 (Spec 11.1.6)
 (defparameter +ml-file-cksum+    #x1C) ;   Checksum of file
 (defparameter +ml-std-rev+       #x32) ;   Standard revision number
-;; See Spec Appendix B
+;; Spec Appendix B
 (defparameter +ml-rel-num+       #x02) ; 2 Release number (word)
 (defparameter +ml-serial-num+    #x12) ; 6 Serial number (six ASCII chars)
 
@@ -105,4 +105,12 @@
       (close in))
     (not (not in)))) ; Convert result to t or nil
       
-                  
+;; Load a byte from memory
+(defun mem-byte (loc)
+  (aref *z-mem* loc))
+
+;; Load a word from memory - MSB first
+(defun mem-word (loc)
+  (+ (ash (aref *z-mem* loc) 8)
+     (aref *z-mem* (1+ loc))))
+
