@@ -28,8 +28,9 @@
 ;; This is an unsigned byte 1-dimensional adjustable array (vector).
 ;; We pre-allocate 128KB and set current length to zero; maximum
 ;; story file size is 128KB in v3.
+(defparameter +z-mem-length+ (* 128 1024))
 (defvar *z-mem*
-  (make-array (* 128 1024) ; FIXME: Magic number
+  (make-array +z-mem-length+
               :element-type '(unsigned-byte 8)
               :adjustable t
               :fill-pointer 0))
@@ -85,3 +86,26 @@
 ;; of 240 2-byte words. (Spec 6.2)
 
 ;; Two-byte values are stored MSB first (Spec 2.1)
+
+
+
+
+;; Implementation ---------------------------------------------------------
+
+;; Loads a story file into the memory vector
+;; Returns nil on failure
+;; FIXME: Use with-open-file
+(defun load-file-to-memory (filename)
+  (let* ((in (open filename :if-does-not-exist nil
+                   :element-type '(unsigned-byte 8)))
+         (opened (not (not in))))
+    (when in
+      ;; Do something
+      (setq *z-mem*
+            (adjust-array *z-mem* +z-mem-length+
+                          :fill-pointer (file-length in)))
+      (read-sequence *z-mem* in)
+      (close in))
+    opened))
+      
+                  
