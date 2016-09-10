@@ -20,6 +20,9 @@
 
 ;; Globals -----------------------------------------------------
 
+;; The version of Z-machine code that we support
+(defparameter +zm-version+ 3)
+
 ;; The default story file we load at Z-Machine startup
 ;; (remember that Genera doesn't have defconstant)
 (defparameter +default-file+ "zork1.z3")
@@ -44,9 +47,28 @@
 ;; Writing to variable 0x00 pushes a value on the stack
 ;; Reading from variable 0x00 pops a value from the stack
 
-;; Z-Machine Routine Call State / Stack Frames (Spec 6.4, 6.5)
-;; TODO: Code me (Spec 6.1, 6.3.2)
-;; (we need to remember how to pop all of a routine's stack pushes after a return)
+;; Z-Machine Routine Call State / Stack Frames (Spec 6.1, 6.3.2, 6.4, 6.5)
+;; The zmrs structure contains all the local state of a Routine
+;; call, including:
+;;   Parameters - implemented as an array (of words)
+;;   Local variables - implemented as an array (of words)
+;;   Stack - implemented as a list (of words)
+;;   Return address
+;; The call stack is a list of these structures.
+;; The starting routine is the lowest state, and has no parameters,
+;; and a zero return address.
+(defstruct zmrs     ; Z-Machine Routine State
+  params            ; 8-size array of words with fill-pointer to actual #
+  locals            ; 15-size array of words (set in routine header)
+                    ;   with fill-pointer to actual # of locals
+  stack             ; list (of words)
+  return-address)   ; Address of the next opcode to run when we return
+;; Maxmimum number of parameters that a routine can have
+(defparameter +zmrs-max-params+ 8)
+;; Maximum number of locals a parameter can have
+(defparameter +zmrs-max-locals+ 15)
+;; Our call stack - pile of ZMRS records as a list
+(defvar *call-stack* '())
 
 ;; Variable numbers (Spec 4.2.2)
 ;; 0x00        = top of stack
@@ -88,9 +110,10 @@
 ;; Two-byte values are stored MSB first (Spec 2.1)
 
 
-
-
 ;; Implementation ---------------------------------------------------------
+
+
+;; Memory -----------------------------------------------------------------
 
 ;; Loads a story file into the memory vector
 ;; Returns nil on failure
@@ -114,3 +137,86 @@
   (+ (ash (aref *z-mem* loc) 8)
      (aref *z-mem* (1+ loc))))
 
+;; Return a subset of memory as a vector starting at specified
+;; location and including N bytes. This shares space with the
+;; main z-machine memory so BE CAREFUL!!!
+(defun mem-slice (loc slen)
+  ;; TODO: Check limits of loc and slen
+  (make-array slen
+              :element-type '(unsigned-byte 8)
+              :Displaced-to *z-mem*
+              :displaced-index-offset loc))
+
+;; Loads an ASCII string from memory
+(defun mem-ascii (loc slen)
+  ;; Get a sub-vector of memory starting at loc and
+  ;; continuing for slen
+  (map 'string #'code-char (mem-slice loc slen)))
+
+;; Gets the serial number from the header as a string
+;; mh = memory header
+(defun mh-serial-num ()
+  (mem-ascii +ml-serial-num+ 6))
+  
+;; Routine Frames ---------------------------------------------------------
+
+;; Creates a new zmrs structure and sets up appropriate empty values of all
+;; the fields of the structure
+(defun new-zmrs ()
+  (let ((retval (make-zmrs)))
+    (setf (zmrs-params retval)
+          (make-array +zmrs-max-params+
+                      :element-type '(unsigned-byte 16)
+                      :adjustable t
+                      :fill-pointer 0))
+    (setf (zmrs-locals retval)
+          (make-array +zmrs-max-locals+
+                      :element-type '(unsigned-byte 16)
+                      :adjustable t
+                      :fill-pointer 0))
+    (setf (zmrs-stack retval) '())
+    (setf (zmrs-return-address retval) 0)
+    retval))
+
+;; Initialize the call stack for an entirely new game
+(defun initialize-call-stack ()
+  (setf *call-stack*
+        (list (new-zmrs))))
+
+;; Creates an initialized  ZMRS for calling a routine
+;; at the specified address with the specified parameters,
+;; and the specified return address.
+;; This handles setting the locals up from the routine
+;; header and also returns the first instruction address.
+;; TODO: CODE ME
+
+;; Program Counter --------------------------------------------------------
+
+
+;; Story File Load/Initialization -----------------------------------------
+
+;; Loads a story file and resets all state of the Z-M to be able to
+;; immediately start executing the story. Returns t on success
+;; and has a second return with an error message.
+(defun load-story-file (filename)
+  ;; Load the file
+  (unless (load-file-to-memory filename)
+    (return-from load-story-file
+      (values nil (format nil "Could not load file: ~A" filename))))
+  (let ((ver     (mem-byte +ml-version+))
+        ; (cksum   (mem-word +ml-file-cksum+))
+        (init-pc (mem-word +ml-initial-pc+))
+        (rel     (mem-word +ml-rel-num+))
+        (serial  (mh-serial-num)))
+    ;; Check the version
+    (unless (equalp ver +zm-version+)
+      (return-from load-story-file
+        (values nil (format nil "Wrong version ~D in file: ~A" ver filename))))
+    ;; TODO: Check the checksum
+    ;; Create an empty call stack
+    (initialize-call-stack)
+    ;; Set the initial Program Counter (Spec 5.5)
+    (setf *z-pc* init-pc)
+    ;; ...done...?
+    ;; TODO: Read serial number
+    (values t (format nil "Loaded ~A release ~D serial ~A" filename rel serial))))
