@@ -94,18 +94,15 @@
 
 ;; Loads a story file into the memory vector
 ;; Returns nil on failure
-;; FIXME: Use with-open-file
 (defun load-file-to-memory (filename)
-  (let* ((in (open filename :if-does-not-exist nil
-                   :element-type '(unsigned-byte 8)))
-         (opened (not (not in))))
+  (with-open-file (in filename :if-does-not-exist nil
+                      :element-type '(unsigned-byte 8))
     (when in
-      ;; Do something
-      (setq *z-mem*
+      (setf *z-mem*
             (adjust-array *z-mem* +z-mem-length+
                           :fill-pointer (file-length in)))
       (read-sequence *z-mem* in)
       (close in))
-    opened))
+    (not (not in)))) ; Convert result to t or nil
       
                   
