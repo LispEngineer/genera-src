@@ -146,7 +146,7 @@
 ;; Load a word from memory - MSB first
 ;; TODO: Make this safe for the actual memory size
 (defun mem-word (loc)
-  (+ (ash (aref *z-mem* loc) 8)
+  (+ (ash (aref *z-mem* loc) 8) ;; Positive ASH amounts are to the left
      (aref *z-mem* (1+ loc))))
 
 ;; Return a subset of memory as a vector starting at specified
@@ -220,9 +220,6 @@
 ;; header and also returns the first instruction address.
 ;; TODO: CODE ME
 
-;; Program Counter --------------------------------------------------------
-
-
 ;; Story File Load/Initialization -----------------------------------------
 
 ;; Loads a story file and resets all state of the Z-M to be able to
@@ -254,3 +251,102 @@
     (setf *z-pc* init-pc)
     ;; Success
     (values t (format nil "Loaded ~A release ~D serial ~A" filename rel serial))))
+
+
+;; Instruction Decoder --------------------------------------------------------
+
+;; Per Spec 4.1, instructions are coded as follows:
+;;
+;; *Opcode            1 or 2 bytes
+;;  Operand types     1 or 2 bytes, 4 or 8 2-bit fields
+;; *Operands          0-16 bytes, 0-8 of these at 1 or 2 bytes each
+;;  Store variable    1 byte
+;;  Branch offset     1 or 2 bytes
+;;  Text              Encoded string (unlimited length)
+;;
+;; Components with * exist in all instructions.
+
+;; Operand types (Spec 4.2)
+(defparameter +op-type-const-large+ #b00) ; 2 bytes, MSB first (Spec 4.2.1)
+(defparameter +op-type-const-small+ #b01)
+(defparameter +op-type-variable+    #b10) ; Variable by value (Spec 4.2.3)
+(defparameter +op-type-omitted+     #b11)
+
+;; Opcode forms (Spec 4.3)
+;; These are "top two" bits of the opcode,
+;; (except v5+ opcode 0xBE is always "extended" form - ignore for v3)
+(defparameter +op-form-variable+    #b11)
+(defparameter +op-form-short+       #b10)
+(defparameter +op-form-long+        #b00) ; LSB in here is an operand type
+(defparameter +op-form-long-2+      #b01)
+
+;; --- Operand Counts (0OP, 1OP, 2OP, VAR) ---
+;; - Short form operand type (Spec 4.3.1)
+;; Taken from bits 4 & 5
+;; Opcode NUMBER is in bits 0-3 (bottom 4 bits)
+(defparameter +op-short-count-0+    #b11) ; 0 operands, otherwise 1
+;; - Long form operand type (Spec 4.3.2)
+;; Operand count is always 2
+;; Opcode NUMBER is in bottom 5 bits
+;; - Variable form operand type (Spec 4.3.3)
+;; Bit 5 == 0: 2OP otherwise VAR
+;; Opcode NUMBER is in bottom 5 bits
+(defparameter +op-var-count-2+      #b0) ; 2 operands if bit 5 is 0
+
+;; --- Operand Types --- (Spec 4.4)
+;; - Short form: Opcode Bits 4-5 give operand type (Spec 4.4.1)
+;; per the +op-type-XXX+ choices above
+;; - Long form (Spec 4.4.2)
+;; Bits 6 and 5 give the types of the first and second operands respectively
+;; The only choices small constant (if 0) or variable (if 1)
+(defparameter +op-long-type-const-small+ #b0)
+(defparameter +op-long-type-variable+    #b1)
+;; - Variable form (Spec 4.4.3)
+;; A byte of 4 operand types follows opcode per +op-type-XXX+ above.
+;; Once one type is omitted, all remaining types are (must be) omitted.
+;; Two opcodes are "double variable" with two bytes of opcode types
+;; (Spec 4.4.3.1): opcode numbers 12, 26: call_vs2, call_vn2
+;; but those are not supported in v3
+
+
+
+;; Instruction decoding algorithm:
+;; First byte:
+;;   Bit 7 = 0 -> Long Form Decoder
+;;   Bit 7 = 1
+;;     Bit 6 = 0 -> Short Form Decoder
+;;     Bit 6 = 1 -> Variable Form Decoder
+
+
+(defstruct decoded-instruction
+  memory-location   ; Where this instruction starts
+  first-byte        ; What the first byte of the instruction is
+  instruction-form  ; 'long, 'short, 'variable (Spec 4.3)
+  operand-count     ; '0OP, 1OP, 2OP, VAR (Spec 4.3)
+  operand-types     ; list of 'const-large, 'const-small, 'variable
+  opcode            ; The actual opcode (within the operand-count)
+  operands          ; list of bytes or words
+  ;; TODO: CODE ME
+  )
+
+;; Gets the specified bit of the specified byte
+;; (Bit 0 = LSB, bit 7 = MSB)
+(defun get-bit (byte bitnum)
+  ;; TODO: Protect against bad inputs?
+  ;; Negative ASH is to the right
+  (boole boole-and (ash byte (- bitnum)) 1))
+
+;; Gets the specified number of bits (MSB first) of the specified byte
+(defun get-bits (byte bitnum numbits)
+  ;; TODO: Protect against bad inputs?
+  (let ((shiftamt  (- bitnum (1- numbits))) ; We shift off unneeded bits
+        (andtarget (1- (ash 1 numbits))))
+    (boole boole-and (ash byte (- shiftamt)) andtarget)))
+    ; (values byte shiftamt andtarget)))
+  
+(defun decode-instruction (mloc)
+  (let ((retval (make-decoded-instruction))
+        (first  (mem-byte mloc)))
+    (setf (decoded-instruction-memory-location retval) mloc)
+    first))
+    
