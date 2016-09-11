@@ -138,12 +138,12 @@
       (close in))
     (not (not in)))) ; Convert result to t or nil
       
-;; Load a byte from memory
+;; Load an (unsigned) byte from memory
 ;; TODO: Make this safe for the actual memory size
 (defun mem-byte (loc)
   (aref *z-mem* loc))
 
-;; Load a word from memory - MSB first
+;; Load an (unsigned) word from memory - MSB first
 ;; TODO: Make this safe for the actual memory size
 (defun mem-word (loc)
   (+ (ash (aref *z-mem* loc) 8) ;; Positive ASH amounts are to the left
@@ -342,7 +342,12 @@
 ;; BB = 1011_1011 = new_line (0OP:187)
 ;;      10        = Short instruction form decoder
 ;;        11      = Operand type - omitted -> 0OP
-;;           1011 = Opcode ("new_line") 
+;;           1011 = Opcode ("new_line")
+;; 54 = 0101_0100 = add
+;;      0         = Long form decoder (4.3)
+;;       1        = First operand is a variable (4.4.2)
+;;        0       = Second operand is a small constant (4.4.2)
+;;         1_0100 = Opcode ("add") (4.3.2)
 
 
 (defstruct decoded-instruction
@@ -395,10 +400,16 @@
       (t ; For V3, if it's not long and not short, it's variable
        (setf (decoded-instruction-form retval) 'variable)
        (di-decode-variable retval)))
-    ;; Decode the opcode number to a name for ease of debugging
+    ;; Decode the opcode number into opcode information
     (setf (decoded-instruction-opcode-info retval)
            (aref (cdr (assoc (decoded-instruction-operand-count retval) +opcode-names+))
                  (decoded-instruction-opcode retval)))
+    ;; Assert: Now we know these things:
+    ;; 1. Opcode info
+    ;; 2. Operand types (if any) as a list
+    ;; 3. Instruction length so far (1 or 2 bytes)
+    ;; Next, let's load the Operands (Spec 4.1) from the operand types
+    (decode-operands retval)
     retval))
            
 
@@ -456,11 +467,12 @@
           (get-bits (decoded-instruction-first-byte retval) 4 5)) ;; FIXME: Magic numbers
     retval))
 
-;; Decodes an operator type byte (Spec 4.4.3)
+;; Decodes an operator type byte (Spec 4.4.3).
 ;; This consists of four two-bit fields.
 ;; If it's a '2OP we always include the first two (even if they
 ;; are omitted), but for a VAR we cut the operand list at the first
 ;; omitted one.
+;; The instruction length is incremented since we decoded another byte.
 (defun di-decode-op-type-byte (retval)
   (let* ((op-types (mem-byte (1+ (decoded-instruction-memory-location retval))))
          ;; Make our full list
@@ -483,7 +495,38 @@
               (subseq otlist 0 (position 'omitted otlist)))) ; Operands before 1st omitted
     retval))
 
+;; Loads the operands of the instruction per the
+;; (previously decoded) operand type list. (Spec 4.1, 4.2)
+;; Increments the instruction length for each operand loaded.
+(defun decode-operands (retval)
+  ;; Store our current memory location from which we'll read the
+  ;; next operand value and the total length of operands read so far.
+  (let ((curmemloc (+ (decoded-instruction-memory-location retval)
+                      (decoded-instruction-length retval)))
+        (oplen 0))
+    ;; Now get our operands one at a time
+    (setf (decoded-instruction-operands retval)
+          ;; By mapping a count & retrieve function to all operand types
+          (map 'list
+               (lambda (ot) ; operand type
+                 (let ((origmemloc curmemloc))
+                   (cond
+                     ((eq ot 'const-large)
+                      (incf curmemloc 2)
+                      (incf oplen 2)
+                      (mem-word origmemloc))
+                     ;; Should never get 'omitted so the only remaining
+                     ;; ones are one byte each, just differ in interpretation
+                     (t
+                      (incf curmemloc)
+                      (incf oplen)
+                      (mem-byte origmemloc)))))
+               (decoded-instruction-operand-types retval)))
+    ;; Update our instruction length
+    (incf (decoded-instruction-length retval) oplen)))
+  
 
+;; Opcode Information ------------------------------------------------
                   
 ;; Opcode information (name, branch, store) - Spec 14
 ;; Names are for human readability
