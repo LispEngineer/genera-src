@@ -363,6 +363,9 @@
   branch-if         ; t or nil: we branch when the condition is true or false
   branch-offset     ; Where we branch to, a signed number (Spec 4.7)
   length            ; How long the instruction is in bytes
+  text-loc          ; If has string: start memory location (Spec 4.8)
+  text-data         ; If has string: raw string binary as vector
+  text-ascii        ; If has string: this is the ascii form
   )
 
 ;; Gets the specified bit of the specified byte
@@ -419,7 +422,7 @@
     ;; We also have to decode the branch offset, if necessary for this opcode
     (when (oi-branch (decoded-instruction-opcode-info retval))
       (decode-branch-offset retval))
-    ;; TODO: Finally, we have to get our text to print, if necessary
+    ;; XXX: CODE ME: Finally, we have to get our text to print, if necessary
     retval))
            
 
@@ -609,17 +612,19 @@
 (defstruct oci ; OpCode Information
   name         ; Symbol: Disassembly name of the opcode (Spec 14)
   store        ; Boolean: Store a result in a variable?
-  branch)      ; Boolean: Provides a label to jump to
+  branch       ; Boolean: Provides a label to jump to
+  str)         ; Boolean: Does this opcode include a following string
 ;; TODO: Add these?
 ;;  number     ; Integer: The opcode number (calculated)
 ;;  count      ; Symbol: '0OP, '1OP, '2OP, 'VAR
   
 ;; Easily construct an opcode information struct
-(defmacro oci-> (name store branch)
+(defmacro oci-> (name store branch &optional str)
   `(make-oci
     :name   (quote ,name)
     :store  ,store
-    :branch ,branch))
+    :branch ,branch
+    :str    ,str))
 
 ;; nil-safe oci accessors
 (defun oi-name   (o) (if (not o) nil (oci-name   o)))
@@ -680,8 +685,8 @@
   (vector
     (oci-> rtrue       nil nil) ; 0
     (oci-> rfalse      nil nil) ; 1
-    (oci-> print       nil nil) ; 2
-    (oci-> print_ret   nil nil) ; 3
+    (oci-> print       nil nil t) ; 2 - includes a string
+    (oci-> print_ret   nil nil t) ; 3 - includes a string
     (oci-> nop         nil nil) ; 4
     (oci-> save        nil t  ) ; 5
     (oci-> restore     nil t  ) ; 6
