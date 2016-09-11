@@ -440,13 +440,41 @@
               '2OP
               'VAR))
     ;; Get the operand types
-    ;; Does this differ based upon 'VAR or '2OP?
-    ;; XXX: CODE ME
+    ;; OPEN QUESTION: Does this differ based upon 'VAR or '2OP?
+    (di-decode-op-type-byte retval)
     ;; Opcode number in bottom 5 bits
     (setf (decoded-instruction-opcode retval)
           (get-bits (decoded-instruction-first-byte retval) 4 5)) ;; FIXME: Magic numbers
     retval))
 
+;; Decodes an operator type byte (Spec 4.4.3)
+;; This consists of four two-bit fields.
+;; If it's a '2OP we always include the first two (even if they
+;; are omitted), but for a VAR we cut the operand list at the first
+;; omitted one.
+(defun di-decode-op-type-byte (retval)
+  (let* ((op-types (mem-byte (1+ (decoded-instruction-memory-location retval))))
+         ;; Make our full list
+         (otlist (list
+                  (aref +op-type-list+
+                        (get-bits op-types 7 2)) ; 7-6 first per Spec 4.4.3
+                  (aref +op-type-list+
+                        (get-bits op-types 5 2))
+                  (aref +op-type-list+
+                        (get-bits op-types 3 2))
+                  (aref +op-type-list+
+                        (get-bits op-types 1 2)))))
+    (format t "~A~%" otlist)
+    ;; Only VARIABLE forms will have a types byte. If it's a 2OP version, then
+    ;; we should cut the list its two items.
+    (setf (decoded-instruction-operand-types retval)
+          (if (eq (decoded-instruction-operand-count retval) '2OP)
+              (subseq otlist 0 2) ; First two operands
+              (subseq otlist 0 (position 'omitted otlist)))) ; Operands before 1st omitted
+    retval))
+
+
+                  
 ;; Opcode to name mappings - Spec 14
 ;; These are for human readability
 ;; anything that is nil is an invalid opcode in v3
