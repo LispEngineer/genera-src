@@ -549,8 +549,65 @@
           (mem-byte curmemloc))
     retval))
 
+;; We load the branch information: (Spec 4.7)
+;; 1. Branch if true or false (1 bit)
+;; 2. Branch offset type (1 bit)
+;;    a. 6-bit positive number
+;;    b. 14-bit signed number
+;; Assert: This is only called for instructions that we know
+;; use a branch offset.
 (defun decode-branch-offset (retval)
-  retval)
+  (let* ((curmemloc (+ (decoded-instruction-memory-location retval)
+                       (decoded-instruction-length retval)))
+         (b1 (mem-byte curmemloc))
+         (twobytes (zerop (get-bit b1 6))))
+    ;; Do we branch if the result is true or false?
+    (setf (decoded-instruction-branch-if retval)
+          (not (zerop (get-bit b1 7))))
+    ;; What is our offset?
+    (setf (decoded-instruction-branch-offset retval)
+          (if (not twobytes)
+              ;; A 1-byte offset uses the bottom 6 bits as a positive only offset
+              (get-bits b1 5 6)
+              ;; A 2-byte offset uses the bottom 6 bits plus the next byte as a
+              ;; signed 14-bit offset
+              (mem-signed-14-bit curmemloc)))
+    retval))
+
+;; This gets a word at the specified location (MSB first),
+;; strips off the top two bits, then turns it into a signed
+;; number (from its 14-bit twos compliment representation).
+;; Used for branches. (Spec 4.7)
+(defun mem-signed-14-bit (loc)
+  (us-to-s (mem-word loc) 14))
+
+#|
+  (let* ((fullword (mem-word loc)) ; Full 16-bit unsigned memory word
+         (us14 (boole boole-and fullword #x3FFF))) ; Unsigned 14-bit number
+    ;; If our unsigned-14-bit number has a 0 top bit, it is
+    ;; already in its own signed positive offset representation
+    (if (zerop (get-bit us14 13))
+        us14
+        ;; Otherwise we have to make it a two's compliment inverse
+        ;; and then subtract that from zero
+        (- (1+ (boole boole-xor us14 #x3FFF))))))
+|#
+
+;; Convert the unsigned (positive) n-bit integer
+;; provided to a signed n-bit integer. First we
+;; make sure it's only got those lower N bits.
+(defun us-to-s (anum bits)
+  (let* ((mask (1- (ash 1 bits))) ; An all 1's bit mask of bits bits
+         (num (boole boole-and anum mask))) ; Our masked number (just in case)
+    ;; Top bit is the sign bit
+    (if (zerop (get-bit num (1- bits)))
+        ;; We're not negative, so no changes needed.
+        num
+        ;; Sign bit says we're negative, so two's compliment
+        ;; ourselves to positive and arithmetically make us negative.
+        ;; Reminder: XOR anything with 1 will invert it.
+        (- (1+ (boole boole-xor num mask))))))
+  
 
 ;; Opcode Information ------------------------------------------------
                   
