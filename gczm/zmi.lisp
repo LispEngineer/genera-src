@@ -572,6 +572,9 @@
               ;; A 2-byte offset uses the bottom 6 bits plus the next byte as a
               ;; signed 14-bit offset
               (mem-signed-14-bit curmemloc)))
+    ;; And increment our instruction length
+    (incf (decoded-instruction-length retval)
+          (if twobytes 2 1))
     retval))
 
 ;; This gets a word at the specified location (MSB first),
@@ -580,18 +583,6 @@
 ;; Used for branches. (Spec 4.7)
 (defun mem-signed-14-bit (loc)
   (us-to-s (mem-word loc) 14))
-
-#|
-  (let* ((fullword (mem-word loc)) ; Full 16-bit unsigned memory word
-         (us14 (boole boole-and fullword #x3FFF))) ; Unsigned 14-bit number
-    ;; If our unsigned-14-bit number has a 0 top bit, it is
-    ;; already in its own signed positive offset representation
-    (if (zerop (get-bit us14 13))
-        us14
-        ;; Otherwise we have to make it a two's compliment inverse
-        ;; and then subtract that from zero
-        (- (1+ (boole boole-xor us14 #x3FFF))))))
-|#
 
 ;; Convert the unsigned (positive) n-bit integer
 ;; provided to a signed n-bit integer. First we
