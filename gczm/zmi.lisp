@@ -274,6 +274,12 @@
 ;; Give names to all the above possibilities as an indexed array
 (defparameter +op-type-list+
   #(const-large const-small variable omitted))
+;; Give operand byte lengths to all the above possibilities (Spec 4.2)
+(defparameter +op-type-len+
+  '((const-large . 2)
+    (const-small . 1)
+    (variable    . 1)
+    (omitted     . 0)))
 
 ;; Instruction opcode forms (Spec 4.3)
 ;; These are "top two" bits of the opcode,
@@ -346,8 +352,9 @@
   operand-count     ; '0OP, 1OP, 2OP, VAR (Spec 4.3)
   operand-types     ; list of 'const-large, 'const-small, 'variable
   opcode            ; The actual opcode (within the operand-count)
-  opcode-name       ; The name of the opcode (for human consumption)
+  opcode-info       ; The oci of the opcode or nil if invalid
   operands          ; list of bytes or words
+  length            ; How long the instruction is in bytes
   ;; TODO: CODE ME
   )
 
@@ -375,6 +382,8 @@
         (first  (mem-byte mloc)))
     (setf (decoded-instruction-memory-location retval) mloc)
     (setf (decoded-instruction-first-byte      retval) first)
+    ;; We start with length 1 byte, and add more as necessary
+    (setf (decoded-instruction-length          retval) 1)
     ;; First determine instruction form, and then handle that form
     (cond
       ((zerop (get-bit first +op-form-bit-not-long+)) ; Not long bit is clear?
@@ -387,9 +396,9 @@
        (setf (decoded-instruction-form retval) 'variable)
        (di-decode-variable retval)))
     ;; Decode the opcode number to a name for ease of debugging
-    (setf (decoded-instruction-opcode-name retval)
-          (aref (cdr (assoc (decoded-instruction-operand-count retval) +opcode-names+))
-                (decoded-instruction-opcode retval)))
+    (setf (decoded-instruction-opcode-info retval)
+           (aref (cdr (assoc (decoded-instruction-operand-count retval) +opcode-names+))
+                 (decoded-instruction-opcode retval)))
     retval))
            
 
@@ -464,7 +473,8 @@
                         (get-bits op-types 3 2))
                   (aref +op-type-list+
                         (get-bits op-types 1 2)))))
-    (format t "~A~%" otlist)
+    ;; If we have a type byte, our instruction is one longer
+    (incf (decoded-instruction-length retval) 1)
     ;; Only VARIABLE forms will have a types byte. If it's a 2OP version, then
     ;; we should cut the list its two items.
     (setf (decoded-instruction-operand-types retval)
@@ -475,97 +485,123 @@
 
 
                   
-;; Opcode to name mappings - Spec 14
-;; These are for human readability
+;; Opcode information (name, branch, store) - Spec 14
+;; Names are for human readability
 ;; anything that is nil is an invalid opcode in v3
+;; See "Reading the opcode tables" after Spec 14.2.4
+(defstruct oci ; OpCode Information
+  name         ; Symbol: Disassembly name of the opcode (Spec 14)
+  store        ; Boolean: Store a result in a variable?
+  branch)      ; Boolean: Provides a label to jump to
+;; TODO: Add these?
+;;  number     ; Integer: The opcode number (calculated)
+;;  count      ; Symbol: '0OP, '1OP, '2OP, 'VAR
+  
+;; Easily construct an opcode information struct
+(defmacro oci-> (name store branch)
+  `(make-oci
+    :name   (quote ,name)
+    :store  ,store
+    :branch ,branch))
+
+;; nil-safe oci accessors
+(defun oi-name   (o) (if (not o) nil (oci-name   o)))
+(defun oi-store  (o) (if (not o) nil (oci-store  o)))
+(defun oi-branch (o) (if (not o) nil (oci-branch o)))
+
+
 
 (defparameter +2op-opcode-names+
-  #(nil         ; 0
-    je          ; 1
-    jl          ; 2
-    jg          ; 3
-    dec_chk     ; 4
-    inc_chk     ; 5
-    jin         ; 6
-    test        ; 7
-    or          ; 8
-    and         ; 9
-    test_attr   ; A
-    set_attr    ; B
-    clear_attr  ; C
-    store       ; D
-    insert_obj  ; E
-    loadw       ; F
-    loadb       ; 10
-    get_prop    ; 11
-    get_prop_addr ; 12
-    get_next_prop ; 13
-    add           ; 14
-    sub           ; 15
-    mul           ; 16
-    div           ; 17
-    mod           ; 18
-    nil nil nil nil nil nil nil))
+  (vector
+    nil                         ; 0
+    (oci-> je         nil t  )  ; 1
+    (oci-> jl         nil t  )  ; 2
+    (oci-> jg         nil t  )  ; 3
+    (oci-> dec_chk    nil t  )  ; 4
+    (oci-> inc_chk    nil t  )  ; 5
+    (oci-> jin        nil t  )  ; 6
+    (oci-> test       nil t  )  ; 7
+    (oci-> or         t   nil)  ; 8
+    (oci-> and        t   nil)  ; 9
+    (oci-> test_attr  nil t  )  ; A
+    (oci-> set_attr   nil nil)  ; B
+    (oci-> clear_attr nil nil)  ; C
+    (oci-> store      nil nil)  ; D
+    (oci-> insert_obj nil nil)  ; E
+    (oci-> loadw      t   nil)  ; F
+    (oci-> loadb      t   nil)  ; 10
+    (oci-> get_prop   t   nil)  ; 11
+    (oci-> get_prop_addr t nil) ; 12
+    (oci-> get_next_prop t nil) ; 13
+    (oci-> add        t   nil)  ; 14
+    (oci-> sub        t   nil)  ; 15
+    (oci-> mul        t   nil)  ; 16
+    (oci-> div        t   nil)  ; 17
+    (oci-> mod        t   nil)  ; 18
+    nil nil nil nil nil nil nil)) ; 19-1F
 
 (defparameter +1op-opcode-names+
-  #(jz             ; 0
-    get_sibling    ; 1
-    get_child      ; 2
-    get_parent     ; 3
-    get_prop_len   ; 4
-    inc            ; 5
-    dec            ; 6
-    print_addr     ; 7
-    nil            ; 8
-    remove_obj     ; 9
-    print_obj      ; A
-    ret            ; B
-    jump           ; C
-    print_paddr    ; D
-    load           ; E
-    not))          ; F
+  (vector
+    (oci-> jz           nil t  )  ; 0
+    (oci-> get_sibling  t   t  )  ; 1
+    (oci-> get_child    t   t  )  ; 2
+    (oci-> get_parent   t   nil)  ; 3
+    (oci-> get_prop_len t   nil)  ; 4
+    (oci-> inc          nil nil)  ; 5
+    (oci-> dec          nil nil)  ; 6
+    (oci-> print_addr   nil nil)  ; 7
+    nil                           ; 8
+    (oci-> remove_obj   nil nil)  ; 9
+    (oci-> print_obj    nil nil)  ; A
+    (oci-> ret          nil nil)  ; B
+    (oci-> jump         nil nil)  ; C
+    (oci-> print_paddr  nil nil)  ; D
+    (oci-> load         t   nil)  ; E
+    (oci-> not          t   nil))) ; F
 
 (defparameter +0op-opcode-names+
-  #(rtrue        ; 0
-    rfalse       ; 1
-    print        ; 2
-    print_ret    ; 3
-    nop          ; 4
-    save         ; 5
-    restore      ; 6
-    restart      ; 7
-    ret_popped   ; 8
-    pop          ; 9
-    quit         ; A 
-    new_line     ; B
-    show_status  ; C
-    verify       ; D
-    nil          ; E
-    nil))        ; F
+  (vector
+    (oci-> rtrue       nil nil) ; 0
+    (oci-> rfalse      nil nil) ; 1
+    (oci-> print       nil nil) ; 2
+    (oci-> print_ret   nil nil) ; 3
+    (oci-> nop         nil nil) ; 4
+    (oci-> save        nil t  ) ; 5
+    (oci-> restore     nil t  ) ; 6
+    (oci-> restart     nil nil) ; 7
+    (oci-> ret_popped  nil nil) ; 8
+    (oci-> pop         nil nil) ; 9
+    (oci-> quit        nil nil) ; A 
+    (oci-> new_line    nil nil) ; B
+    (oci-> show_status nil nil) ; C
+    (oci-> verify      nil t  ) ; D
+    nil                         ; E
+    nil))                       ; F
 
 (defparameter +var-opcode-names+
-  #(call          ; 0
-    storew        ; 1
-    storeb        ; 2
-    put_prop      ; 3
-    sread         ; 4
-    print_char    ; 5
-    print_num     ; 6
-    random        ; 7
-    push          ; 8
-    pull          ; 9
-    split_window  ; A
-    set_window    ; B
-    nil           ; C
-    nil nil nil   ; D-F
-    nil nil nil   ; 10-12
-    output_stream ; 13
-    input_stream  ; 14
-    sound_effect  ; 15 (only used in one v3 game)
-    nil nil nil   ; 16-18
-    nil nil nil   ; 19-1B
-    nil nil nil   ; 1C-1E
-    nil))         ; 1F
+  (vector
+    (oci-> call          t   nil) ; 0
+    (oci-> storew        nil nil) ; 1
+    (oci-> storeb        nil nil) ; 2
+    (oci-> put_prop      nil nil) ; 3
+    (oci-> sread         nil nil) ; 4
+    (oci-> print_char    nil nil) ; 5
+    (oci-> print_num     nil nil) ; 6
+    (oci-> random        t   nil) ; 7
+    (oci-> push          nil nil) ; 8
+    (oci-> pull          nil nil) ; 9
+    (oci-> split_window  nil nil) ; A
+    (oci-> set_window    nil nil) ; B
+    nil                           ; C
+    nil nil nil                   ; D-F
+    nil nil nil                   ; 10-12
+    (oci-> output_stream nil nil) ; 13
+    (oci-> input_stream  nil nil) ; 14
+    (oci-> sound_effect  nil nil) ; 15 (only used in one v3 game)
+    nil nil nil                   ; 16-18
+    nil nil nil                   ; 19-1B
+    nil nil nil                   ; 1C-1E
+    nil))                         ; 1F
 
 ;; Association list of ____ to names for the opcode number
 (defparameter +opcode-names+
@@ -574,3 +610,23 @@
    (cons '1OP +1op-opcode-names+)
    (cons '0OP +0op-opcode-names+)
    (cons 'VAR +var-opcode-names+)))
+
+
+
+;; Testing -------------------------------------------------------
+
+;; Some good zork1.z3 opcode decoding memory locations
+;; Disassembly generated by "txd -d -n"
+(defparameter ++test-opcode-decode-locs++
+  '(#x4f05   ; e0 03 2a 39 80 10 ff ff 00  CALL 5472 (#8010,#ffff) -> -(SP)
+    #x4f0e   ; e1 97 00 00 01              STOREW (SP)+,#00,#01
+    #x4f3a   ; e3 57 9c 06 04              PUT_PROP        "magic boat",#06,#04
+    #x4f51   ; 54 1e 02 00                 ADD             G0e,#02 -> -(SP)
+    #x4f7e   ; 4a 10 03 c8                 TEST_ATTR       G00,#03 [TRUE] 4f88
+    #x4f87   ; bb                          NEW_LINE
+    #x4f8e   ; 2d 90 7f                    STORE           G80,G6f
+    #x4f91   ; 6e 7f 10                    INSERT_OBJ      G6f,G00
+    #x4f9e   ; 8c ff 66                    JUMP            4f05
+    ))
+(defparameter ++decoded-opcodes++
+  (map 'list #'decode-instruction ++test-opcode-decode-locs++))
