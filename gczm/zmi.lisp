@@ -187,6 +187,28 @@
          (sum (reduce #'+ summed-area)))
     (mod sum #x10000)))
         
+;; This gets a word at the specified location (MSB first),
+;; strips off the top two bits, then turns it into a signed
+;; number (from its 14-bit twos compliment representation).
+;; Used for branches. (Spec 4.7)
+(defun mem-signed-14-bit (loc)
+  (us-to-s (mem-word loc) 14))
+
+;; Convert the unsigned (positive) "bits"-bit integer
+;; provided to a signed "bits"-bit integer. First we
+;; make sure it's only got those lower "bits" bits.
+(defun us-to-s (anum bits)
+  (let* ((mask (1- (ash 1 bits))) ; An all 1's bit mask of bits bits
+         (num (boole boole-and anum mask))) ; Our masked number (just in case)
+    ;; Top bit is the sign bit
+    (if (zerop (get-bit num (1- bits)))
+        ;; We're not negative, so no changes needed.
+        num
+        ;; Sign bit says we're negative, so two's compliment
+        ;; ourselves to positive and arithmetically make us negative.
+        ;; Reminder: XOR anything with 1 will invert it.
+        (- (1+ (boole boole-xor num mask))))))
+
   
 ;; Routine Frames ---------------------------------------------------------
 
@@ -423,6 +445,8 @@
     (when (oi-branch (decoded-instruction-opcode-info retval))
       (decode-branch-offset retval))
     ;; XXX: CODE ME: Finally, we have to get our text to print, if necessary
+    (when (oi-text (decoded-instruction-opcode-info retval))
+      (decode-instruction-text retval))
     retval))
            
 
@@ -580,27 +604,24 @@
           (if twobytes 2 1))
     retval))
 
-;; This gets a word at the specified location (MSB first),
-;; strips off the top two bits, then turns it into a signed
-;; number (from its 14-bit twos compliment representation).
-;; Used for branches. (Spec 4.7)
-(defun mem-signed-14-bit (loc)
-  (us-to-s (mem-word loc) 14))
+;; Precondition: This instruction has following text string.
+;; 1. Pulls the encoded text string out
+;; 2. TODO: Decodes the string into local character set (ASCII for now)
+;; 3. Updates the length of the instruction with the length of the string
+(defun decode-instruction-text (retval)
+  ;; First get our text memory location
+  (setf (decoded-instruction-text-loc retval)
+        (+ (decoded-instruction-memory-location retval)
+           (decoded-instruction-length retval)))
+  ;; Now load our encoded text
+  (setf (decoded-instruction-text-data retval)
+        (mem-string (decoded-instruction-text-loc retval)))
+  ;; Now update our length
+  (incf (decoded-instruction-length retval)
+        (length (decoded-instruction-text-data retval)))
+  ;; XXX: Decode the text to local character set (ASCII?)
+  retval)
 
-;; Convert the unsigned (positive) n-bit integer
-;; provided to a signed n-bit integer. First we
-;; make sure it's only got those lower N bits.
-(defun us-to-s (anum bits)
-  (let* ((mask (1- (ash 1 bits))) ; An all 1's bit mask of bits bits
-         (num (boole boole-and anum mask))) ; Our masked number (just in case)
-    ;; Top bit is the sign bit
-    (if (zerop (get-bit num (1- bits)))
-        ;; We're not negative, so no changes needed.
-        num
-        ;; Sign bit says we're negative, so two's compliment
-        ;; ourselves to positive and arithmetically make us negative.
-        ;; Reminder: XOR anything with 1 will invert it.
-        (- (1+ (boole boole-xor num mask))))))
 
 ;; String handling ---------------------------------------------------
 
@@ -774,6 +795,8 @@
     #x503c   ; 21 01 03 4d                 JE              #01,L02 [FALSE] 504b
     #x5040   ; a0 02 c6                    JZ              L01 [TRUE] 5047
     #x504e   ; b2 ...                      PRINT           "You wouldn't find any"
+    #x4e3b   ; b2 ...                      PRINT           "a " ; shortest string!
+    #x5010   ; b3 ...                      PRINT_RET       " here!""
     ))
 (defparameter ++decoded-opcodes++
   (map 'list #'decode-instruction ++test-opcode-decode-locs++))
