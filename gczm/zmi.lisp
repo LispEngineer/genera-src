@@ -330,14 +330,14 @@
 
 ;; --- Operand Types --- (Spec 4.4)
 ;; - Short form: Opcode Bits 4-5 give operand type (Spec 4.4.1)
-;; per the +op-type-XXX+ choices above
+;; per the +op-type-X+ choices above
 ;; - Long form (Spec 4.4.2)
 ;; Bits 6 and 5 give the types of the first and second operands respectively
 ;; The only choices small constant (if 0) or variable (if 1)
 (defparameter +op-long-type-const-small+ #b0)
 (defparameter +op-long-type-variable+    #b1)
 ;; - Variable form (Spec 4.4.3)
-;; A byte of 4 operand types follows opcode per +op-type-XXX+ above.
+;; A byte of 4 operand types follows opcode per +op-type-X+ above.
 ;; Once one type is omitted, all remaining types are (must be) omitted.
 ;; Two opcodes are "double variable" with two bytes of opcode types
 ;; (Spec 4.4.3.1): opcode numbers 12, 26: call_vs2, call_vn2
@@ -444,7 +444,7 @@
     ;; We also have to decode the branch offset, if necessary for this opcode
     (when (oi-branch (decoded-instruction-opcode-info retval))
       (decode-branch-offset retval))
-    ;; XXX: CODE ME: Finally, we have to get our text to print, if necessary
+    ;; Finally, we have to get our text to print, if necessary
     (when (oi-text (decoded-instruction-opcode-info retval))
       (decode-instruction-text retval))
     retval))
@@ -619,7 +619,11 @@
   ;; Now update our length
   (incf (decoded-instruction-length retval)
         (length (decoded-instruction-text-data retval)))
-  ;; XXX: Decode the text to local character set (ASCII?)
+  ;; Decode the text to local character set (ASCII?)
+  (setf (decoded-instruction-text-ascii retval)
+        (z-characters-to-string
+         (break-zchar-string
+          (decoded-instruction-text-data retval))))
   retval)
 
 
@@ -772,9 +776,9 @@
     ;; Reverse our accumulator
     (setf raccum (nreverse raccum))
     ;; Concatenate our accumulator's strings and characters into
-    ;; one giant string
-    ;; XXX: CODE ME
-    raccum))
+    ;; one giant string and return it. We'll use the format mini-language
+    ;; for that. (See: http://cl-cookbook.sourceforge.net/strings.html)
+    (format nil "~{~A~}" raccum)))
 
 ;; Assoc list of modes to Z-character sets used in
 ;; z-characters-to-string above
