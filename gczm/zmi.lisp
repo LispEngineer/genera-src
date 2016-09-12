@@ -365,7 +365,7 @@
   length            ; How long the instruction is in bytes
   text-loc          ; If has string: start memory location (Spec 4.8)
   text-data         ; If has string: raw string binary as vector
-  text-ascii        ; If has string: this is the ascii form
+  text-ascii        ; If has string: this is the local computer text (ASCII?) form
   )
 
 ;; Gets the specified bit of the specified byte
@@ -601,7 +601,28 @@
         ;; ourselves to positive and arithmetically make us negative.
         ;; Reminder: XOR anything with 1 will invert it.
         (- (1+ (boole boole-xor num mask))))))
-  
+
+;; String handling ---------------------------------------------------
+
+;; See: Spec 3 "How text and characters are encoded"
+;; Given a start memory location, returns a vector (that is actually
+;; displaced into main memory - so be careful!) that contains an entire
+;; Z-character string as encoded per Spec 3.2.
+(defun mem-string (loc)
+  (let ((lastloc (mem-string-find-end loc)))
+    (mem-slice loc (- lastloc loc -2))))
+
+;; Given the starting word location of a string, gives the word
+;; location of the final word of the string (which could be the
+;; same as the first word).
+(defun mem-string-find-end (start)
+  ;; Step through memory one word at a time (2 bytes)
+  ;; and find our last word of text memory location.
+  ;; TODO: Protect from memory overflow
+  (do* ((lastword start               (+ lastword 2))
+        (textword (mem-word lastword) (mem-word lastword)))
+       ;; The top bit is set only in the last word of a string (Spec 3.2)
+       ((nonzerop (get-bit textword 15)) lastword)))
 
 ;; Opcode Information ------------------------------------------------
                   
@@ -613,23 +634,24 @@
   name         ; Symbol: Disassembly name of the opcode (Spec 14)
   store        ; Boolean: Store a result in a variable?
   branch       ; Boolean: Provides a label to jump to
-  str)         ; Boolean: Does this opcode include a following string
+  text)         ; Boolean: Does this opcode include a following text string
 ;; TODO: Add these?
 ;;  number     ; Integer: The opcode number (calculated)
 ;;  count      ; Symbol: '0OP, '1OP, '2OP, 'VAR
   
 ;; Easily construct an opcode information struct
-(defmacro oci-> (name store branch &optional str)
+(defmacro oci-> (name store branch &optional text)
   `(make-oci
     :name   (quote ,name)
     :store  ,store
     :branch ,branch
-    :str    ,str))
+    :text   ,text))
 
 ;; nil-safe oci accessors
 (defun oi-name   (o) (if (not o) nil (oci-name   o)))
 (defun oi-store  (o) (if (not o) nil (oci-store  o)))
 (defun oi-branch (o) (if (not o) nil (oci-branch o)))
+(defun oi-text   (o) (if (not o) nil (oci-text   o)))
 
 
 
