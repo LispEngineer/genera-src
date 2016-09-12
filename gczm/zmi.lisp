@@ -667,7 +667,8 @@
   #(#\Space     ; Character  0 is always a space
     nil nil nil ; Characters 1-3 are from the abbreviation table
     nil nil     ; Characters 4-5 are shifts to A1 and A2
-    #\Space #\Newline
+    nil         ; ZSCII specifier (Spec 3.5.3 and 3.4)
+    #\Newline
     #\0 #\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9
     #\. #\, #\! #\? #\_ #\# #\' #\" #\/ #\\ #\- #\: #\( #\)))
 
@@ -688,7 +689,7 @@
                             :fill-pointer 0)))
     ;; For every two bytes, turn into three Z-characters
     (loop for (b1 b2) on (coerce ztext 'list) by #'cddr do
-         (format t "~A ~A~%" b1 b2)
+         ; (format t "~A ~A~%" b1 b2)
          (let ((combined (+ (* 256 b1) b2)))
            ;; We use vector-push-extend even though
            ;; vector-push should be fine, just in case...
@@ -696,6 +697,109 @@
            (vector-push-extend (get-bits combined  9 5) retval)
            (vector-push-extend (get-bits combined  4 5) retval)))
     retval))
+
+;; Convert a z-character string into a ZSCII string.
+;; (This first version will be very inefficient.)
+;; We'll build up a list of characters and strings in reverse
+;; order, one item at a time,
+;; then reverse it and concatenate it all into one string.
+;; There are several special z-character sequences to take care of:
+;;    0     = always a space (Spec 3.5.1)
+;;    z x   = (z=1/2/3) Abbreviation 32 * (z - 1) + x (Spec 3.3)
+;;    4 a   = shift to set a1 for a (can overlap, e.g., 5 5 a) (Spec 3.2.3)
+;;    5 b   = shift to set a2 for b
+;; a2:6 m n = ZSCII code m * 32 + n (a2 only) (Spec 3.4)
+;;
+;; NOTE: Abbreviation decoding is slightly modified, see Spec 3.3.1,
+;; and not currently handled here.
+;;
+;; We'll step through each z-character in a modal fashion:
+;; a0 = starting mode
+;; a1 = mode after previous z-character was a 4
+;; a2 = mode after previous z-character was a 5
+;; abv = mode after previous z-character was a 1/2/3 (abv variable set to that)
+;; zsc1 = mode after reading an a2:6 to read first zscii char (zscii-high set)
+;; zsc2 = mode after reading an a2:6 and zscii-high
+(defun z-characters-to-string (zchars)
+  (let ((raccum nil)      ; List of accumulated components of output in reverse order
+        (mode 'a0)        ; Decoding mode
+        (abv nil)         ; (1, 2 or 3) which abbreviation initial number
+        (zscii-high nil)) ; High caracter of a2:6 ZSCII decoder found
+    (loop for zc across zchars do
+         ;(format t "zc: ~A, start mode: ~A, " zc mode)
+         (cond
+           ;; Handle second byte of our abbreviation:
+           ;; 1. Insert abbreviation
+           ;; 2. Return to mode a0
+           ((eq mode 'abv)
+            (push (get-abbrev abv zc) raccum)
+            (setf mode 'a0))
+           ;; Handle first byte of zscii
+           ;; 1. Save first byte
+           ;; 2. Set mode to zsc2
+           ((eq mode 'zsc1)
+            (setf mode 'zsc2 zscii-high zc))
+           ;; Handle second byte of zscii
+           ;; 1. Add character to our accumulator
+           ;; 2. Set mode to a0
+           ((eq mode 'zsc2)
+            (push (zscii-from-zchars zscii-high zc) raccum)
+            (setf mode 'a0))
+           ;; Handle beginning of zscii from a2 character 6
+           ((and (eq mode 'a2) (= zc 6))
+            (setf mode 'zsc1))
+           ;; ASSERT: Mode = a0, a1, a2
+           ;; Z-character 0 is always a space
+           ((= zc 0)
+            (push #\Space raccum)
+            (setf mode 'a0))
+           ;; Z-characters 1-3 are always abbreviations
+           ((or (= zc 1) (= zc 2) (= zc 3))
+            (setf mode 'abv abv zc))
+           ;; Z-characters 4 and 5 are always shifts
+           ((= zc 4)
+            (setf mode 'a1))
+           ((= zc 5)
+            (setf mode 'a2))
+           ;; All other characters can be looked up from one of the
+           ;; three +zchars-a#+ lookup tables
+           (t
+            (push (aref (cdr (assoc mode +mode-to-chars+)) zc) raccum)
+            (setf mode 'a0)))
+         ;(format t "end mode: ~A~%" mode)
+         )
+
+    ;; Reverse our accumulator
+    (setf raccum (nreverse raccum))
+    ;; Concatenate our accumulator's strings and characters into
+    ;; one giant string
+    ;; XXX: CODE ME
+    raccum))
+
+;; Assoc list of modes to Z-character sets used in
+;; z-characters-to-string above
+(defparameter +mode-to-chars+
+  (list (cons 'a0 +zchars-a0+)
+        (cons 'a1 +zchars-a1+)
+        (cons 'a2 +zchars-a2+)))
+
+;; Make a zscii character from two 5-bit z-characters (Spec 3.8 and 3.4)
+(defun zscii-from-zchars (a b)
+  ;; Just assume this is ASCII for now <sigh>
+  (code-char (+ (* a 32) b)))
+
+;; Get a fully decoded abbreviation string ready for printing
+;; (Spec 3.3, 3.3.1, and ???)
+(defun get-abbrev (x y)
+  ;; XXX: CODE ME
+  (format nil "Abv:~A" (+ (* 32 (1- x)) y)))
+
+
+         
+            
+            
+
+  
            
 ;; Opcode Information ------------------------------------------------
                   
