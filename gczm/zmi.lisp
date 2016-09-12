@@ -645,6 +645,58 @@
        ;; The top bit is set only in the last word of a string (Spec 3.2)
        ((nonzerop (get-bit textword 15)) lastword)))
 
+;; Z-characters (Spec 3.2 - 3.5.end)
+;; Note that these are ZSCII, but ZSCII for standard printable
+;; ASCII character codes are the same, and I'm assuming a CL
+;; being used runs on ASCII...
+(defparameter +zchars-a0+
+  #(#\Space     ; Character  0 is always a space
+    nil nil nil ; Characters 1-3 are from the abbreviation table
+    nil nil     ; Characters 4-5 are shifts to A1 and A2
+    #\a #\b #\c #\d #\e #\f #\g #\h #\i #\j #\k #\l #\m
+    #\n #\o #\p #\q #\r #\s #\t #\u #\v #\w #\x #\y #\z))
+
+(defparameter +zchars-a1+
+  #(#\Space     ; Character  0 is always a space
+    nil nil nil ; Characters 1-3 are from the abbreviation table
+    nil nil     ; Characters 4-5 are shifts to A1 and A2
+    #\A #\B #\C #\D #\E #\F #\G #\H #\I #\J #\K #\L #\M
+    #\N #\O #\P #\Q #\R #\S #\T #\U #\V #\W #\X #\Y #\Z))
+
+(defparameter +zchars-a2+
+  #(#\Space     ; Character  0 is always a space
+    nil nil nil ; Characters 1-3 are from the abbreviation table
+    nil nil     ; Characters 4-5 are shifts to A1 and A2
+    #\Space #\Newline
+    #\0 #\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9
+    #\. #\, #\! #\? #\_ #\# #\' #\" #\/ #\\ #\- #\: #\( #\)))
+
+;; Convert an encoded text Z-character string to a vector of
+;; ZSCII codes. No decoding is done; we just break the string
+;; as follows:
+;; 1. Every two bytes is turned into a word
+;; 2. Every word is turned into three 5-bit fields omitting the
+;;    first bit (Spec 3.2)
+;; 3. Those are added to the return vector
+;; We return a vector of these 5-bit values.
+(defun break-zchar-string (ztext)
+  ;; Preallocate our return value array since it will have
+  ;; a known size (3 entries per every two bytes in ztext)
+  (let ((retval (make-array (* 3 (floor (length ztext) 2))
+                            :element-type '(unsigned-byte 8)
+                            :adjustable t
+                            :fill-pointer 0)))
+    ;; For every two bytes, turn into three Z-characters
+    (loop for (b1 b2) on (coerce ztext 'list) by #'cddr do
+         (format t "~A ~A~%" b1 b2)
+         (let ((combined (+ (* 256 b1) b2)))
+           ;; We use vector-push-extend even though
+           ;; vector-push should be fine, just in case...
+           (vector-push-extend (get-bits combined 14 5) retval)
+           (vector-push-extend (get-bits combined  9 5) retval)
+           (vector-push-extend (get-bits combined  4 5) retval)))
+    retval))
+           
 ;; Opcode Information ------------------------------------------------
                   
 ;; Opcode information (name, branch, store) - Spec 14
@@ -800,3 +852,9 @@
     ))
 (defparameter ++decoded-opcodes++
   (map 'list #'decode-instruction ++test-opcode-decode-locs++))
+
+#|
+;; Some tests of breaking strings
+(break-zchar-string (decoded-instruction-text-data (car (last ++decoded-opcodes++))))
+(break-zchar-string (decoded-instruction-text-data (car (last ++decoded-opcodes++ 2))))
+|#
