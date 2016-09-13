@@ -43,6 +43,8 @@ The initial plan is:
 
 ## `zork1.z3`
 
+Header:
+
 ```
 $ infodump -i genera-src/gczm/zork1.z3
 
@@ -64,4 +66,111 @@ Serial number:            840726
 Abbreviations address:    01f0
 File size:                14b8c
 Checksum:                 a129
+```
+
+Abbreviations:
+
+```
+$ ./infodump -a genera-src/gczm/zork1.z3
+
+Story file is genera-src/gczm/zork1.z3
+
+    **** Abbreviations ****
+
+[ 0] "the "
+[ 1] "The "
+[ 2] "You "
+[ 3] ", "
+[ 4] "your "
+[ 5] "is "
+[ 6] "and "
+[ 7] "you "
+[ 8] "There "
+[ 9] "can't "
+[10] "of "
+[11] "to "
+[12] ". "
+[13] "with "
+[14] "are "
+[15] "that "
+[16] "have "
+[17] "which "
+[18] "This "
+[19] "from "
+[20] "large "
+[21] "through "
+[22] "appears "
+[23] "in "
+[24] "here"
+[25] "water "
+[26] "room "
+[27] "Cyclops "
+[28] "leading "
+[29] "narrow "
+[30] "cannot "
+[31] "small "
+[32] "into "
+[33] "cyclops "
+[34] "his "
+[35] "thief "
+[36] "It "
+[37] "south "
+[38] "seems "
+[39] "already "
+[40] "don't "
+[41] "be "
+[42] "but "
+[43] "would "
+[44] "Your "
+[45] "there "
+[46] "can "
+[47] "this "
+[48] "It's "
+[49] "staircase "
+[50] "on "
+[51] "for "
+[52] "west "
+[53] "east "
+[54] "north "
+[55] "not "
+[56] "troll "
+[57] "nothing "
+[58] "looking "
+[59] "I "
+[60] "path "
+[61] "closed"
+[62] "candles "
+[63] "Frigid "
+[64] "won't "
+[65] "probably "
+[66] "here "
+[67] "Room"
+[68] "about "
+[69] "A "
+[70] "too "
+[71] "that"
+[72] "room"
+[73] "door "
+[74] "grating "
+[75] "ground "
+[76] "out "
+[77] "other "
+[78] "wall "
+[79] "passages "
+[80] "impossible "
+[81] "has "
+[82] "over "
+[83] "level "
+[84] "knocks "
+[85] "before "
+[86] "passage "
+[87] "Fortunately"
+[88] "Unfortunately"
+[89] "it "
+[90] "an "
+[91] "think "
+[92] "river "
+[93] "troll's "
+[94] "doesn't "
+[95] "You're "
 ```
