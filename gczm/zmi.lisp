@@ -275,6 +275,139 @@
     (values t (format nil "Loaded ~A release ~D serial ~A" filename rel serial))))
 
 
+           
+;; Opcode Information ------------------------------------------------
+                  
+;; Opcode information (name, branch, store) - Spec 14
+;; Names are for human readability
+;; anything that is nil is an invalid opcode in v3
+;; See "Reading the opcode tables" after Spec 14.2.4
+(defstruct oci ; OpCode Information
+  name         ; Symbol: Disassembly name of the opcode (Spec 14)
+  store        ; Boolean: Store a result in a variable?
+  branch       ; Boolean: Provides a label to jump to
+  text)         ; Boolean: Does this opcode include a following text string
+;; TODO: Add these?
+;;  number     ; Integer: The opcode number (calculated)
+;;  count      ; Symbol: '0OP, '1OP, '2OP, 'VAR
+  
+;; Easily construct an opcode information struct
+(defmacro oci-> (name store branch &optional text)
+  `(make-oci
+    :name   (quote ,name)
+    :store  ,store
+    :branch ,branch
+    :text   ,text))
+
+;; nil-safe oci accessors
+(defun oi-name   (o) (if (not o) nil (oci-name   o)))
+(defun oi-store  (o) (if (not o) nil (oci-store  o)))
+(defun oi-branch (o) (if (not o) nil (oci-branch o)))
+(defun oi-text   (o) (if (not o) nil (oci-text   o)))
+
+
+
+(defparameter +2op-opcode-names+
+  (vector
+    nil                         ; 0
+    (oci-> je         nil t  )  ; 1
+    (oci-> jl         nil t  )  ; 2
+    (oci-> jg         nil t  )  ; 3
+    (oci-> dec_chk    nil t  )  ; 4
+    (oci-> inc_chk    nil t  )  ; 5
+    (oci-> jin        nil t  )  ; 6
+    (oci-> test       nil t  )  ; 7
+    (oci-> or         t   nil)  ; 8
+    (oci-> and        t   nil)  ; 9
+    (oci-> test_attr  nil t  )  ; A
+    (oci-> set_attr   nil nil)  ; B
+    (oci-> clear_attr nil nil)  ; C
+    (oci-> store      nil nil)  ; D
+    (oci-> insert_obj nil nil)  ; E
+    (oci-> loadw      t   nil)  ; F
+    (oci-> loadb      t   nil)  ; 10
+    (oci-> get_prop   t   nil)  ; 11
+    (oci-> get_prop_addr t nil) ; 12
+    (oci-> get_next_prop t nil) ; 13
+    (oci-> add        t   nil)  ; 14
+    (oci-> sub        t   nil)  ; 15
+    (oci-> mul        t   nil)  ; 16
+    (oci-> div        t   nil)  ; 17
+    (oci-> mod        t   nil)  ; 18
+    nil nil nil nil nil nil nil)) ; 19-1F
+
+(defparameter +1op-opcode-names+
+  (vector
+    (oci-> jz           nil t  )  ; 0
+    (oci-> get_sibling  t   t  )  ; 1
+    (oci-> get_child    t   t  )  ; 2
+    (oci-> get_parent   t   nil)  ; 3
+    (oci-> get_prop_len t   nil)  ; 4
+    (oci-> inc          nil nil)  ; 5
+    (oci-> dec          nil nil)  ; 6
+    (oci-> print_addr   nil nil)  ; 7
+    nil                           ; 8
+    (oci-> remove_obj   nil nil)  ; 9
+    (oci-> print_obj    nil nil)  ; A
+    (oci-> ret          nil nil)  ; B
+    (oci-> jump         nil nil)  ; C
+    (oci-> print_paddr  nil nil)  ; D
+    (oci-> load         t   nil)  ; E
+    (oci-> not          t   nil))) ; F
+
+(defparameter +0op-opcode-names+
+  (vector
+    (oci-> rtrue       nil nil) ; 0
+    (oci-> rfalse      nil nil) ; 1
+    (oci-> print       nil nil t) ; 2 - includes a string
+    (oci-> print_ret   nil nil t) ; 3 - includes a string
+    (oci-> nop         nil nil) ; 4
+    (oci-> save        nil t  ) ; 5
+    (oci-> restore     nil t  ) ; 6
+    (oci-> restart     nil nil) ; 7
+    (oci-> ret_popped  nil nil) ; 8
+    (oci-> pop         nil nil) ; 9
+    (oci-> quit        nil nil) ; A 
+    (oci-> new_line    nil nil) ; B
+    (oci-> show_status nil nil) ; C
+    (oci-> verify      nil t  ) ; D
+    nil                         ; E
+    nil))                       ; F
+
+(defparameter +var-opcode-names+
+  (vector
+    (oci-> call          t   nil) ; 0
+    (oci-> storew        nil nil) ; 1
+    (oci-> storeb        nil nil) ; 2
+    (oci-> put_prop      nil nil) ; 3
+    (oci-> sread         nil nil) ; 4
+    (oci-> print_char    nil nil) ; 5
+    (oci-> print_num     nil nil) ; 6
+    (oci-> random        t   nil) ; 7
+    (oci-> push          nil nil) ; 8
+    (oci-> pull          nil nil) ; 9
+    (oci-> split_window  nil nil) ; A
+    (oci-> set_window    nil nil) ; B
+    nil                           ; C
+    nil nil nil                   ; D-F
+    nil nil nil                   ; 10-12
+    (oci-> output_stream nil nil) ; 13
+    (oci-> input_stream  nil nil) ; 14
+    (oci-> sound_effect  nil nil) ; 15 (only used in one v3 game)
+    nil nil nil                   ; 16-18
+    nil nil nil                   ; 19-1B
+    nil nil nil                   ; 1C-1E
+    nil))                         ; 1F
+
+;; Association list of ____ to names for the opcode number
+(defparameter +opcode-names+
+  (list
+   (cons '2OP +2op-opcode-names+)
+   (cons '1OP +1op-opcode-names+)
+   (cons '0OP +0op-opcode-names+)
+   (cons 'VAR +var-opcode-names+)))
+
+
 ;; Instruction Decoder --------------------------------------------------------
 
 ;; Per Spec 4.1, instructions are coded as follows:
@@ -676,6 +809,13 @@
     #\0 #\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9
     #\. #\, #\! #\? #\_ #\# #\' #\" #\/ #\\ #\- #\: #\( #\)))
 
+;; Assoc list of modes (used below in z-characters-to-string)
+;; to Z-character sets
+(defparameter +mode-to-chars+
+  (list (cons 'a0 +zchars-a0+)
+        (cons 'a1 +zchars-a1+)
+        (cons 'a2 +zchars-a2+)))
+
 ;; Convert an encoded text Z-character string to a vector of
 ;; ZSCII codes. No decoding is done; we just break the string
 ;; as follows:
@@ -724,7 +864,15 @@
 ;; abv = mode after previous z-character was a 1/2/3 (abv variable set to that)
 ;; zsc1 = mode after reading an a2:6 to read first zscii char (zscii-high set)
 ;; zsc2 = mode after reading an a2:6 and zscii-high
-(defun z-characters-to-string (zchars)
+;;
+;; Parameter no-abbrevs is set if we want to disable abbreviations recursively
+;; per Spec 3.3.1. (In theory, we should also make sure that we have no incomplete
+;; multi-Z-character constructs, but they are harmless so ignore that. I imagine
+;; that was because the old Z-machines didn't handle recursion and that the
+;; abbreviation decoding modified the original string decoder's state.)
+;; This is obviously only set when called from get-abbrev.
+(defun z-characters-to-string (zchars &optional no-abbrevs)
+  ; (format nil "z-chars: ~A, no-abv: ~A~%" zchars no-abbrevs)
   (let ((raccum nil)      ; List of accumulated components of output in reverse order
         (mode 'a0)        ; Decoding mode
         (abv nil)         ; (1, 2 or 3) which abbreviation initial number
@@ -733,10 +881,12 @@
          ;(format t "zc: ~A, start mode: ~A, " zc mode)
          (cond
            ;; Handle second byte of our abbreviation:
-           ;; 1. Insert abbreviation
+           ;; 1. Insert abbreviation or a placeholder if no abbreviations allowed
            ;; 2. Return to mode a0
            ((eq mode 'abv)
-            (push (get-abbrev abv zc) raccum)
+            (if no-abbrevs
+                (push (format nil "[ABV:~A,~A]" abv zc) raccum)
+                (push (get-abbrev abv zc) raccum))
             (setf mode 'a0))
            ;; Handle first byte of zscii
            ;; 1. Save first byte
@@ -780,13 +930,6 @@
     ;; for that. (See: http://cl-cookbook.sourceforge.net/strings.html)
     (format nil "~{~A~}" raccum)))
 
-;; Assoc list of modes to Z-character sets used in
-;; z-characters-to-string above
-(defparameter +mode-to-chars+
-  (list (cons 'a0 +zchars-a0+)
-        (cons 'a1 +zchars-a1+)
-        (cons 'a2 +zchars-a2+)))
-
 ;; Make a zscii character from two 5-bit z-characters (Spec 3.8 and 3.4)
 (defun zscii-from-zchars (a b)
   ;; Just assume this is ASCII for now <sigh>
@@ -794,147 +937,35 @@
 
 ;; Get a fully decoded abbreviation string ready for printing
 ;; (Spec 3.3, 3.3.1, and ???)
+;; Note that the Spec is really bad about this. I used the older 06e Spec
+;; to figure this out.
+;; 1. Get the "byte address" word in header at location +ml-loc-abbrev+
+;; 2. This memory location contains a table of 96 word-size "word addresses",
+;;    for each abbreviation (whose actual "byte address" is double)
+;; 3. Look up entry 32 * (x - 1) + y in this table as a string
+;; 4. Decode and return that string as a CL string
+;; TODO: Detect and prevent recursion (why? Do we care?)
 (defun get-abbrev (x y)
-  ;; XXX: CODE ME
-  (format nil "Abv:~A" (+ (* 32 (1- x)) y)))
-
-
+  (let* ((loc-abv-table  (mem-word +ml-loc-abbrev+))
+         ;; Which entry in the word-size table above?
+         (abv-entry      (+ (* 32 (1- x)) y))
+         ;; Calc that entry - *2 because each entry is 2 bytes
+         (loc-abv-entry  (+ loc-abv-table (* 2 abv-entry)))
+         ;; Now, load that entry for the location of the abbreviation string
+         (loc-abv        (mem-word loc-abv-entry))
+         ;; Finally, load that location as a string
+         ;; REMEMBER that this is a "word address" and hence must be doubled
+         (z-char-str     (mem-string (* 2 loc-abv))))
+    #| ; Debugging
+    (format t "Called (get-abbrev ~A ~A)~%" x y)
+    (format t "Abbrev table: ~x, entry num: ~A, abv entry loc: ~x~%"
+            loc-abv-table abv-entry loc-abv-entry)
+    (format t "Abv loc: ~x~%" loc-abv)
+    (format t "Z-characters: ~A~%" z-char-str)
+    |#
+    (z-characters-to-string
+     (break-zchar-string z-char-str) t))) ; = no abbreviations
          
-            
-            
-
-  
-           
-;; Opcode Information ------------------------------------------------
-                  
-;; Opcode information (name, branch, store) - Spec 14
-;; Names are for human readability
-;; anything that is nil is an invalid opcode in v3
-;; See "Reading the opcode tables" after Spec 14.2.4
-(defstruct oci ; OpCode Information
-  name         ; Symbol: Disassembly name of the opcode (Spec 14)
-  store        ; Boolean: Store a result in a variable?
-  branch       ; Boolean: Provides a label to jump to
-  text)         ; Boolean: Does this opcode include a following text string
-;; TODO: Add these?
-;;  number     ; Integer: The opcode number (calculated)
-;;  count      ; Symbol: '0OP, '1OP, '2OP, 'VAR
-  
-;; Easily construct an opcode information struct
-(defmacro oci-> (name store branch &optional text)
-  `(make-oci
-    :name   (quote ,name)
-    :store  ,store
-    :branch ,branch
-    :text   ,text))
-
-;; nil-safe oci accessors
-(defun oi-name   (o) (if (not o) nil (oci-name   o)))
-(defun oi-store  (o) (if (not o) nil (oci-store  o)))
-(defun oi-branch (o) (if (not o) nil (oci-branch o)))
-(defun oi-text   (o) (if (not o) nil (oci-text   o)))
-
-
-
-(defparameter +2op-opcode-names+
-  (vector
-    nil                         ; 0
-    (oci-> je         nil t  )  ; 1
-    (oci-> jl         nil t  )  ; 2
-    (oci-> jg         nil t  )  ; 3
-    (oci-> dec_chk    nil t  )  ; 4
-    (oci-> inc_chk    nil t  )  ; 5
-    (oci-> jin        nil t  )  ; 6
-    (oci-> test       nil t  )  ; 7
-    (oci-> or         t   nil)  ; 8
-    (oci-> and        t   nil)  ; 9
-    (oci-> test_attr  nil t  )  ; A
-    (oci-> set_attr   nil nil)  ; B
-    (oci-> clear_attr nil nil)  ; C
-    (oci-> store      nil nil)  ; D
-    (oci-> insert_obj nil nil)  ; E
-    (oci-> loadw      t   nil)  ; F
-    (oci-> loadb      t   nil)  ; 10
-    (oci-> get_prop   t   nil)  ; 11
-    (oci-> get_prop_addr t nil) ; 12
-    (oci-> get_next_prop t nil) ; 13
-    (oci-> add        t   nil)  ; 14
-    (oci-> sub        t   nil)  ; 15
-    (oci-> mul        t   nil)  ; 16
-    (oci-> div        t   nil)  ; 17
-    (oci-> mod        t   nil)  ; 18
-    nil nil nil nil nil nil nil)) ; 19-1F
-
-(defparameter +1op-opcode-names+
-  (vector
-    (oci-> jz           nil t  )  ; 0
-    (oci-> get_sibling  t   t  )  ; 1
-    (oci-> get_child    t   t  )  ; 2
-    (oci-> get_parent   t   nil)  ; 3
-    (oci-> get_prop_len t   nil)  ; 4
-    (oci-> inc          nil nil)  ; 5
-    (oci-> dec          nil nil)  ; 6
-    (oci-> print_addr   nil nil)  ; 7
-    nil                           ; 8
-    (oci-> remove_obj   nil nil)  ; 9
-    (oci-> print_obj    nil nil)  ; A
-    (oci-> ret          nil nil)  ; B
-    (oci-> jump         nil nil)  ; C
-    (oci-> print_paddr  nil nil)  ; D
-    (oci-> load         t   nil)  ; E
-    (oci-> not          t   nil))) ; F
-
-(defparameter +0op-opcode-names+
-  (vector
-    (oci-> rtrue       nil nil) ; 0
-    (oci-> rfalse      nil nil) ; 1
-    (oci-> print       nil nil t) ; 2 - includes a string
-    (oci-> print_ret   nil nil t) ; 3 - includes a string
-    (oci-> nop         nil nil) ; 4
-    (oci-> save        nil t  ) ; 5
-    (oci-> restore     nil t  ) ; 6
-    (oci-> restart     nil nil) ; 7
-    (oci-> ret_popped  nil nil) ; 8
-    (oci-> pop         nil nil) ; 9
-    (oci-> quit        nil nil) ; A 
-    (oci-> new_line    nil nil) ; B
-    (oci-> show_status nil nil) ; C
-    (oci-> verify      nil t  ) ; D
-    nil                         ; E
-    nil))                       ; F
-
-(defparameter +var-opcode-names+
-  (vector
-    (oci-> call          t   nil) ; 0
-    (oci-> storew        nil nil) ; 1
-    (oci-> storeb        nil nil) ; 2
-    (oci-> put_prop      nil nil) ; 3
-    (oci-> sread         nil nil) ; 4
-    (oci-> print_char    nil nil) ; 5
-    (oci-> print_num     nil nil) ; 6
-    (oci-> random        t   nil) ; 7
-    (oci-> push          nil nil) ; 8
-    (oci-> pull          nil nil) ; 9
-    (oci-> split_window  nil nil) ; A
-    (oci-> set_window    nil nil) ; B
-    nil                           ; C
-    nil nil nil                   ; D-F
-    nil nil nil                   ; 10-12
-    (oci-> output_stream nil nil) ; 13
-    (oci-> input_stream  nil nil) ; 14
-    (oci-> sound_effect  nil nil) ; 15 (only used in one v3 game)
-    nil nil nil                   ; 16-18
-    nil nil nil                   ; 19-1B
-    nil nil nil                   ; 1C-1E
-    nil))                         ; 1F
-
-;; Association list of ____ to names for the opcode number
-(defparameter +opcode-names+
-  (list
-   (cons '2OP +2op-opcode-names+)
-   (cons '1OP +1op-opcode-names+)
-   (cons '0OP +0op-opcode-names+)
-   (cons 'VAR +var-opcode-names+)))
 
 
 
@@ -942,6 +973,8 @@
 
 ;; Some good zork1.z3 opcode decoding memory locations
 ;; Disassembly generated by "txd -d -n"
+;(load-story-file "zork1.z3")
+
 (defparameter ++test-opcode-decode-locs++
   '(#x4f05   ; e0 03 2a 39 80 10 ff ff 00  CALL            5472 (#8010,#ffff) -> -(SP)
     #x4f0e   ; e1 97 00 00 01              STOREW          (SP)+,#00,#01

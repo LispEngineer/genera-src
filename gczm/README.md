@@ -16,6 +16,8 @@ it is `Infocom game data (Z-machine 3, Release 88 / Serial 840726)`
 # References
 
 * [Z-Machine Specifications](http://inform-fiction.org/zmachine/standards/)
+* [Older Spec](http://ifarchive.jmac.org/if-archive/infocom/interpreters/specification/zspec02/zmach06e.pdf) - This
+is much better in some ways, e.g., it talks in more detail about the abbreviations table
 * [Ztools](http://ifarchive.org/indexes/if-archiveXinfocomXtoolsXztools.html)
 or [also here](http://inform-fiction.org/zmachine/ztools.html)
 
