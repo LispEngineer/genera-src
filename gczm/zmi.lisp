@@ -965,9 +965,99 @@
     |#
     (z-characters-to-string
      (break-zchar-string z-char-str) t))) ; = no abbreviations
-         
 
 
+
+;; Instruction Implementations ----------------------------------
+
+;; Each instruction is named after the mnemonic in the instruction
+;; tables. It's called instruction-X where X is the name (such as
+;; instruction-call). Since the PC, Memory and Stack Frames are
+;; all globals, the only parameter needed is the particular
+;; instruction to be executed. Special instruction functions are
+;; named sinstruction-X.
+;;
+;; Returned are two values, as per run-next-instruction.
+
+
+
+;; No instruction provided (should never happen)
+(defun sinstruction-nil (instr)
+  (declare (ignore instr))
+  (values nil "No instruction provided"))
+
+;; Decoded opcode not found
+(defun sinstruction-invalid (instr)
+  ;; ASSERT: instr is not nil
+  (values nil (format nil "Invalid instruction: Loc: 0x~x, first byte: 0x~x"
+                      (decoded-instruction-memory-location instr)
+                      (decoded-instruction-first-byte      instr))))
+
+;; Decoded opcode not yet implemented
+(defun sinstruction-nyi (instr)
+  ;; ASSERT: instr is not nil AND instr.opcode-info is not nil
+  (let ((oi (decoded-instruction-opcode-info instr)))
+    (values nil (format nil "Unimplemented: Loc 0x~x, first byte: 0x~x, opcode: ~A"
+                        (decoded-instruction-memory-location instr)
+                        (decoded-instruction-first-byte      instr)
+                        (oci-name oi)))))
+
+
+
+;; Instruction Main Routine -------------------------------------
+
+;; This decodes and executes a single instruction. This will
+;; definitely change the Program Counter. We'll see about the
+;; rest of it...
+;; Return values:
+;; t   _      - everything was good
+;; nil reason - error, with human-readable message in reason
+(defun run-next-instruction ()
+  (let* ((start-pc   *z-pc*)
+         (instr      (decode-instruction start-pc))
+         (instr-func (find-instruction-function instr)))
+    (format t "Executing instruction: 0x~x: ~A~%" *z-pc* instr-func)
+    (funcall instr-func instr)))
+    
+;; This locates an instruction execution function for the
+;; decoded instruction. If the instruction is not implemented,
+;; it returns a placeholder, and if the instruction is
+;; invalid, it returns a special function about that.
+;; Note that it would probably just be better to store the
+;; functions in the oci structure. :) But, this way is more fun.
+(defun find-instruction-function (instr)
+  (cond
+    ((not instr)
+     ;; No instruction provided - severe error
+     #'sinstruction-nil)
+    ((not (decoded-instruction-opcode-info instr))
+     ;; No such opcode
+     #'sinstruction-invalid)
+    (t
+     ;; Create our instruction name as a string, all caps (per internal CL storage)
+     ;; Make a symbol out of it
+     ;; And see if we have a function with that name
+     ;; if = Instruction Function
+     (let* ((if-name (nstring-upcase
+                      (format nil "instruction-~A"
+                              (oci-name (decoded-instruction-opcode-info instr)))))
+            (if-symbol (find-symbol if-name))
+            ;; This returns nil on nil input (since fboundp on nil is nil)
+            (if-func (symbol-function-or-nil if-symbol)))
+       (if if-func
+           ;; Call our function, if we found one
+           if-func
+           ;; Not yet implemented
+           #'sinstruction-nyi)))))
+     
+;; Gets the function of a symbol or nil if none.
+;; From Common Lisp Hyperspec... http://clhs.lisp.se/Body/f_symb_1.htm
+(defun symbol-function-or-nil (symbol)
+  (if (and (fboundp symbol) 
+           (not (macro-function symbol))
+           (not (special-operator-p symbol)))
+      (symbol-function symbol)
+      nil))
 
 ;; Testing -------------------------------------------------------
 
