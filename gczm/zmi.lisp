@@ -47,23 +47,29 @@
 ;; Writing to variable 0x00 pushes a value on the stack
 ;; Reading from variable 0x00 pops a value from the stack
 
-;; Z-Machine Routine Call State / Stack Frames (Spec 6.1, 6.3.2, 6.4, 6.5)
+;; Z-Machine Routine Stack frames (Spec 6.1, 6.3.2, 6.4, 6.5)
 ;; The zmrs structure contains all the local state of a Routine
 ;; call, including:
 ;;   Parameters - implemented as an array (of words)
 ;;   Local variables - implemented as an array (of words)
 ;;   Stack - implemented as a list (of words)
-;;   Return address
+;;   Calling instruction - for handling the return value storage
+;;                         and calculating the return address
+;;                         (which is that instruction's location + length)
+;;                         THE MAIN ROUTINE WILL BE NIL
 ;; The call stack is a list of these structures.
 ;; The starting routine is the lowest state, and has no parameters,
 ;; and a zero return address.
 (defstruct zmrs     ; Z-Machine Routine State
+  ;; XXX: parameters are arguments to the "call" instruction,
+  ;; and are overlaid on top of locals, so this shouldn't be needed...
   params            ; 8-size array of words with fill-pointer to actual #
   locals            ; 15-size array of words (set in routine header)
                     ;   with fill-pointer to actual # of locals
   stack             ; list (of words)
-  return-address)   ; Address of the next opcode to run when we return
-;; Maxmimum number of parameters that a routine can have
+  instr)            ; Calling instruction (including store and return PC)
+;; Maxmimum number of parameters that a routine can have, although in
+;; v3 we can really only have up to 3
 (defparameter +zmrs-max-params+ 8)
 ;; Maximum number of locals a parameter can have
 (defparameter +zmrs-max-locals+ 15)
@@ -227,7 +233,7 @@
                       :adjustable t
                       :fill-pointer 0))
     (setf (zmrs-stack retval) '())
-    (setf (zmrs-return-address retval) 0)
+    (setf (zmrs-instr retval) nil)
     retval))
 
 ;; Initialize the call stack for an entirely new game
@@ -979,6 +985,54 @@
 ;;
 ;; Returned are two values, as per run-next-instruction.
 
+
+;; The first instruction in Zork 1: CALL
+;; If the routine is 0, we do nothing and "return"/store false/zero.
+;; The routine address is a "packed address" which is located at
+;; double it's number in v3, call it raddr. (Spec 1.2.3)
+;; At raddr is a byte that says how many word local variables this
+;; routine has, which immediately follow.
+;; The first zero-to-three local variables are replaced by the
+;; caller's arguments. If there are more arguments than variables,
+;; then those arguments are ignored.
+;; We set the local variable
+;; Operands:
+;; 0 - routine
+;; 1-3 - arguments (optional, 0, 1, 2 or 3)
+;; Store: handled by the return (!!!)
+
+(defun instruction-call (instr)
+  ;; If we have no operands, we have an error
+  (when (zerop (length (decoded-instruction-operands instr)))
+    (return-from instruction-call
+     (values nil (format nil "CALL: No routine argument. Loc: 0x~x"
+                         (decoded-instruction-memory-location instr)))))
+  ;; Get our routine address, new routine stack frame, etc.
+  (let* (
+         ;; Get the operands
+         (operands (decoded-instruction-operands instr))
+         ;; Get the packed routine address
+         (praddr (first operands))
+         ;; Unpack the routine address (v3)
+         (raddr (* 2 praddr))
+         ;; Get the (up-to-three) arguments
+         (arguments (cdr operands))
+         ;; TODO: Check number of arguments is 0-3
+         ;; TODO: Check that the memory address is fine
+         ;; Get the number of locals for the routine
+         (numlocals (mem-byte raddr))
+         ;; TODO: Check that the number of locals is within bounds
+         ;; Get the routine start instruction address
+         (r-pc (+ raddr 1 (* 2 numlocals)))
+         ;; Get the local values
+         (localdefaults (loop for l upto numlocals
+                           collect (mem-word (+ raddr 1 (* 2 l)))))
+         ;; Now calculate the starting locals
+         )
+    (format t "CALL: Routine address: 0x~x, # args: ~A, # locals ~A, routine start pc: 0x~x"
+            raddr (length arguments) numlocals r-pc)
+    ;; XXX: CODE ME
+    (values nil "NOT FINISHED")))
 
 
 ;; No instruction provided (should never happen)
