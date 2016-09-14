@@ -1005,8 +1005,13 @@
 ;; 00    - top of stack (of current frame)
 ;; 01-0F - local variable index 0-E (of current frame) (local #1 to #15)
 ;; 10-FF - global variables
+;; Reading from the stack pops the value off (Spec 6.3)
+;; Possible errors:
+;; 1. Reading from an empty stack
+;; 2. Accessing non-existent local variable
 (defun retrieve-operands (instr)
   ;; XXX: CODE ME (decode variable operands)
+  ;; XXX: Allow this to return an error
   (format t "CODE ME: retrieve-operands~%")
   (decoded-instruction-operands instr))
 
