@@ -129,6 +129,13 @@
 ;; Implementation ---------------------------------------------------------
 
 
+;; Program Counter --------------------------------------------------------
+
+(defun set-pc (newpc)
+  (setf *z-pc* newpc))
+(defun get-pc ()
+  *z-pc*)
+
 ;; Memory -----------------------------------------------------------------
 
 ;; Loads a story file into the memory vector
@@ -241,12 +248,17 @@
   (setf *call-stack*
         (list (new-zmrs))))
 
-;; Creates an initialized  ZMRS for calling a routine
-;; at the specified address with the specified parameters,
-;; and the specified return address.
-;; This handles setting the locals up from the routine
-;; header and also returns the first instruction address.
-;; TODO: CODE ME
+;; Add a new stack frame to the call stack
+(defun push-call-stack (a-zmrs)
+  (push a-zmrs *call-stack*))
+
+;; Remove the current stack frame from the call stack and return it
+(defun pop-call-stack ()
+  (pop *call-stack*))
+
+;; Gets the current stack frame
+(defun cur-zmrs ()
+  (car *call-stack*))
 
 ;; Story File Load/Initialization -----------------------------------------
 
@@ -276,7 +288,7 @@
     ;; Create an empty call stack
     (initialize-call-stack)
     ;; Set the initial Program Counter (Spec 5.5)
-    (setf *z-pc* init-pc)
+    (set-pc init-pc)
     ;; Success
     (values t (format nil "Loaded ~A release ~D serial ~A" filename rel serial))))
 
@@ -986,6 +998,18 @@
 ;; Returned are two values, as per run-next-instruction.
 
 
+;; Returns a list of all the operands by value, i.e.,
+;; dereference any variable operands. (Spec 4.2.X)
+;; For const-large and const-small, this means just return their
+;; value verbatim. For variables, this means to give:
+;; 00    - top of stack (of current frame)
+;; 01-0F - local variable index 0-E (of current frame) (local #1 to #15)
+;; 10-FF - global variables
+(defun retrieve-operands (instr)
+  ;; XXX: CODE ME (decode variable operands)
+  (format t "CODE ME: retrieve-operands~%")
+  (decoded-instruction-operands instr))
+
 ;; The first instruction in Zork 1: CALL
 ;; If the routine is 0, we do nothing and "return"/store false/zero.
 ;; The routine address is a "packed address" which is located at
@@ -1000,7 +1024,6 @@
 ;; 0 - routine
 ;; 1-3 - arguments (optional, 0, 1, 2 or 3)
 ;; Store: handled by the return (!!!)
-
 (defun instruction-call (instr)
   ;; If we have no operands, we have an error
   (when (zerop (length (decoded-instruction-operands instr)))
@@ -1010,7 +1033,7 @@
   ;; Get our routine address, new routine stack frame, etc.
   (let* (
          ;; Get the operands
-         (operands (decoded-instruction-operands instr))
+         (operands (retrieve-operands instr))
          ;; Get the packed routine address
          (praddr (first operands))
          ;; Unpack the routine address (v3)
@@ -1025,14 +1048,31 @@
          ;; Get the routine start instruction address
          (r-pc (+ raddr 1 (* 2 numlocals)))
          ;; Get the local values
-         (localdefaults (loop for l upto numlocals
+         (localdefaults (loop for l below numlocals
                            collect (mem-word (+ raddr 1 (* 2 l)))))
-         ;; Now calculate the starting locals
-         )
-    (format t "CALL: Routine address: 0x~x, # args: ~A, # locals ~A, routine start pc: 0x~x"
+         ;; Now calculate the starting locals: use arguments for the first
+         ;; ones then the default locals for the rest
+         (locals
+          (loop
+             for l in localdefaults
+             for a = arguments then (cdr a)
+             collect (if a (car a) l)))
+         ;; Create our next stack frame
+         (newframe (new-zmrs)))
+    (format t "CALL: Routine address: 0x~x, # args: ~A, # locals ~A, routine start pc: 0x~x~%"
             raddr (length arguments) numlocals r-pc)
-    ;; XXX: CODE ME
-    (values nil "NOT FINISHED")))
+    (format t "CALL: Default locals: ~A~%" localdefaults)
+    (format t "CALL: Starting locals: ~A~%" locals)
+    ;; Set up our new stack frame
+    (setf (zmrs-instr newframe) instr)
+    (loop for l in locals do (vector-push-extend l (zmrs-locals newframe)))
+    ;(format t "CALL: New stack frame: ~A~%" newframe)
+    ;; Push our stack frame onto the call stack
+    (push-call-stack newframe)
+    ;; Update our PC to be at the new location
+    (set-pc r-pc)
+    ;; And we're done
+    (values t nil)))
 
 
 ;; No instruction provided (should never happen)
@@ -1067,10 +1107,10 @@
 ;; t   _      - everything was good
 ;; nil reason - error, with human-readable message in reason
 (defun run-next-instruction ()
-  (let* ((start-pc   *z-pc*)
+  (let* ((start-pc   (get-pc))
          (instr      (decode-instruction start-pc))
          (instr-func (find-instruction-function instr)))
-    (format t "Executing instruction: 0x~x: ~A~%" *z-pc* instr-func)
+    (format t "Executing instruction: 0x~x: ~A~%" start-pc instr-func)
     (funcall instr-func instr)))
     
 ;; This locates an instruction execution function for the
