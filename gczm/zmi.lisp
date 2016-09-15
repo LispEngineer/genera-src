@@ -1,5 +1,8 @@
 ;;; -*- Mode: Lisp; Syntax: ANSI-Common-Lisp; Package: ZMI; Base: 10; Lowercase: Yes -*-
 
+;; ZMI - Common Lisp Z-Machine Interpreter (hopefully reasonably portable)
+;; Douglas P. Fields, Jr. - https://symbolics.lisp.engineer/
+
 ;; Z-Machine Interpreter for v3 only
 ;; See: http://inform-fiction.org/zmachine/standards/
 
