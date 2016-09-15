@@ -34,9 +34,9 @@
 
 ;; Genera requires the :report below. If it's absent, then
 ;; we get the following error:
-;; D,#TD1PsT[Begin using 006 escapes](1 0 (NIL 0) (:FIX :BOLD :NORMAL) "CPTFONTCB")Error: Error in flavor CONDTEST::ON-ZERO-DENOMINATOR
-0;;        1Missing method DBG:REPORT (required by CONDITION)
-0#+Genera
+;; Error: Error in flavor CONDTEST::ON-ZERO-DENOMINATOR
+;;        Missing method DBG:REPORT (required by CONDITION)
+#+Genera
 (define-condition on-zero-denominator (error)
   ((message :initarg :message :reader message))
   (:report (lambda (condition stream)
@@ -45,14 +45,14 @@
 #| 
 ;; From Genera Document Examiner DEFINE-CONDITION macro docs
 ;; Note that the original had unbalanced parens; fixed below.
-(2 0 (NIL 0) (SAGE:SANS-SERIF-BODY SAGE::TYPEWRITER :NORMAL) "CPTFONT")(DEFINE-CONDITION MACHINE-ERROR (ERROR) 
-0  (2(MACHINE-NAME
-0    2:INIT-ARG :MACHINE-NAME
-0    2:READER   MACHINE-ERROR-MACHINE-NAME))
+(DEFINE-CONDITION MACHINE-ERROR (ERROR) 
+  ((MACHINE-NAME
+    :INIT-ARG :MACHINE-NAME
+    :READER   MACHINE-ERROR-MACHINE-NAME))
   (:REPORT (LAMBDA (CONDITION STREAM)
-0	     2(FORMAT STREAM "There is a problem with ~A."
-0		     2(MACHINE-ERROR-MACHINE-NAME CONDITION)))))
-0|#
+	     (FORMAT STREAM "There is a problem with ~A."
+		     (MACHINE-ERROR-MACHINE-NAME CONDITION)))))
+|#
 
 (defun high-level-code ()
   (handler-bind
