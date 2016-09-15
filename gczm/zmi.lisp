@@ -3,6 +3,13 @@
 ;; ZMI - Common Lisp Z-Machine Interpreter (hopefully reasonably portable)
 ;; Douglas P. Fields, Jr. - https://symbolics.lisp.engineer/
 
+;; NOTE: On Genera, before loading this file, create the package.
+;; Allowing the editor to create the package doesn't make it correctly.
+;; At the Genera Lisp Listener:
+;;  Set Lisp Context (a lisp syntax name [default Common-Lisp]) ANSI-Common-Lisp
+;;  (defpackage ...using the command from below...)
+
+
 ;; Z-Machine Interpreter for v3 only
 ;; See: http://inform-fiction.org/zmachine/standards/
 
@@ -16,7 +23,7 @@
 #+Genera
 (defpackage :zmi
   ;; See: ftp://ftp.ai.sri.com/pub/mailing-lists/slug/930331/msg00112.html
-  (:use :clim-lisp)) ; Or the base ANSI-Common-Lisp package
+  (:use future-common-lisp conditions))
 
 (in-package :zmi)
 
@@ -130,6 +137,24 @@
 
 
 ;; Implementation ---------------------------------------------------------
+
+
+;; Conditions -------------------------------------------------------------
+
+;; There's an error with an instruction (e.g., no opcode,
+;; not yet implemented)
+(define-condition instr-error (error)
+  ((message :initarg :message :reader message))
+  ;; Below required by Genera
+  (:report (lambda (condition stream)
+	     (format stream "Instruction error: ~A" (message condition)))))
+
+;; TODO: Add conditions for:
+;; * Memory read error
+;; * Memory write error (e.g., writing to read-only sections of header)
+;; * Stack pop error (stack underflow)
+;; * Local variable read/write errors (accessing undefined local)
+
 
 
 ;; Program Counter --------------------------------------------------------
@@ -1098,11 +1123,19 @@
 ;; Decoded opcode not yet implemented
 (defun sinstruction-nyi (instr)
   ;; ASSERT: instr is not nil AND instr.opcode-info is not nil
-  (let ((oi (decoded-instruction-opcode-info instr)))
-    (values nil (format nil "Unimplemented: Loc 0x~x, first byte: 0x~x, opcode: ~A"
-                        (decoded-instruction-memory-location instr)
-                        (decoded-instruction-first-byte      instr)
-                        (oci-name oi)))))
+  (let* ((oi (decoded-instruction-opcode-info instr))
+         (errmsg (format nil "Unimplemented: Loc 0x~x, first byte: 0x~x, opcode: ~A"
+                         (decoded-instruction-memory-location instr)
+                         (decoded-instruction-first-byte      instr)
+                         (oci-name oi))))
+    (restart-case
+        ;; Always throw an error
+        (error 'instr-error :message errmsg)
+      (do-nothing () (values nil errmsg))
+      (skip-instruction ()
+        (set-pc (+ (decoded-instruction-memory-location instr)
+                   (decoded-instruction-length instr)))
+        (values t "Instruction skipped")))))
 
 
 
