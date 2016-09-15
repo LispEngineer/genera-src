@@ -25,20 +25,15 @@
 
 ;; Do a little test of conditions now, using
 ;; code originally from http://c2.com/cgi/wiki?CommonLispConditionSystem
-;; (but fixed, they had the parentheses wrong)
+;; (but fixed, the parentheses were unbalanced when I copied it from that page)
 
-
-#+SBCL
-(define-condition on-zero-denominator (error)
-  ((message :initarg :message :reader message)))
-
-;; Genera requires the :report below. If it's absent, then
-;; we get the following error:
-;; Error: Error in flavor CONDTEST::ON-ZERO-DENOMINATOR
-;;        Missing method DBG:REPORT (required by CONDITION)
-#+Genera
 (define-condition on-zero-denominator (error)
   ((message :initarg :message :reader message))
+  ;; Genera REQUIRES the :report below. If it's absent, then
+  ;; we get the following error:
+  ;;   Error: Error in flavor CONDTEST::ON-ZERO-DENOMINATOR
+  ;;          Missing method DBG:REPORT (required by CONDITION)
+  ;; However, SBCL accepts it as well.
   (:report (lambda (condition stream)
 	     (format stream "On-zero-denominator: ~A" (message condition)))))
 
