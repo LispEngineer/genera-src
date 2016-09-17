@@ -28,6 +28,18 @@
 (in-package :zmi)
 
 
+;; Debugging ---------------------------------------------------
+
+;; Is debugging output on?
+(defparameter +debug+ t)
+
+;; Writes to the output if debugging is on.
+;; All arguments are exactly the same as format.
+(defun dbg (stream string &rest values)
+  (when +debug+
+    (apply #'format stream string values)))
+
+
 ;; Globals -----------------------------------------------------
 
 ;; The version of Z-machine code that we support
@@ -136,10 +148,20 @@
 ;; Two-byte values are stored MSB first (Spec 2.1)
 
 
+;; FIXME: XXX: Anywhere we write a value, make sure it's an 8- or 16-bit
+;; unsigned value (e.g., pushing data onto a stack)
+
+
 ;; Implementation ---------------------------------------------------------
 
 
 ;; Conditions -------------------------------------------------------------
+
+
+;; Read a new value from the user when doing a restart
+(defun restart-read-new-value ()
+  (format t "Enter a new value: ")
+  (multiple-value-list (eval (read))))
 
 ;; There's an error with an instruction (e.g., no opcode,
 ;; not yet implemented)
@@ -154,6 +176,27 @@
 ;; * Memory write error (e.g., writing to read-only sections of header)
 ;; * Stack pop error (stack underflow)
 ;; * Local variable read/write errors (accessing undefined local)
+
+;; The value stack (one for each call frame) has underflowed.
+(define-condition stack-underflow (error)
+  ((message :initarg :message :reader message))
+  ;; Below required by Genera
+  (:report (lambda (condition stream)
+	     (format stream "Value stack underflow: ~A" (message condition)))))
+
+;; We requested to access a missing local variable
+(define-condition missing-local-variable (error)
+  ((message :initarg :message :reader message))
+  ;; Below required by Genera
+  (:report (lambda (condition stream)
+	     (format stream "Missing local variable: ~A" (message condition)))))
+
+;; We requested to access a non-existent global variable
+(define-condition missing-global-variable (error)
+  ((message :initarg :message :reader message))
+  ;; Below required by Genera
+  (:report (lambda (condition stream)
+	     (format stream "Missing global variable: ~A" (message condition)))))
 
 
 
@@ -288,6 +331,30 @@
 (defun cur-zmrs ()
   (car *call-stack*))
 
+;; Pops a value onto the current frame's stack
+;; Raises a condition if the stack is empty
+(defun pop-stack ()
+  (if (zmrs-stack (cur-zmrs))
+      ;; We have a value to pop
+      (pop (zmrs-stack (cur-zmrs)))
+      (restart-case
+          (progn
+            (dbg t "Warning: Stack underflow~%")
+            (error 'stack-underflow :message "Stack empty"))
+        (return-zero ()
+          :report "Ignore, returning 0"
+          0)
+        (use-value (value)
+          :report "Ignore, returning specified value"
+          :interactive restart-read-new-value
+          value))))
+
+;; Pushes a value onto the current frame's stack
+;; XXX: Verify that the value fits in a 16-bit unsigned spot
+;; and raise a condition if not
+(defun push-stack (value)
+  (push value (zmrs-stack (cur-zmrs))))
+
 ;; Story File Load/Initialization -----------------------------------------
 
 ;; Loads a story file and resets all state of the Z-M to be able to
@@ -351,9 +418,7 @@
 (defun oi-branch (o) (if (not o) nil (oci-branch o)))
 (defun oi-text   (o) (if (not o) nil (oci-text   o)))
 
-
-
-(defparameter +2op-opcode-names+
+(defparameter +2op-opcodes+
   (vector
     nil                         ; 0
     (oci-> je         nil t  )  ; 1
@@ -382,7 +447,7 @@
     (oci-> mod        t   nil)  ; 18
     nil nil nil nil nil nil nil)) ; 19-1F
 
-(defparameter +1op-opcode-names+
+(defparameter +1op-opcodes+
   (vector
     (oci-> jz           nil t  )  ; 0
     (oci-> get_sibling  t   t  )  ; 1
@@ -401,7 +466,7 @@
     (oci-> load         t   nil)  ; E
     (oci-> not          t   nil))) ; F
 
-(defparameter +0op-opcode-names+
+(defparameter +0op-opcodes+
   (vector
     (oci-> rtrue       nil nil) ; 0
     (oci-> rfalse      nil nil) ; 1
@@ -420,7 +485,7 @@
     nil                         ; E
     nil))                       ; F
 
-(defparameter +var-opcode-names+
+(defparameter +var-opcodes+
   (vector
     (oci-> call          t   nil) ; 0
     (oci-> storew        nil nil) ; 1
@@ -446,12 +511,12 @@
     nil))                         ; 1F
 
 ;; Association list of ____ to names for the opcode number
-(defparameter +opcode-names+
+(defparameter +opcodes+
   (list
-   (cons '2OP +2op-opcode-names+)
-   (cons '1OP +1op-opcode-names+)
-   (cons '0OP +0op-opcode-names+)
-   (cons 'VAR +var-opcode-names+)))
+   (cons '2OP +2op-opcodes+)
+   (cons '1OP +1op-opcodes+)
+   (cons '0OP +0op-opcodes+)
+   (cons 'VAR +var-opcodes+)))
 
 
 ;; Instruction Decoder --------------------------------------------------------
@@ -608,7 +673,7 @@
        (di-decode-variable retval)))
     ;; Decode the opcode number into opcode information
     (setf (decoded-instruction-opcode-info retval)
-           (aref (cdr (assoc (decoded-instruction-operand-count retval) +opcode-names+))
+           (aref (cdr (assoc (decoded-instruction-operand-count retval) +opcodes+))
                  (decoded-instruction-opcode retval)))
     ;; Assert: Now we know these things:
     ;; 1. Opcode info
@@ -1003,15 +1068,77 @@
          ;; REMEMBER that this is a "word address" and hence must be doubled
          (z-char-str     (mem-string (* 2 loc-abv))))
     #| ; Debugging
-    (format t "Called (get-abbrev ~A ~A)~%" x y)
-    (format t "Abbrev table: ~x, entry num: ~A, abv entry loc: ~x~%"
+    (dbg t "Called (get-abbrev ~A ~A)~%" x y)
+    (dbg t "Abbrev table: ~x, entry num: ~A, abv entry loc: ~x~%"
             loc-abv-table abv-entry loc-abv-entry)
-    (format t "Abv loc: ~x~%" loc-abv)
-    (format t "Z-characters: ~A~%" z-char-str)
+    (dbg t "Abv loc: ~x~%" loc-abv)
+    (dbg t "Z-characters: ~A~%" z-char-str)
     |#
     (z-characters-to-string
      (break-zchar-string z-char-str) t))) ; = no abbreviations
 
+
+;; Variable Handling --------------------------------------------
+
+;; Reads a local variable from the current stack frame.
+;; which must be between 0 and 14.
+;; Signals a condition if there is no such local variable.
+(defun var-local-read (which)
+  (let* ((frame (cur-zmrs))
+         (locals (zmrs-locals frame)))
+    (if (and (< which (length locals)) (>= which 0))
+        (aref locals which)
+        (restart-case
+            (progn
+              (dbg t "Error: Local ~A not available in ~A~%" which locals)
+              (error 'missing-local-variable
+                     :message (format nil "No such local variable: ~A" which)))
+          (return-zero ()
+            :report "Ignore, returning 0"
+            0)
+          (use-value (value)
+            :report "Ignore, returning specified value"
+            :interactive restart-read-new-value
+            value)))))
+
+;; Reads a global variable (Spec 6.2)
+;; which must be between 0 and 239 (0xEF)
+(defun var-global-read (which)
+  ;; TODO: Precalculate and cache the base
+  (let* ((global-base (mem-word +ml-loc-globals+)))
+    (if (and (>= which 0) (<= which #xEF))
+        (mem-word (+ global-base (* 2 which)))
+        (restart-case
+            (progn
+              (dbg t "Error: No such global variable 0x~x~%" which)
+              (error 'missing-global-variable
+                     :message (format nil "No such global variable: 0x~x" which)))
+          (return-zero ()
+            :report "Ignore, returning 0"
+            0)
+          (use-value (value)
+            :report "Ignore, returning specified value"
+            :interactive restart-read-new-value
+            value)))))
+
+;; Reads the specified variable (single byte) and returns it.
+;; Spec 4.2.2
+;; This can raise several conditions:
+;;   Stack underflow if reading variable 0x00
+;;   Local variable not present for 0x01 thru 0x0f
+;;   (Memory errors indirectly)
+;; This routine may modify the current frame's stack or locals.
+(defun var-read (which)
+  (cond
+    ;; Pop the stack and return that
+    ((= which #x00)
+     (pop-stack))
+    ;; Read a local variable from the current frame
+    ((and (>= which #x01) (<= which #x0f))
+     (var-local-read (1- which)))
+    ;; Read a global variable
+    (t
+     (var-global-read (- which #x10)))))
 
 
 ;; Instruction Implementations ----------------------------------
@@ -1038,10 +1165,22 @@
 ;; 1. Reading from an empty stack
 ;; 2. Accessing non-existent local variable
 (defun retrieve-operands (instr)
-  ;; XXX: CODE ME (decode variable operands)
-  ;; XXX: Allow this to return an error
-  (format t "CODE ME: retrieve-operands~%")
-  (decoded-instruction-operands instr))
+  (dbg t "Retrieving operands for ~A: ~A~%"
+       (decoded-instruction-operand-types instr)
+       (decoded-instruction-operands      instr))
+  ;; Loop through all operands and turn them into values
+  (let ((retval
+         (loop for type  in (decoded-instruction-operand-types instr)
+               for opval in (decoded-instruction-operands      instr)
+            collect
+              (cond
+                ;; Handle each operand type
+                ((eq type 'const-small) opval)
+                ((eq type 'const-large) opval)
+                ((eq type 'variable) (var-read opval)) ;; Can raise a condition
+                (t 0))))) ;; XXX: Raise a condition with restarts
+    (dbg t "Retrieved operands: ~A~%" retval)
+    retval))
 
 ;; The first instruction in Zork 1: CALL
 ;; If the routine is 0, we do nothing and "return"/store false/zero.
@@ -1092,14 +1231,14 @@
              collect (if a (car a) l)))
          ;; Create our next stack frame
          (newframe (new-zmrs)))
-    (format t "CALL: Routine address: 0x~x, # args: ~A, # locals ~A, routine start pc: 0x~x~%"
+    (dbg t "CALL: Routine address: 0x~x, # args: ~A, # locals ~A, routine start pc: 0x~x~%"
             raddr (length arguments) numlocals r-pc)
-    (format t "CALL: Default locals: ~A~%" localdefaults)
-    (format t "CALL: Starting locals: ~A~%" locals)
+    (dbg t "CALL: Default locals: ~A~%" localdefaults)
+    (dbg t "CALL: Starting locals: ~A~%" locals)
     ;; Set up our new stack frame
     (setf (zmrs-instr newframe) instr)
     (loop for l in locals do (vector-push-extend l (zmrs-locals newframe)))
-    ;(format t "CALL: New stack frame: ~A~%" newframe)
+    ;(dbg t "CALL: New stack frame: ~A~%" newframe)
     ;; Push our stack frame onto the call stack
     (push-call-stack newframe)
     ;; Update our PC to be at the new location
@@ -1107,6 +1246,11 @@
     ;; And we're done
     (values t nil)))
 
+;; ADD: Signed 16-bit addition (Spec p79, 15.3)
+#|
+(defun instruction-add (instr)
+  )
+|#
 
 ;; No instruction provided (should never happen)
 (defun sinstruction-nil (instr)
@@ -1151,7 +1295,7 @@
   (let* ((start-pc   (get-pc))
          (instr      (decode-instruction start-pc))
          (instr-func (find-instruction-function instr)))
-    (format t "Executing instruction: 0x~x: ~A~%" start-pc instr-func)
+    (dbg t "Executing instruction: 0x~x: ~A~%" start-pc instr-func)
     (funcall instr-func instr)))
     
 ;; This locates an instruction execution function for the
