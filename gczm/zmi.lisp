@@ -1827,6 +1827,19 @@
     (when (string-equal cmd "q")
       (return-from debug-run nil))
     (debug-run))) ; tail recursion
+
+;; Run the program with tracing but no debugging
+(defun trace-run ()
+  (let ((+debug+ nil))
+    (loop
+       (handler-case
+           (progn
+             (format t "~A~%" (disassemble-instr (decode-instruction *z-pc*)))
+             (run-next-instruction))
+         (error (e)
+           (progn
+             (format t "Ending due to condition: ~A~%" e)
+             (return)))))))
     
 
 #|
