@@ -405,7 +405,6 @@
       ; (dbg t "Read property: ~A~%" r)
       r)))
 
-
 ;; Loads an object from memory
 (defun load-object (which)
   (let* ((tloc (object-loc which))
@@ -446,6 +445,14 @@
     ;; Reverse our properties list to reflect in-memory (descending ID) order
     (setf (zobj-properties r) (nreverse (zobj-properties r)))
     r))
+
+;; Gets the specified property from a zobj, or nil if no property
+;; with that number (so use the default). Returns a zprop object.
+(defun zobj-prop (zo propnum)
+  (flet ((isprop (prop)
+           (= (zprop-id prop) propnum)))
+    (let ((props (zobj-properties zo)))
+      (find-if #'isprop props))))
   
 
 ;; Gets the object table start location
@@ -1830,7 +1837,8 @@
           (error 'invalid-operand-count :message
                  (format nil "LOADW: Got ~A operands, expected 2" (length operands)))
         (ignore () :report "Ignore; load nothing"))
-      (return-from instruction-loadw (values nil "Invalid # of args")))
+      ;; XXX: This doesn't seem like it will work, it doesn't advance PC
+      (return-from instruction-loadw (values nil "Invalid # of operands")))
     (let* ((array-base (first operands))
            (array-index (second operands))
            (var-dest (decoded-instruction-store instr))
@@ -1865,7 +1873,31 @@
 ;; Properties are numbered 1-31.
 ;; Each property present has 1-8 bytes of data.
 ;; THIS INSTRUCTION only deals with properties of 1-2 bytes of data.
-
+(defun instruction-put_prop (instr)
+  (let ((operands (retrieve-operands instr)))
+    (when (not (= 3 (length operands)))
+      ;; Raise condition for invalid number of args.
+      ;; This should really just crash the whole program.
+      (error 'invalid-operand-count :message
+             (format nil "PUT_PROP: Got ~A operands, expected 3" (length operands))))
+    (let* ((obj-id  (first operands))
+           (prop-id (second operands))
+           (value   (third operands))
+           (object (load-object obj-id))
+           (prop   (zobj-prop object prop-id)))
+      ;; If we didn't find the property, it's an error
+      (when (null prop)
+        (error 'invalid-property :message
+               (format nil "No property ~A on object ~A to set to ~A"
+                       prop-id obj-id value)))
+      (if (= 1 (zprop-data-size prop))
+          (mem-byte-write (1+ (zprop-mem-loc prop)) (logand value #xFF))
+          (mem-word-write (1+ (zprop-mem-loc prop)) value))
+      (dbg t "PUT_PROP: Put ~4,'0X to object ~A property ~A~%"
+           value obj-id prop-id)
+      (advance-pc instr)
+      (values t "PUT_PROP"))))
+  
 
 
 
