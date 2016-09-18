@@ -1234,6 +1234,11 @@
 ;;
 ;; Returned are two values, as per run-next-instruction.
 
+;; Moves to the next instruction assuming no branches, etc.
+(defun advance-pc (instr)
+  (set-pc (+ (decoded-instruction-memory-location instr)
+             (decoded-instruction-length instr))))
+
 
 ;; Returns a list of all the operands by value, i.e.,
 ;; dereference any variable operands. (Spec 4.2.X)
@@ -1268,10 +1273,7 @@
     (dbg t "Retrieved operands: ~A~%" retval)
     retval))
 
-;; Moves to the next instruction assuming no branches, etc.
-(defun advance-pc (instr)
-  (set-pc (+ (decoded-instruction-memory-location instr)
-             (decoded-instruction-length instr))))
+;; CALL FRAME INSTRUCTIONS ---------------------------------------------------
 
 ;; The first instruction in Zork 1: CALL
 ;; If the routine is 0, we do nothing and "return"/store false/zero.
@@ -1342,6 +1344,8 @@
     (values t "Called")))
 
 
+;; MATH INSTRUCTIONS ------------------------------------------------------------
+
 
 ;; Prints a warning if the number is outside the
 ;; range of a normal 16-bit number
@@ -1378,6 +1382,8 @@
 
 
 
+;; BRANCH INSTRUCTIONS -----------------------------------------------------
+
 ;; Tells us if we should take the branch
 ;; given the result of the comparison and the "branch-if" bit.
 ;; Returns true if both are true or both are false
@@ -1412,7 +1418,6 @@
               (= (car operands) 0)))))
     (sinstruction-jx instr #'test-jz)))
 
-
 ;; Implements all jump-if instructions by taking a test
 ;; function. The text function takes one argument, which is
 ;; the list of operands, and returns true if the test passes,
@@ -1446,6 +1451,35 @@
       (t
        (set-pc (+ i-pc i-len offset -2))
        (values t "Branched")))))
+
+
+;; MEMORY INSTRUCTIONS --------------------------------------------------
+
+
+;; STOREW (Spec page 102)
+;; Operands: array word-index value
+;; Stores "value" at memory location (array + 2 * word-index)
+;; Memory location must be in dynamic memory (0x0000 to +ml-loc-static+).
+;; XXX: Enforce memory restriction
+(defun instruction-storew (instr)
+  (let ((operands (retrieve-operands instr)))
+    (when (not (= 3 (length operands)))
+      ;; XXX: Raise condition for invalid number of args
+      (return-from instruction-storew (values nil "Invalid # of args")))
+    (let* ((array-base (first operands))
+           (array-index (second operands))
+           (value (third operands))
+           (ml-dest (+ array-base (* 2 array-index))))
+      (dbg t "STOREW: Writing 0x~x to 0x~x (as ~x[~x])~%"
+           value ml-dest array-base array-index)
+      (mem-word-write ml-dest value)
+      (advance-pc instr)
+      (values t "Stored word"))))
+      
+
+
+
+;; META-INSTRUCTIONS ----------------------------------------------------
 
 ;; No instruction provided (should never happen)
 (defun sinstruction-nil (instr)
