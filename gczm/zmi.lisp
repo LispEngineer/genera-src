@@ -211,12 +211,19 @@
   (:report (lambda (condition stream)
 	     (format stream "Wrong number of operands: ~A" (message condition)))))
 
-;; Request for a missing propery
+;; Request for an invalid (missing, out of range) propery
 (define-condition invalid-property (error)
   ((message :initarg :message :reader message))
   ;; Below required by Genera
   (:report (lambda (condition stream)
 	     (format stream "Invalid property: ~A" (message condition)))))
+
+;; Request for an invalid (out of range, missing) object
+(define-condition invalid-object (error)
+  ((message :initarg :message :reader message))
+  ;; Below required by Genera
+  (:report (lambda (condition stream)
+	     (format stream "Invalid object: ~A" (message condition)))))
 
 
 ;; Program Counter --------------------------------------------------------
@@ -348,6 +355,99 @@
 ;; See: zmach06e.pdf Chapter 3.4
 ;; See: Spec Chapter 12
 
+;; A structure which holds information about a z-object's properties
+;; Spec 12.4.1
+(defstruct zprop
+  ;; TODO: Add an object ID?
+  id              ; Which property number this is
+  mem-loc         ; Memory location of this property (at size byte)
+  data-size       ; How many (actual data bytes)
+  data-val        ; The byte or word size data
+  data-vec        ; The data as a vector of bytes
+  )
+
+;; A structure which holds information about an object
+;; Spec 12.3.1, 12.4, 12.4.1
+(defstruct zobj
+  id              ; Which numer this object is
+  tree-loc        ; Where the object's location starts
+  attributes      ; The attributes as a 32-bit unsigned value
+  parent          ; The parent ID
+  sibling         ; The sibling ID
+  child           ; The child ID
+  props-loc       ; Where the object's properties start in memory
+  ;; Properties -------------------------------------------------------
+  text-length     ; The length of the short name text in (2 byte) words
+  text-zchars     ; The raw Z-characters of the text of that object (byte vector)
+  short-name      ; The ASCII decoded short-name of the object
+  first-prop-loc  ; Where the first actual property is in memory
+  properties      ; An list of properties (zprops)
+  )
+
+;; Loads a property from the specified location,
+;; or returns nil if the size byte at the location is 0.
+;; Spec 12.4.1
+(defun load-property (loc)
+  (let ((size (mem-byte loc)))
+    (when (= size 0)
+      (return-from load-property nil))
+    ;; Top 3 bits of size contains length of data MINUS ONE
+    ;; Bottom 5 bits of size is the property number
+    (let* ((d-size (1+ (ash size -5))) ; Right-shift 5 bits
+           (r (make-zprop :mem-loc loc
+                          :id (logand size #x1F)
+                          :data-size d-size
+                          :data-vec (mem-slice (1+ loc) d-size)
+                          :data-val (case d-size
+                                      (0 nil)
+                                      (1 (mem-byte (1+ loc)))
+                                      (otherwise (mem-word (1+ loc)))))))
+      ; (dbg t "Read property: ~A~%" r)
+      r)))
+
+
+;; Loads an object from memory
+(defun load-object (which)
+  (let* ((tloc (object-loc which))
+         (r (make-zobj :id       which
+                       :tree-loc tloc))
+         (ploc nil)  ; Property location we're going to read
+         (prop nil)) ; Property we just read
+    ;; Populate information from object tree entry (Spec 12.3.1)
+    (setf (zobj-attributes r)
+          (+ (ash (mem-word tloc) 16)
+             (mem-word (+ 2 tloc))))
+    (setf (zobj-parent    r) (mem-byte (+ 4 tloc)))
+    (setf (zobj-sibling   r) (mem-byte (+ 5 tloc)))
+    (setf (zobj-child     r) (mem-byte (+ 6 tloc)))
+    (setf (zobj-props-loc r) (mem-word (+ 7 tloc)))
+    ;; Get the name of the object (Spec 12.4)
+    (setf (zobj-text-length r) (mem-byte (zobj-props-loc r)))
+    ;; Note: We don't use mem-string since we have an explicit length
+    (setf (zobj-text-zchars r) (mem-slice (1+ (zobj-props-loc r))
+                                          (* 2 (zobj-text-length r))))
+    (setf (zobj-short-name r) (z-characters-to-string
+                               (break-zchar-string
+                                (zobj-text-zchars r))))
+    ;; Properties
+    ;; Get address of first property
+    (setf (zobj-first-prop-loc r)
+          (+ (zobj-props-loc r)
+             1 ; For the size of the short name
+             (* 2 (zobj-text-length r))))
+    ;; Loop through all properties until we get a nil
+    (setf (zobj-properties r) nil)
+    (setf ploc (zobj-first-prop-loc r))
+    (loop
+       (setf prop (load-property ploc))
+       (when (null prop) (return))
+       (push prop (zobj-properties r))
+       (setf ploc (+ ploc 1 (zprop-data-size prop))))
+    ;; Reverse our properties list to reflect in-memory (descending ID) order
+    (setf (zobj-properties r) (nreverse (zobj-properties r)))
+    r))
+  
+
 ;; Gets the object table start location
 ;; Spec 12.1
 ;; See: +ml-loc-obj+
@@ -367,6 +467,21 @@
     (dbg t "Default property ~A: 0x~x~%" prop def-val)
     def-val))
 
+;; Gets the base of the object tree. Spec 12.3.
+;; This is right after the object table's 31 default properties.
+(defun object-tree-loc ()
+  (+ (object-table-loc) (* 31 2)))
+
+;; How large each entry is in the object tree in bytes (Spec 12.3.1)
+(defparameter +object-tree-entry-size+ 9)
+
+;; Gets the location of a specified object. (Spec 12.3, 12.3.1)
+;; This is located after the default objects. The object table size
+(defun object-loc (which)
+  (when (or (< which 1) (> which 255))
+    (error 'invalid-object :message
+           (format nil "No such object number: ~A" which)))
+  (+ (object-tree-loc) (* +object-tree-entry-size+ (1- which))))
   
 ;; Routine Frames ---------------------------------------------------------
 
