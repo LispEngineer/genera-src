@@ -670,6 +670,75 @@
   text-ascii        ; If has string: this is the local computer text (ASCII?) form
   )
 
+
+;; Formats an operand for disassembly printing
+;; If is-read, then we're popping the stack, otherwise
+;; we're pushing it
+(defun disassemble-operand (operand-type operand &optional (is-read t))
+  (cond
+    ((eql operand-type 'const-large)
+     (format nil "#~4,'0X" operand))
+    ((eql operand-type 'const-small)
+     (format nil "#~2,'0X" operand))
+    ;; Otherwise, variables
+    ((= operand 0)
+     (if is-read "(SP)+" "-(SP)"))
+    ((>= operand #x10)
+     (format nil "G~2,'0X" (- operand #x10)))
+    (t
+     (format nil "L~2,'0X" (1- operand)))))
+
+;; Outputs the branching destination as a string
+;; See also sinstruction-jx
+(defun disassemble-branch-dest (instr)
+  (let ((offset (decoded-instruction-branch-offset instr))
+        (i-pc  (decoded-instruction-memory-location instr))
+        (i-len (decoded-instruction-length instr)))
+    (cond
+      ((= offset 0) "RET(FALSE)")
+      ((= offset 1) "RET(TRUE)")
+      (t (format nil "~4,'0X" (+ i-pc i-len offset -2))))))
+
+;; Formats our decoded instruction in a format somewhat akin to TXD.
+;; Returns a string.
+(defun disassemble-instr (instr)
+  ;; XXX: This works on SBCL, needs to be tested on Genera
+  (with-slots (memory-location
+               operand-count
+               operand-types
+               opcode
+               opcode-info
+               operands
+               (store-loc store)
+               branch-if
+               branch-offset
+               text-ascii) instr
+    (with-slots ((instr-name  name)
+                 (store-flag  store)
+                 (branch-flag branch)
+                 (text-flag   text)) opcode-info
+      (let ((str (make-string-output-stream))
+            (ops operands) ; We may modify these locally
+            (op-types operand-types))
+        (format str "~4,'0X: ~15A " memory-location (string-upcase instr-name))
+        ;; Special instructions -------------
+        (when (eql instr-name 'call)
+          (format str "~4,'0X " (* 2 (car ops)))
+          (setf ops (cdr ops))
+          (setf op-types (cdr op-types)))
+        ;; End special instructions ---------
+        (format str "~{~A~^,~} "
+                (map 'list #'disassemble-operand op-types ops))
+        (when store-flag
+          (format str "-> ~A " (disassemble-operand 'variable store-loc nil)))
+        (when branch-flag
+          (format str "[~A] ~A " (if branch-if "TRUE" "FALSE")
+                  (disassemble-branch-dest instr)))
+        (when text-flag
+          (format str "\"~A\"" text-ascii))
+        (get-output-stream-string str)))))
+                               
+
 ;; Gets the specified bit of the specified byte
 ;; (Bit 0 = LSB, bit 7 = MSB)
 (defun get-bit (byte bitnum)
@@ -1448,7 +1517,7 @@
          (dest (decoded-instruction-store instr)))
     (warn-16-bit-size result)
     (var-write dest unsigned-result)
-    (dbg t "~A: ~A op ~A = ~A (0x~x -> var 0x~x)"
+    (dbg t "~A: ~A op ~A = ~A (0x~x -> var 0x~x)~%"
          inst-name a b result unsigned-result dest)
     (advance-pc instr)
     (values t inst-name)))
@@ -1695,6 +1764,26 @@
     ))
 (defparameter ++decoded-opcodes++
   (map 'list #'decode-instruction ++test-opcode-decode-locs++))
+
+;; Step through the program
+(defun debug-run ()
+  (format t "~A~%" (disassemble-instr (decode-instruction *z-pc*)))
+  (format t "[N]ext, [Q]uit: ")
+  (let ((cmd (read-line)))
+    (when (string-equal cmd "q")
+      (return-from debug-run nil))
+    (handler-case
+        (run-next-instruction)
+      (error (e)
+        (progn
+          (format t "Ending due to condition: ~A~%" e)
+          (return-from debug-run nil))))
+    (format t "[N]ext, [Q]uit: ")
+    (setf cmd (read-line))
+    (when (string-equal cmd "q")
+      (return-from debug-run nil))
+    (debug-run))) ; tail recursion
+    
 
 #|
 ;; Some tests of breaking strings

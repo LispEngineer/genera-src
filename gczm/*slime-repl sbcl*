@@ -1,0 +1,4062 @@
+; SLIME 2016-04-19; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 17 SEP 2016 09:53:35 PM):
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.339
+
+CL-USER> 
+ZMI> (load-story-file "zork1.z3")
+T
+"Loaded zork1.z3 release 88 serial 840726"
+ZMI> (progn (fmt t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+; in: PROGN (FMT T "~A~%" (DECODE-INSTRUCTION *Z-PC*))
+;     (ZMI::FMT T "~A~%" (ZMI::DECODE-INSTRUCTION ZMI::*Z-PC*))
+; 
+; caught STYLE-WARNING:
+;   undefined function: FMT
+; 
+; compilation unit finished
+;   Undefined function:
+;     FMT
+;   caught 1 STYLE-WARNING condition
+; Evaluation aborted on #<UNDEFINED-FUNCTION FMT {1003D33B63}>.
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 20229
+   :FIRST-BYTE 224
+   :FORM VARIABLE
+   :OPERAND-COUNT VAR
+   :OPERAND-TYPES (CONST-LARGE CONST-LARGE CONST-LARGE)
+   :OPCODE 0
+   :OPCODE-INFO #S(OCI :NAME CALL :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (10809 32784 65535)
+   :STORE 0
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 9
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x4F05: #<FUNCTION INSTRUCTION-CALL>
+Retrieving operands for (CONST-LARGE CONST-LARGE CONST-LARGE): (10809 32784
+                                                                65535)
+Retrieved operands: (10809 32784 65535)
+CALL: Routine address: 0x5472, # args: 2, # locals 3, routine start pc: 0x5479
+CALL: Default locals: (0 0 0)
+CALL: Starting locals: (32784 65535 0)
+T
+NIL
+ZMI> (setf *print-base* 16)
+10
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5479
+   :FIRST-BYTE E0
+   :FORM VARIABLE
+   :OPERAND-COUNT VAR
+   :OPERAND-TYPES (CONST-LARGE VARIABLE)
+   :OPCODE 0
+   :OPCODE-INFO #S(OCI :NAME CALL :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (2A43 1)
+   :STORE 3
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 6
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5479: #<FUNCTION INSTRUCTION-CALL>
+Retrieving operands for (CONST-LARGE VARIABLE): (2A43 1)
+Retrieved operands: (2A43 8010)
+CALL: Routine address: 0x5486, # args: 1, # locals 5, routine start pc: 0x5491
+CALL: Default locals: (0 0 0 0 0)
+CALL: Starting locals: (8010 0 0 0 0)
+T
+NIL
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5491
+   :FIRST-BYTE 54
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE CONST-SMALL)
+   :OPCODE 14
+   :OPCODE-INFO #S(OCI :NAME ADD :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (94 B4)
+   :STORE 3
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5491: #<FUNCTION SINSTRUCTION-NYI>
+
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 17 SEP 2016 10:08:46 PM):
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.566
+; Evaluation aborted on #<INSTR-ERROR {1004054C63}>.
+ZMI> (load-story-file "zork1.z3")
+T
+"Loaded zork1.z3 release 88 serial 840726"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 4F05
+   :FIRST-BYTE E0
+   :FORM VARIABLE
+   :OPERAND-COUNT VAR
+   :OPERAND-TYPES (CONST-LARGE CONST-LARGE CONST-LARGE)
+   :OPCODE 0
+   :OPCODE-INFO #S(OCI :NAME CALL :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (2A39 8010 FFFF)
+   :STORE 0
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 9
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x4F05: #<FUNCTION INSTRUCTION-CALL>
+Retrieving operands for (CONST-LARGE CONST-LARGE CONST-LARGE): (2A39 8010 FFFF)
+Retrieved operands: (2A39 8010 FFFF)
+CALL: Routine address: 0x5472, # args: 2, # locals 3, routine start pc: 0x5479
+CALL: Default locals: (0 0 0)
+CALL: Starting locals: (8010 FFFF 0)
+T
+NIL
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5479
+   :FIRST-BYTE E0
+   :FORM VARIABLE
+   :OPERAND-COUNT VAR
+   :OPERAND-TYPES (CONST-LARGE VARIABLE)
+   :OPCODE 0
+   :OPCODE-INFO #S(OCI :NAME CALL :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (2A43 1)
+   :STORE 3
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 6
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5479: #<FUNCTION INSTRUCTION-CALL>
+Retrieving operands for (CONST-LARGE VARIABLE): (2A43 1)
+Retrieved operands: (2A43 8010)
+CALL: Routine address: 0x5486, # args: 1, # locals 5, routine start pc: 0x5491
+CALL: Default locals: (0 0 0 0 0)
+CALL: Starting locals: (8010 0 0 0 0)
+T
+NIL
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5491
+   :FIRST-BYTE 54
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE CONST-SMALL)
+   :OPCODE 14
+   :OPCODE-INFO #S(OCI :NAME ADD :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (94 B4)
+   :STORE 3
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5491: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE CONST-SMALL): (94 B4)
+Retrieved operands: (23E9 B4)
+249D
+ZMI> (var-read #x94)
+23E9
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 17 SEP 2016 10:11:56 PM):
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.354
+ZMI> (load-story-file "zork1.z3")
+T
+"Loaded zork1.z3 release 88 serial 840726"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 4F05
+   :FIRST-BYTE E0
+   :FORM VARIABLE
+   :OPERAND-COUNT VAR
+   :OPERAND-TYPES (CONST-LARGE CONST-LARGE CONST-LARGE)
+   :OPCODE 0
+   :OPCODE-INFO #S(OCI :NAME CALL :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (2A39 8010 FFFF)
+   :STORE 0
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 9
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x4F05: #<FUNCTION INSTRUCTION-CALL>
+Retrieving operands for (CONST-LARGE CONST-LARGE CONST-LARGE): (2A39 8010 FFFF)
+Retrieved operands: (2A39 8010 FFFF)
+CALL: Routine address: 0x5472, # args: 2, # locals 3, routine start pc: 0x5479
+CALL: Default locals: (0 0 0)
+CALL: Starting locals: (8010 FFFF 0)
+T
+NIL
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5479
+   :FIRST-BYTE E0
+   :FORM VARIABLE
+   :OPERAND-COUNT VAR
+   :OPERAND-TYPES (CONST-LARGE VARIABLE)
+   :OPCODE 0
+   :OPCODE-INFO #S(OCI :NAME CALL :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (2A43 1)
+   :STORE 3
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 6
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5479: #<FUNCTION INSTRUCTION-CALL>
+Retrieving operands for (CONST-LARGE VARIABLE): (2A43 1)
+Retrieved operands: (2A43 8010)
+CALL: Routine address: 0x5486, # args: 1, # locals 5, routine start pc: 0x5491
+CALL: Default locals: (0 0 0 0 0)
+CALL: Starting locals: (8010 0 0 0 0)
+T
+NIL
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5491
+   :FIRST-BYTE 54
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE CONST-SMALL)
+   :OPCODE 14
+   :OPCODE-INFO #S(OCI :NAME ADD :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (94 B4)
+   :STORE 3
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5491: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE CONST-SMALL): (94 B4)
+Retrieved operands: (23E9 B4)
+Add: 23E9 + B4 = 249D (0x249D -> var 0x3)
+T
+""
+ZMI> (read-var 3)
+; in: READ-VAR 3
+;     (ZMI::READ-VAR 3)
+; 
+; caught STYLE-WARNING:
+;   undefined function: READ-VAR
+; 
+; compilation unit finished
+;   Undefined function:
+;     READ-VAR
+;   caught 1 STYLE-WARNING condition
+; Evaluation aborted on #<UNDEFINED-FUNCTION READ-VAR {1004FC3963}>.
+ZMI> (var-read 3)
+249D
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5491
+   :FIRST-BYTE 54
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE CONST-SMALL)
+   :OPCODE 14
+   :OPCODE-INFO #S(OCI :NAME ADD :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (94 B4)
+   :STORE 3
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5491: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE CONST-SMALL): (94 B4)
+Retrieved operands: (23E9 B4)
+Add: 23E9 + B4 = 249D (0x249D -> var 0x3)
+T
+""
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5491
+   :FIRST-BYTE 54
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE CONST-SMALL)
+   :OPCODE 14
+   :OPCODE-INFO #S(OCI :NAME ADD :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (94 B4)
+   :STORE 3
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5491: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE CONST-SMALL): (94 B4)
+Retrieved operands: (23E9 B4)
+Add: 23E9 + B4 = 249D (0x249D -> var 0x3)
+T
+""
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5491
+   :FIRST-BYTE 54
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE CONST-SMALL)
+   :OPCODE 14
+   :OPCODE-INFO #S(OCI :NAME ADD :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (94 B4)
+   :STORE 3
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5491: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE CONST-SMALL): (94 B4)
+Retrieved operands: (23E9 B4)
+Add: 23E9 + B4 = 249D (0x249D -> var 0x3)
+T
+""
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5491
+   :FIRST-BYTE 54
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE CONST-SMALL)
+   :OPCODE 14
+   :OPCODE-INFO #S(OCI :NAME ADD :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (94 B4)
+   :STORE 3
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5491: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE CONST-SMALL): (94 B4)
+Retrieved operands: (23E9 B4)
+Add: 23E9 + B4 = 249D (0x249D -> var 0x3)
+T
+""
+
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 17 SEP 2016 10:14:53 PM):
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.275
+ZMI> (load-story-file "zork1.z3")
+T
+"Loaded zork1.z3 release 88 serial 840726"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 4F05
+   :FIRST-BYTE E0
+   :FORM VARIABLE
+   :OPERAND-COUNT VAR
+   :OPERAND-TYPES (CONST-LARGE CONST-LARGE CONST-LARGE)
+   :OPCODE 0
+   :OPCODE-INFO #S(OCI :NAME CALL :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (2A39 8010 FFFF)
+   :STORE 0
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 9
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x4F05: #<FUNCTION INSTRUCTION-CALL>
+Retrieving operands for (CONST-LARGE CONST-LARGE CONST-LARGE): (2A39 8010 FFFF)
+Retrieved operands: (2A39 8010 FFFF)
+CALL: Routine address: 0x5472, # args: 2, # locals 3, routine start pc: 0x5479
+CALL: Default locals: (0 0 0)
+CALL: Starting locals: (8010 FFFF 0)
+T
+NIL
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5479
+   :FIRST-BYTE E0
+   :FORM VARIABLE
+   :OPERAND-COUNT VAR
+   :OPERAND-TYPES (CONST-LARGE VARIABLE)
+   :OPCODE 0
+   :OPCODE-INFO #S(OCI :NAME CALL :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (2A43 1)
+   :STORE 3
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 6
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5479: #<FUNCTION INSTRUCTION-CALL>
+Retrieving operands for (CONST-LARGE VARIABLE): (2A43 1)
+Retrieved operands: (2A43 8010)
+CALL: Routine address: 0x5486, # args: 1, # locals 5, routine start pc: 0x5491
+CALL: Default locals: (0 0 0 0 0)
+CALL: Starting locals: (8010 0 0 0 0)
+T
+NIL
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5491
+   :FIRST-BYTE 54
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE CONST-SMALL)
+   :OPCODE 14
+   :OPCODE-INFO #S(OCI :NAME ADD :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (94 B4)
+   :STORE 3
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5491: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE CONST-SMALL): (94 B4)
+Retrieved operands: (23E9 B4)
+Add: 23E9 + B4 = 249D (0x249D -> var 0x3)
+T
+NIL
+ZMI> (decode-instruction *z-pc*)
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5495
+   :FIRST-BYTE 74
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE VARIABLE)
+   :OPCODE 14
+   :OPCODE-INFO #S(OCI :NAME |ADD| :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (94 92)
+   :STORE 4
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5495
+   :FIRST-BYTE 74
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE VARIABLE)
+   :OPCODE 14
+   :OPCODE-INFO #S(OCI :NAME ADD :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (94 92)
+   :STORE 4
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5495: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE VARIABLE): (94 92)
+Retrieved operands: (23E9 B4)
+Add: 23E9 + B4 = 249D (0x249D -> var 0x4)
+T
+NIL
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5499
+   :FIRST-BYTE 61
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE VARIABLE)
+   :OPCODE 1
+   :OPCODE-INFO #S(OCI :NAME JE :STORE NIL :BRANCH T :TEXT NIL)
+   :OPERANDS (4 3)
+   :STORE NIL
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET 18
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5499: #<FUNCTION SINSTRUCTION-NYI>
+NIL
+"Unimplemented: Loc 0x5499, first byte: 0x61, opcode: JE"
+ZMI> (first nil)
+NIL
+ZMI> (first '(1 2 3))
+1
+ZMI> (last '(1 2 3))
+(3)
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 17 SEP 2016 10:37:25 PM):
+
+; file: /Users/dfields/src/genera/genera-src/gczm/zmi.lisp
+; in: DEFUN INSTRUCTION-JE
+;     (LET* ((ZMI::OPERANDS (ZMI::RETRIEVE-OPERANDS ZMI::INSTR))
+;            (ZMI::A (FIRST ZMI::OPERANDS))
+;            (ZMI::I-PC (ZMI::DECODED-INSTRUCTION-MEMORY-LOCATION ZMI::INSTR))
+;            (ZMI::I-LEN (ZMI::DECODED-INSTRUCTION-LENGTH ZMI::INSTR))
+;            (ZMI::BR-IF (ZMI::DECODED-INSTRUCTION-BRANCH-IF ZMI::INSTR))
+;            (ZMI::OFFSET (ZMI::DECODED-INSTRUCTION-BRANCH-OFFSET ZMI::INSTR)))
+;       (ZMI::DBG T "JE: ~A == ~A if ~A to ~A~%" ZMI::A (CDR ZMI::OPERANDS)
+;                 (IF ZMI::BR-IF
+;                     "true"
+;                     "false")
+;                 ZMI::OFFSET)
+;       (VALUES NIL "JE: Not yet implemented"))
+; 
+; caught STYLE-WARNING:
+;   The variable I-PC is defined but never used.
+; 
+; caught STYLE-WARNING:
+;   The variable I-LEN is defined but never used.
+; 
+; compilation unit finished
+;   caught 2 STYLE-WARNING conditions
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.439
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5499
+   :FIRST-BYTE 61
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE VARIABLE)
+   :OPCODE 1
+   :OPCODE-INFO #S(OCI :NAME JE :STORE NIL :BRANCH T :TEXT NIL)
+   :OPERANDS (4 3)
+   :STORE NIL
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET 18
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5499: #<FUNCTION INSTRUCTION-JE>
+Retrieving operands for (VARIABLE VARIABLE): (4 3)
+Retrieved operands: (249D 249D)
+JE: 249D == (249D) if false to 18
+NIL
+"JE: Not yet implemented"
+ZMI> (null t)
+NIL
+ZMI> (null '())
+T
+ZMI> (map 'list (lambda (x) (= x 1)) '(1 2 3))
+(T NIL NIL)
+ZMI> (map #'and '(t))
+; Evaluation aborted on #<SB-INT:SIMPLE-PROGRAM-ERROR "invalid number of arguments: ~S" {1006A530F3}>.
+ZMI> (map #'and '(t) :initial-value t)
+; Evaluation aborted on #<SIMPLE-ERROR "bad thing to be a type specifier: ~/sb-impl:print-type-specifier/" {1006BF8BA3}>.
+ZMI> (map 'list #'and '(t) :initial-value t)
+; Evaluation aborted on #<TYPE-ERROR expected-type: "SEQUENCE"datum: :INITIAL-VALUE>.
+ZMI> (map 'list #'and '(t))
+; Evaluation aborted on #<UNDEFINED-FUNCTION AND {10039BE1C3}>.
+ZMI> (every (lambda (x) (= x 1)) '(1 2 3))
+NIL
+ZMI> (every (lambda (x) (= x 1)) '(1 1 1))
+T
+ZMI> (every (lambda (x) (= x 1)) '(1))
+T
+ZMI> (every (lambda (x) (= x 1)) '())
+T
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 17 SEP 2016 10:49:51 PM):
+
+; file: /Users/dfields/src/genera/genera-src/gczm/zmi.lisp
+; in: DEFUN INSTRUCTION-JE
+;     (LET* ((ZMI::OPERANDS (ZMI::RETRIEVE-OPERANDS ZMI::INSTR))
+;            (ZMI::A (FIRST ZMI::OPERANDS))
+;            (ZMI::I-PC (ZMI::DECODED-INSTRUCTION-MEMORY-LOCATION ZMI::INSTR))
+;            (ZMI::I-LEN (ZMI::DECODED-INSTRUCTION-LENGTH ZMI::INSTR))
+;            (ZMI::BR-IF (ZMI::DECODED-INSTRUCTION-BRANCH-IF ZMI::INSTR))
+;            (ZMI::OFFSET (ZMI::DECODED-INSTRUCTION-BRANCH-OFFSET ZMI::INSTR))
+;            (ZMI::ALL-EQUAL (COND (#) (# T) (T #))))
+;       (ZMI::DBG T "JE: ~A == ~A if ~A to ~A: Result ~A~%" ZMI::A
+;                 (CDR ZMI::OPERANDS)
+;                 (IF ZMI::BR-IF
+;                     "true"
+;                     "false")
+;                 ZMI::OFFSET
+;                 (IF ZMI::ALL-EQUAL
+;                     "true"
+;                     "false"))
+;       (VALUES NIL "JE: Not yet implemented"))
+; 
+; caught STYLE-WARNING:
+;   The variable I-PC is defined but never used.
+; 
+; caught STYLE-WARNING:
+;   The variable I-LEN is defined but never used.
+; 
+; compilation unit finished
+;   caught 2 STYLE-WARNING conditions
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.420
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5499
+   :FIRST-BYTE 61
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE VARIABLE)
+   :OPCODE 1
+   :OPCODE-INFO #S(OCI :NAME JE :STORE NIL :BRANCH T :TEXT NIL)
+   :OPERANDS (4 3)
+   :STORE NIL
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET 18
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5499: #<FUNCTION INSTRUCTION-JE>
+Retrieving operands for (VARIABLE VARIABLE): (4 3)
+Retrieved operands: (249D 249D)
+JE: 249D == (249D) if false to 18: Result true
+NIL
+"JE: Not yet implemented"
+ZMI> b
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 17 SEP 2016 11:00:27 PM):
+
+; file: /Users/dfields/src/genera/genera-src/gczm/zmi.lisp
+; in: DEFUN INSTRUCTION-JE
+;     (ZMI::ADVANCE-PC)
+; 
+; caught WARNING:
+;   The function was called with zero arguments, but wants exactly one.
+; 
+; compilation unit finished
+;   caught 1 WARNING condition
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.335
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 17 SEP 2016 11:00:39 PM):
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.306
+; Evaluation aborted on #<UNBOUND-VARIABLE B {1003203873}>.
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5499
+   :FIRST-BYTE 61
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE VARIABLE)
+   :OPCODE 1
+   :OPCODE-INFO #S(OCI :NAME JE :STORE NIL :BRANCH T :TEXT NIL)
+   :OPERANDS (4 3)
+   :STORE NIL
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET 18
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5499: #<FUNCTION INSTRUCTION-JE>
+Retrieving operands for (VARIABLE VARIABLE): (4 3)
+Retrieved operands: (249D 249D)
+JE: 249D == (249D) if false to 18: Result true
+T
+"Branch not taken"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 549D
+   :FIRST-BYTE 55
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE CONST-SMALL)
+   :OPCODE 15
+   :OPCODE-INFO #S(OCI :NAME SUB :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (92 6)
+   :STORE 92
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x549D: #<FUNCTION SINSTRUCTION-NYI>
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 17 SEP 2016 11:06:35 PM):
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.218
+; Evaluation aborted on #<INSTR-ERROR {1004DAD993}>.
+ZMI> (load-story-file "zork1.z3")
+T
+"Loaded zork1.z3 release 88 serial 840726"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 4F05
+   :FIRST-BYTE E0
+   :FORM VARIABLE
+   :OPERAND-COUNT VAR
+   :OPERAND-TYPES (CONST-LARGE CONST-LARGE CONST-LARGE)
+   :OPCODE 0
+   :OPCODE-INFO #S(OCI :NAME CALL :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (2A39 8010 FFFF)
+   :STORE 0
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 9
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x4F05: #<FUNCTION INSTRUCTION-CALL>
+Retrieving operands for (CONST-LARGE CONST-LARGE CONST-LARGE): (2A39 8010 FFFF)
+Retrieved operands: (2A39 8010 FFFF)
+CALL: Routine address: 0x5472, # args: 2, # locals 3, routine start pc: 0x5479
+CALL: Default locals: (0 0 0)
+CALL: Starting locals: (8010 FFFF 0)
+T
+"Called"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5479
+   :FIRST-BYTE E0
+   :FORM VARIABLE
+   :OPERAND-COUNT VAR
+   :OPERAND-TYPES (CONST-LARGE VARIABLE)
+   :OPCODE 0
+   :OPCODE-INFO #S(OCI :NAME CALL :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (2A43 1)
+   :STORE 3
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 6
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5479: #<FUNCTION INSTRUCTION-CALL>
+Retrieving operands for (CONST-LARGE VARIABLE): (2A43 1)
+Retrieved operands: (2A43 8010)
+CALL: Routine address: 0x5486, # args: 1, # locals 5, routine start pc: 0x5491
+CALL: Default locals: (0 0 0 0 0)
+CALL: Starting locals: (8010 0 0 0 0)
+T
+"Called"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5491
+   :FIRST-BYTE 54
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE CONST-SMALL)
+   :OPCODE 14
+   :OPCODE-INFO #S(OCI :NAME ADD :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (94 B4)
+   :STORE 3
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5491: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE CONST-SMALL): (94 B4)
+Retrieved operands: (23E9 B4)
+ADD: 23E9 + B4 = 249D (0x249D -> var 0x3)
+T
+"Added"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5495
+   :FIRST-BYTE 74
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE VARIABLE)
+   :OPCODE 14
+   :OPCODE-INFO #S(OCI :NAME ADD :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (94 92)
+   :STORE 4
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5495: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE VARIABLE): (94 92)
+Retrieved operands: (23E9 B4)
+ADD: 23E9 + B4 = 249D (0x249D -> var 0x4)
+T
+"Added"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5499
+   :FIRST-BYTE 61
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE VARIABLE)
+   :OPCODE 1
+   :OPCODE-INFO #S(OCI :NAME JE :STORE NIL :BRANCH T :TEXT NIL)
+   :OPERANDS (4 3)
+   :STORE NIL
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET 18
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5499: #<FUNCTION INSTRUCTION-JE>
+Retrieving operands for (VARIABLE VARIABLE): (4 3)
+Retrieved operands: (249D 249D)
+JE: 249D == (249D) if false to 18: Result true
+T
+"Branch not taken"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 549D
+   :FIRST-BYTE 55
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE CONST-SMALL)
+   :OPCODE 15
+   :OPCODE-INFO #S(OCI :NAME SUB :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (92 6)
+   :STORE 92
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x549D: #<FUNCTION INSTRUCTION-SUB>
+Retrieving operands for (VARIABLE CONST-SMALL): (92 6)
+Retrieved operands: (B4 6)
+SUB: B4 - 6 = AE (0xAE -> var 0x92)
+T
+"Subtracted"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 54A1
+   :FIRST-BYTE A0
+   :FORM SHORT
+   :OPERAND-COUNT 1OP
+   :OPERAND-TYPES (VARIABLE)
+   :OPCODE 0
+   :OPCODE-INFO #S(OCI :NAME JZ :STORE NIL :BRANCH T :TEXT NIL)
+   :OPERANDS (2)
+   :STORE NIL
+   :BRANCH-IF T
+   :BRANCH-OFFSET 6
+   :LENGTH 3
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x54A1: #<FUNCTION SINSTRUCTION-NYI>
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 17 SEP 2016 11:09:59 PM):
+
+; file: /Users/dfields/src/genera/genera-src/gczm/zmi.lisp
+; in: DEFUN INSTRUCTION-CALL
+;     (RETURN-FROM 'ZMI::INSTRUCTION-CALL (ZMI::SINSTRUCTION-NYI ZMI::INSTR))
+; 
+; caught ERROR:
+;   return for unknown block: 'INSTRUCTION-CALL
+; 
+; compilation unit finished
+;   caught 1 ERROR condition
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.224
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 17 SEP 2016 11:10:17 PM):
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.214
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 17 SEP 2016 11:12:24 PM):
+
+; file: /Users/dfields/src/genera/genera-src/gczm/zmi.lisp
+; in: DEFSTRUCT ZMRS
+;     (DEFSTRUCT ZMI::ZMRS ZMI::LOCALS ZMI::STACK ZMI::INSTR)
+; --> PROGN EVAL-WHEN 
+; ==>
+;   (SB-KERNEL::%COMPILER-DEFSTRUCT
+;    '#<SB-KERNEL:DEFSTRUCT-DESCRIPTION ZMI::ZMRS {10057AFC43}>
+;    '#(#<SB-KERNEL:LAYOUT for T {100008D5A3}>
+;       #<SB-KERNEL:LAYOUT for STRUCTURE-OBJECT {100008D623}>))
+; 
+; caught WARNING:
+;   change in instance length of class ZMRS:
+;     The most recently compiled length: 5
+;     the most recently loaded length: 4
+; 
+; caught WARNING:
+;   Clobbering the compiler's idea of the layout of #<STRUCTURE-CLASSOID ZMRS>.
+; 
+; caught STYLE-WARNING:
+;   The new FTYPE proclamation for ZMI::MAKE-ZMRS
+;     (FUNCTION (&KEY (:LOCALS T) (:STACK T) (:INSTR T))
+;      (VALUES ZMI::ZMRS &OPTIONAL))
+;   does not match the old FTYPE proclamation
+;     (FUNCTION (&KEY (:PARAMS T) (:LOCALS T) (:STACK T) (:INSTR T))
+;      (VALUES ZMI::ZMRS &OPTIONAL))
+; 
+; compilation unit finished
+;   caught 2 WARNING conditions
+;   caught 1 STYLE-WARNING condition
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.277
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 17 SEP 2016 11:12:24 PM):
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.222
+; Evaluation aborted on #<INSTR-ERROR {10052DF4D3}>.
+ZMI> (load-story-file "zork1.z3")
+T
+"Loaded zork1.z3 release 88 serial 840726"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 4F05
+   :FIRST-BYTE E0
+   :FORM VARIABLE
+   :OPERAND-COUNT VAR
+   :OPERAND-TYPES (CONST-LARGE CONST-LARGE CONST-LARGE)
+   :OPCODE 0
+   :OPCODE-INFO #S(OCI :NAME CALL :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (2A39 8010 FFFF)
+   :STORE 0
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 9
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x4F05: #<FUNCTION INSTRUCTION-CALL>
+Retrieving operands for (CONST-LARGE CONST-LARGE CONST-LARGE): (2A39 8010 FFFF)
+Retrieved operands: (2A39 8010 FFFF)
+CALL: Routine address: 0x5472, # args: 2, # locals 3, routine start pc: 0x5479
+CALL: Default locals: (0 0 0)
+CALL: Starting locals: (8010 FFFF 0)
+T
+"Called"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5479
+   :FIRST-BYTE E0
+   :FORM VARIABLE
+   :OPERAND-COUNT VAR
+   :OPERAND-TYPES (CONST-LARGE VARIABLE)
+   :OPCODE 0
+   :OPCODE-INFO #S(OCI :NAME CALL :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (2A43 1)
+   :STORE 3
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 6
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5479: #<FUNCTION INSTRUCTION-CALL>
+Retrieving operands for (CONST-LARGE VARIABLE): (2A43 1)
+Retrieved operands: (2A43 8010)
+CALL: Routine address: 0x5486, # args: 1, # locals 5, routine start pc: 0x5491
+CALL: Default locals: (0 0 0 0 0)
+CALL: Starting locals: (8010 0 0 0 0)
+T
+"Called"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5491
+   :FIRST-BYTE 54
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE CONST-SMALL)
+   :OPCODE 14
+   :OPCODE-INFO #S(OCI :NAME ADD :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (94 B4)
+   :STORE 3
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5491: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE CONST-SMALL): (94 B4)
+Retrieved operands: (23E9 B4)
+ADD: 23E9 + B4 = 249D (0x249D -> var 0x3)
+T
+"Added"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5495
+   :FIRST-BYTE 74
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE VARIABLE)
+   :OPCODE 14
+   :OPCODE-INFO #S(OCI :NAME ADD :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (94 92)
+   :STORE 4
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5495: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE VARIABLE): (94 92)
+Retrieved operands: (23E9 B4)
+ADD: 23E9 + B4 = 249D (0x249D -> var 0x4)
+T
+"Added"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5499
+   :FIRST-BYTE 61
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE VARIABLE)
+   :OPCODE 1
+   :OPCODE-INFO #S(OCI :NAME JE :STORE NIL :BRANCH T :TEXT NIL)
+   :OPERANDS (4 3)
+   :STORE NIL
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET 18
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5499: #<FUNCTION INSTRUCTION-JE>
+Retrieving operands for (VARIABLE VARIABLE): (4 3)
+Retrieved operands: (249D 249D)
+JE: 249D == (249D) if false to 18: Result true
+T
+"Branch not taken"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 549D
+   :FIRST-BYTE 55
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE CONST-SMALL)
+   :OPCODE 15
+   :OPCODE-INFO #S(OCI :NAME SUB :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (92 6)
+   :STORE 92
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x549D: #<FUNCTION INSTRUCTION-SUB>
+Retrieving operands for (VARIABLE CONST-SMALL): (92 6)
+Retrieved operands: (B4 6)
+SUB: B4 - 6 = AE (0xAE -> var 0x92)
+T
+"Subtracted"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 54A1
+   :FIRST-BYTE A0
+   :FORM SHORT
+   :OPERAND-COUNT 1OP
+   :OPERAND-TYPES (VARIABLE)
+   :OPCODE 0
+   :OPCODE-INFO #S(OCI :NAME JZ :STORE NIL :BRANCH T :TEXT NIL)
+   :OPERANDS (2)
+   :STORE NIL
+   :BRANCH-IF T
+   :BRANCH-OFFSET 6
+   :LENGTH 3
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x54A1: #<FUNCTION SINSTRUCTION-NYI>
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 17 SEP 2016 11:27:24 PM):
+
+; file: /Users/dfields/src/genera/genera-src/gczm/zmi.lisp
+; in: DEFUN SINSTRUCTION-JX
+;     (IF ZMI::ALL-EQUAL
+;         "true"
+;         "false")
+; 
+; caught WARNING:
+;   undefined variable: ALL-EQUAL
+; 
+; compilation unit finished
+;   Undefined variable:
+;     ALL-EQUAL
+;   caught 1 WARNING condition
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.215
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 17 SEP 2016 11:27:43 PM):
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.210
+; Evaluation aborted on #<INSTR-ERROR {1005635E63}>.
+ZMI> (load-story-file "zork1.z3")
+T
+"Loaded zork1.z3 release 88 serial 840726"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 4F05
+   :FIRST-BYTE E0
+   :FORM VARIABLE
+   :OPERAND-COUNT VAR
+   :OPERAND-TYPES (CONST-LARGE CONST-LARGE CONST-LARGE)
+   :OPCODE 0
+   :OPCODE-INFO #S(OCI :NAME CALL :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (2A39 8010 FFFF)
+   :STORE 0
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 9
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x4F05: #<FUNCTION INSTRUCTION-CALL>
+Retrieving operands for (CONST-LARGE CONST-LARGE CONST-LARGE): (2A39 8010 FFFF)
+Retrieved operands: (2A39 8010 FFFF)
+CALL: Routine address: 0x5472, # args: 2, # locals 3, routine start pc: 0x5479
+CALL: Default locals: (0 0 0)
+CALL: Starting locals: (8010 FFFF 0)
+T
+"Called"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5479
+   :FIRST-BYTE E0
+   :FORM VARIABLE
+   :OPERAND-COUNT VAR
+   :OPERAND-TYPES (CONST-LARGE VARIABLE)
+   :OPCODE 0
+   :OPCODE-INFO #S(OCI :NAME CALL :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (2A43 1)
+   :STORE 3
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 6
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5479: #<FUNCTION INSTRUCTION-CALL>
+Retrieving operands for (CONST-LARGE VARIABLE): (2A43 1)
+Retrieved operands: (2A43 8010)
+CALL: Routine address: 0x5486, # args: 1, # locals 5, routine start pc: 0x5491
+CALL: Default locals: (0 0 0 0 0)
+CALL: Starting locals: (8010 0 0 0 0)
+T
+"Called"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5491
+   :FIRST-BYTE 54
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE CONST-SMALL)
+   :OPCODE 14
+   :OPCODE-INFO #S(OCI :NAME ADD :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (94 B4)
+   :STORE 3
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5491: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE CONST-SMALL): (94 B4)
+Retrieved operands: (23E9 B4)
+ADD: 23E9 + B4 = 249D (0x249D -> var 0x3)
+T
+"Added"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5495
+   :FIRST-BYTE 74
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE VARIABLE)
+   :OPCODE 14
+   :OPCODE-INFO #S(OCI :NAME ADD :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (94 92)
+   :STORE 4
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5495: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE VARIABLE): (94 92)
+Retrieved operands: (23E9 B4)
+ADD: 23E9 + B4 = 249D (0x249D -> var 0x4)
+T
+"Added"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5499
+   :FIRST-BYTE 61
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE VARIABLE)
+   :OPCODE 1
+   :OPCODE-INFO #S(OCI :NAME JE :STORE NIL :BRANCH T :TEXT NIL)
+   :OPERANDS (4 3)
+   :STORE NIL
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET 18
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5499: #<FUNCTION INSTRUCTION-JE>
+Retrieving operands for (VARIABLE VARIABLE): (4 3)
+Retrieved operands: (249D 249D)
+JE: (249D) if false to 18: Result true
+T
+"Branch not taken"
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 17 SEP 2016 11:28:41 PM):
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.294
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 549D
+   :FIRST-BYTE 55
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE CONST-SMALL)
+   :OPCODE 15
+   :OPCODE-INFO #S(OCI :NAME SUB :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (92 6)
+   :STORE 92
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x549D: #<FUNCTION INSTRUCTION-SUB>
+Retrieving operands for (VARIABLE CONST-SMALL): (92 6)
+Retrieved operands: (B4 6)
+SUB: B4 - 6 = AE (0xAE -> var 0x92)
+T
+"Subtracted"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 54A1
+   :FIRST-BYTE A0
+   :FORM SHORT
+   :OPERAND-COUNT 1OP
+   :OPERAND-TYPES (VARIABLE)
+   :OPCODE 0
+   :OPCODE-INFO #S(OCI :NAME JZ :STORE NIL :BRANCH T :TEXT NIL)
+   :OPERANDS (2)
+   :STORE NIL
+   :BRANCH-IF T
+   :BRANCH-OFFSET 6
+   :LENGTH 3
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x54A1: #<FUNCTION SINSTRUCTION-NYI>
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 17 SEP 2016 11:33:27 PM):
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.234
+(load-story-file "zork1.z3")
+T
+"Loaded zork1.z3 release 88 serial 840726"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 4F05
+   :FIRST-BYTE E0
+   :FORM VARIABLE
+   :OPERAND-COUNT VAR
+   :OPERAND-TYPES (CONST-LARGE CONST-LARGE CONST-LARGE)
+   :OPCODE 0
+   :OPCODE-INFO #S(OCI :NAME CALL :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (2A39 8010 FFFF)
+   :STORE 0
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 9
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x4F05: #<FUNCTION INSTRUCTION-CALL>
+Retrieving operands for (CONST-LARGE CONST-LARGE CONST-LARGE): (2A39 8010 FFFF)
+Retrieved operands: (2A39 8010 FFFF)
+CALL: Routine address: 0x5472, # args: 2, # locals 3, routine start pc: 0x5479
+CALL: Default locals: (0 0 0)
+CALL: Starting locals: (8010 FFFF 0)
+T
+"Called"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5479
+   :FIRST-BYTE E0
+   :FORM VARIABLE
+   :OPERAND-COUNT VAR
+   :OPERAND-TYPES (CONST-LARGE VARIABLE)
+   :OPCODE 0
+   :OPCODE-INFO #S(OCI :NAME CALL :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (2A43 1)
+   :STORE 3
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 6
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5479: #<FUNCTION INSTRUCTION-CALL>
+Retrieving operands for (CONST-LARGE VARIABLE): (2A43 1)
+Retrieved operands: (2A43 8010)
+CALL: Routine address: 0x5486, # args: 1, # locals 5, routine start pc: 0x5491
+CALL: Default locals: (0 0 0 0 0)
+CALL: Starting locals: (8010 0 0 0 0)
+T
+"Called"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5491
+   :FIRST-BYTE 54
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE CONST-SMALL)
+   :OPCODE 14
+   :OPCODE-INFO #S(OCI :NAME ADD :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (94 B4)
+   :STORE 3
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5491: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE CONST-SMALL): (94 B4)
+Retrieved operands: (23E9 B4)
+ADD: 23E9 op B4 = 249D (0x249D -> var 0x3)
+T
+"ADD"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5495
+   :FIRST-BYTE 74
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE VARIABLE)
+   :OPCODE 14
+   :OPCODE-INFO #S(OCI :NAME ADD :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (94 92)
+   :STORE 4
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5495: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE VARIABLE): (94 92)
+Retrieved operands: (23E9 B4)
+ADD: 23E9 op B4 = 249D (0x249D -> var 0x4)
+T
+"ADD"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5499
+   :FIRST-BYTE 61
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE VARIABLE)
+   :OPCODE 1
+   :OPCODE-INFO #S(OCI :NAME JE :STORE NIL :BRANCH T :TEXT NIL)
+   :OPERANDS (4 3)
+   :STORE NIL
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET 18
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5499: #<FUNCTION INSTRUCTION-JE>
+Retrieving operands for (VARIABLE VARIABLE): (4 3)
+Retrieved operands: (249D 249D)
+JE: (249D 249D) if false to 18: Result true
+T
+"Branch not taken"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 549D
+   :FIRST-BYTE 55
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE CONST-SMALL)
+   :OPCODE 15
+   :OPCODE-INFO #S(OCI :NAME SUB :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (92 6)
+   :STORE 92
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x549D: #<FUNCTION INSTRUCTION-SUB>
+Retrieving operands for (VARIABLE CONST-SMALL): (92 6)
+Retrieved operands: (B4 6)
+SUB: B4 op 6 = AE (0xAE -> var 0x92)
+T
+"SUB"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 54A1
+   :FIRST-BYTE A0
+   :FORM SHORT
+   :OPERAND-COUNT 1OP
+   :OPERAND-TYPES (VARIABLE)
+   :OPCODE 0
+   :OPCODE-INFO #S(OCI :NAME JZ :STORE NIL :BRANCH T :TEXT NIL)
+   :OPERANDS (2)
+   :STORE NIL
+   :BRANCH-IF T
+   :BRANCH-OFFSET 6
+   :LENGTH 3
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x54A1: #<FUNCTION SINSTRUCTION-NYI>
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 17 SEP 2016 11:37:12 PM):
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.212
+; Evaluation aborted on #<INSTR-ERROR {1005D8E413}>.
+; Evaluation aborted on #<INSTR-ERROR {1005D8E413}>.
+ZMI> 
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 54A1
+   :FIRST-BYTE A0
+   :FORM SHORT
+   :OPERAND-COUNT 1OP
+   :OPERAND-TYPES (VARIABLE)
+   :OPCODE 0
+   :OPCODE-INFO #S(OCI :NAME JZ :STORE NIL :BRANCH T :TEXT NIL)
+   :OPERANDS (2)
+   :STORE NIL
+   :BRANCH-IF T
+   :BRANCH-OFFSET 6
+   :LENGTH 3
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x54A1: #<FUNCTION INSTRUCTION-JZ>
+Retrieving operands for (VARIABLE): (2)
+Retrieved operands: (0)
+JZ: (0) if true to 6: Result true
+T
+"Branched"
+ZMI> *z-pc*
+54A8
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 54A8
+   :FIRST-BYTE 74
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE VARIABLE)
+   :OPCODE 14
+   :OPCODE-INFO #S(OCI :NAME ADD :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (94 92)
+   :STORE 5
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x54A8: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE VARIABLE): (94 92)
+Retrieved operands: (23E9 AE)
+ADD: 23E9 op AE = 2497 (0x2497 -> var 0x5)
+T
+"ADD"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 54AC
+   :FIRST-BYTE E1
+   :FORM VARIABLE
+   :OPERAND-COUNT VAR
+   :OPERAND-TYPES (VARIABLE CONST-SMALL VARIABLE)
+   :OPCODE 1
+   :OPCODE-INFO #S(OCI :NAME STOREW :STORE NIL :BRANCH NIL :TEXT NIL)
+   :OPERANDS (5 2 1)
+   :STORE NIL
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 5
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x54AC: #<FUNCTION SINSTRUCTION-NYI>
+NIL
+"Unimplemented: Loc 0x54AC, first byte: 0xE1, opcode: STOREW"
+ZMI> 
+; No value; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 18 SEP 2016 12:00:30 AM):
+
+; file: /Users/dfields/src/genera/genera-src/gczm/zmi.lisp
+; in: DEFUN INSTRUCTION-STOREW
+;     (RETURN-FROM 'ZMI::INSTRUCTION-STOREW (VALUES NIL "Invalid # of args"))
+; 
+; caught ERROR:
+;   return for unknown block: 'INSTRUCTION-STOREW
+; 
+; compilation unit finished
+;   caught 1 ERROR condition
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.225
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 18 SEP 2016 12:00:46 AM):
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.216
+
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 54AC
+   :FIRST-BYTE E1
+   :FORM VARIABLE
+   :OPERAND-COUNT VAR
+   :OPERAND-TYPES (VARIABLE CONST-SMALL VARIABLE)
+   :OPCODE 1
+   :OPCODE-INFO #S(OCI :NAME STOREW :STORE NIL :BRANCH NIL :TEXT NIL)
+   :OPERANDS (5 2 1)
+   :STORE NIL
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 5
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x54AC: #<FUNCTION INSTRUCTION-STOREW>
+Retrieving operands for (VARIABLE CONST-SMALL VARIABLE): (5 2 1)
+Retrieved operands: (2497 2 8010)
+STOREW: Writing 0x8010 to 0x249B (as 2497[2])
+T
+"Stored word"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 54AC
+   :FIRST-BYTE E1
+   :FORM VARIABLE
+   :OPERAND-COUNT VAR
+   :OPERAND-TYPES (VARIABLE CONST-SMALL VARIABLE)
+   :OPCODE 1
+   :OPCODE-INFO #S(OCI :NAME STOREW :STORE NIL :BRANCH NIL :TEXT NIL)
+   :OPERANDS (5 2 1)
+   :STORE NIL
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 5
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x54AC: #<FUNCTION INSTRUCTION-STOREW>
+Retrieving operands for (VARIABLE CONST-SMALL VARIABLE): (5 2 1)
+Retrieved operands: (2497 2 8010)
+STOREW: Writing 0x8010 to 0x249B (as 2497[2])
+T
+"Stored word"
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 18 SEP 2016 12:02:08 AM):
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.249
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 54AC
+   :FIRST-BYTE E1
+   :FORM VARIABLE
+   :OPERAND-COUNT VAR
+   :OPERAND-TYPES (VARIABLE CONST-SMALL VARIABLE)
+   :OPCODE 1
+   :OPCODE-INFO #S(OCI :NAME STOREW :STORE NIL :BRANCH NIL :TEXT NIL)
+   :OPERANDS (5 2 1)
+   :STORE NIL
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 5
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x54AC: #<FUNCTION INSTRUCTION-STOREW>
+Retrieving operands for (VARIABLE CONST-SMALL VARIABLE): (5 2 1)
+Retrieved operands: (2497 2 8010)
+STOREW: Writing 0x8010 to 0x249B (as 2497[2])
+T
+"Stored word"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 54B1
+   :FIRST-BYTE AB
+   :FORM SHORT
+   :OPERAND-COUNT 1OP
+   :OPERAND-TYPES (VARIABLE)
+   :OPCODE B
+   :OPCODE-INFO #S(OCI :NAME RET :STORE NIL :BRANCH NIL :TEXT NIL)
+   :OPERANDS (5)
+   :STORE NIL
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 2
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x54B1: #<FUNCTION SINSTRUCTION-NYI>
+; Evaluation aborted on #<INSTR-ERROR {1004053843}>.
+ZMI> (zmrs-instr nil)
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 18 SEP 2016 12:14:15 AM):
+
+; file: /Users/dfields/src/genera/genera-src/gczm/zmi.lisp
+; in: DEFUN SINSTRUCTION-RET
+;     (DEFUN ZMI::SINSTRUCTION-RET (ZMI::INSTR ZMI::VALUE)
+;       (LET* ((ZMI::FRAME (ZMI::POP-CALL-STACK))
+;              (ZMI::FINST (ZMI::ZMRS-INSTR ZMI::FRAME))
+;              (ZMI::RETDEST (ZMI::DECODED-INSTRUCTION-STORE ZMI::FINST)))
+;         (ZMI::DBG T "RET-internal: Returning 0x~x into variable 0x~x~%"
+;                   ZMI::VALUE ZMI::RETDEST)
+;         (ZMI::VAR-WRITE ZMI::RETDEST ZMI::FINST)
+;         (ZMI::SET-PC
+;          (+ (ZMI::DECODED-INSTRUCTION-MEMORY-LOCATION ZMI::FINST)
+;             (ZMI::DECODED-INSTRUCTION-LENGTH ZMI::FINST)))
+;         (VALUES T "Returned")))
+; --> PROGN SB-IMPL::%DEFUN SB-IMPL::%DEFUN SB-INT:NAMED-LAMBDA 
+; ==>
+;   #'(SB-INT:NAMED-LAMBDA ZMI::SINSTRUCTION-RET
+;         (ZMI::INSTR ZMI::VALUE)
+;       (BLOCK ZMI::SINSTRUCTION-RET
+;         (LET* ((ZMI::FRAME #) (ZMI::FINST #) (ZMI::RETDEST #))
+;           (ZMI::DBG T "RET-internal: Returning 0x~x into variable 0x~x~%"
+;                     ZMI::VALUE ZMI::RETDEST)
+;           (ZMI::VAR-WRITE ZMI::RETDEST ZMI::FINST)
+;           (ZMI::SET-PC (+ # #))
+;           (VALUES T "Returned"))))
+; 
+; caught STYLE-WARNING:
+;   The variable INSTR is defined but never used.
+; 
+; compilation unit finished
+;   caught 1 STYLE-WARNING condition
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.237
+; Evaluation aborted on #<TYPE-ERROR expected-type: "ZMRS"datum: NIL>.
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 54B1
+   :FIRST-BYTE AB
+   :FORM SHORT
+   :OPERAND-COUNT 1OP
+   :OPERAND-TYPES (VARIABLE)
+   :OPCODE B
+   :OPCODE-INFO #S(OCI :NAME RET :STORE NIL :BRANCH NIL :TEXT NIL)
+   :OPERANDS (5)
+   :STORE NIL
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 2
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x54B1: #<FUNCTION INSTRUCTION-RET>
+Retrieving operands for (VARIABLE): (5)
+Retrieved operands: (2497)
+RET-internal: Returning 0x2497 into variable 0x3
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 18 SEP 2016 12:16:10 AM):
+
+; file: /Users/dfields/src/genera/genera-src/gczm/zmi.lisp
+; in: DEFUN SINSTRUCTION-RET
+;     (DEFUN ZMI::SINSTRUCTION-RET (ZMI::INSTR ZMI::VALUE)
+;       (LET* ((ZMI::FRAME (ZMI::POP-CALL-STACK))
+;              (ZMI::FINST (ZMI::ZMRS-INSTR ZMI::FRAME))
+;              (ZMI::RETDEST (ZMI::DECODED-INSTRUCTION-STORE ZMI::FINST)))
+;         (ZMI::DBG T "RET-internal: Returning 0x~x into variable 0x~x~%"
+;                   ZMI::VALUE ZMI::RETDEST)
+;         (ZMI::VAR-WRITE ZMI::RETDEST ZMI::VALUE)
+;         (ZMI::SET-PC
+;          (+ (ZMI::DECODED-INSTRUCTION-MEMORY-LOCATION ZMI::FINST)
+;             (ZMI::DECODED-INSTRUCTION-LENGTH ZMI::FINST)))
+;         (VALUES T "Returned")))
+; --> PROGN SB-IMPL::%DEFUN SB-IMPL::%DEFUN SB-INT:NAMED-LAMBDA 
+; ==>
+;   #'(SB-INT:NAMED-LAMBDA ZMI::SINSTRUCTION-RET
+;         (ZMI::INSTR ZMI::VALUE)
+;       (BLOCK ZMI::SINSTRUCTION-RET
+;         (LET* ((ZMI::FRAME #) (ZMI::FINST #) (ZMI::RETDEST #))
+;           (ZMI::DBG T "RET-internal: Returning 0x~x into variable 0x~x~%"
+;                     ZMI::VALUE ZMI::RETDEST)
+;           (ZMI::VAR-WRITE ZMI::RETDEST ZMI::VALUE)
+;           (ZMI::SET-PC (+ # #))
+;           (VALUES T "Returned"))))
+; 
+; caught STYLE-WARNING:
+;   The variable INSTR is defined but never used.
+; 
+; compilation unit finished
+;   caught 1 STYLE-WARNING condition
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.209
+; Evaluation aborted on #<TYPE-ERROR expected-type: "(UNSIGNED-BYTE 10)"
+             datum: #S(DECODED-INSTRUCTION ..)>.
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 54B1
+   :FIRST-BYTE AB
+   :FORM SHORT
+   :OPERAND-COUNT 1OP
+   :OPERAND-TYPES (VARIABLE)
+   :OPCODE B
+   :OPCODE-INFO #S(OCI :NAME RET :STORE NIL :BRANCH NIL :TEXT NIL)
+   :OPERANDS (5)
+   :STORE NIL
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 2
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x54B1: #<FUNCTION INSTRUCTION-RET>
+Retrieving operands for (VARIABLE): (5)
+Error: Local 4 not available in #(8010 FFFF 0)
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 18 SEP 2016 12:18:13 AM):
+
+; file: /Users/dfields/src/genera/genera-src/gczm/zmi.lisp
+; in: DEFUN SINSTRUCTION-RET
+;     (DEFUN ZMI::SINSTRUCTION-RET (ZMI::INSTR ZMI::VALUE)
+;       (LET* ((ZMI::FRAME (ZMI::POP-CALL-STACK))
+;              (ZMI::FINST (ZMI::ZMRS-INSTR ZMI::FRAME))
+;              (ZMI::RETDEST (ZMI::DECODED-INSTRUCTION-STORE ZMI::FINST)))
+;         (ZMI::DBG T
+;                   "RET-internal: Returning 0x~x into variable 0x~x~ (caller address 0x~x)%"
+;                   ZMI::VALUE ZMI::RETDEST
+;                   (ZMI::DECODED-INSTRUCTION-MEMORY-LOCATION ZMI::FINST))
+;         (ZMI::VAR-WRITE ZMI::RETDEST ZMI::VALUE)
+;         (ZMI::SET-PC
+;          (+ (ZMI::DECODED-INSTRUCTION-MEMORY-LOCATION ZMI::FINST)
+;             (ZMI::DECODED-INSTRUCTION-LENGTH ZMI::FINST)))
+;         (VALUES T "Returned")))
+; --> PROGN SB-IMPL::%DEFUN SB-IMPL::%DEFUN SB-INT:NAMED-LAMBDA 
+; ==>
+;   #'(SB-INT:NAMED-LAMBDA ZMI::SINSTRUCTION-RET
+;         (ZMI::INSTR ZMI::VALUE)
+;       (BLOCK ZMI::SINSTRUCTION-RET
+;         (LET* ((ZMI::FRAME #) (ZMI::FINST #) (ZMI::RETDEST #))
+;           (ZMI::DBG T
+;                     "RET-internal: Returning 0x~x into variable 0x~x~ (caller address 0x~x)%"
+;                     ZMI::VALUE ZMI::RETDEST
+;                     (ZMI::DECODED-INSTRUCTION-MEMORY-LOCATION ZMI::FINST))
+;           (ZMI::VAR-WRITE ZMI::RETDEST ZMI::VALUE)
+;           (ZMI::SET-PC (+ # #))
+;           (VALUES T "Returned"))))
+; 
+; caught STYLE-WARNING:
+;   The variable INSTR is defined but never used.
+; 
+; compilation unit finished
+;   caught 1 STYLE-WARNING condition
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.232
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 18 SEP 2016 12:19:46 AM):
+
+; file: /Users/dfields/src/genera/genera-src/gczm/zmi.lisp
+; in: DEFUN SINSTRUCTION-RET
+;     ((ZMI::IGNOREABLE ZMI::VALUE))
+; 
+; caught WARNING:
+;   unrecognized declaration ((IGNOREABLE VALUE))
+
+;     (DEFUN ZMI::SINSTRUCTION-RET (ZMI::INSTR ZMI::VALUE)
+;       (DECLARE ((ZMI::IGNOREABLE ZMI::VALUE)))
+;       (LET* ((ZMI::FRAME (ZMI::POP-CALL-STACK))
+;              (ZMI::FINST (ZMI::ZMRS-INSTR ZMI::FRAME))
+;              (ZMI::RETDEST (ZMI::DECODED-INSTRUCTION-STORE ZMI::FINST)))
+;         (ZMI::DBG T
+;                   "RET-internal: Returning 0x~x into variable 0x~x~ (caller address 0x~x)%"
+;                   ZMI::VALUE ZMI::RETDEST
+;                   (ZMI::DECODED-INSTRUCTION-MEMORY-LOCATION ZMI::FINST))
+;         (ZMI::VAR-WRITE ZMI::RETDEST ZMI::VALUE)
+;         (ZMI::SET-PC
+;          (+ (ZMI::DECODED-INSTRUCTION-MEMORY-LOCATION ZMI::FINST)
+;             (ZMI::DECODED-INSTRUCTION-LENGTH ZMI::FINST)))
+;         (VALUES T "Returned")))
+; --> PROGN SB-IMPL::%DEFUN SB-IMPL::%DEFUN SB-INT:NAMED-LAMBDA 
+; ==>
+;   #'(SB-INT:NAMED-LAMBDA ZMI::SINSTRUCTION-RET
+;         (ZMI::INSTR ZMI::VALUE)
+;       (DECLARE ((ZMI::IGNOREABLE ZMI::VALUE)))
+;       (BLOCK ZMI::SINSTRUCTION-RET
+;         (LET* ((ZMI::FRAME #) (ZMI::FINST #) (ZMI::RETDEST #))
+;           (ZMI::DBG T
+;                     "RET-internal: Returning 0x~x into variable 0x~x~ (caller address 0x~x)%"
+;                     ZMI::VALUE ZMI::RETDEST
+;                     (ZMI::DECODED-INSTRUCTION-MEMORY-LOCATION ZMI::FINST))
+;           (ZMI::VAR-WRITE ZMI::RETDEST ZMI::VALUE)
+;           (ZMI::SET-PC (+ # #))
+;           (VALUES T "Returned"))))
+; 
+; caught STYLE-WARNING:
+;   The variable INSTR is defined but never used.
+; 
+; compilation unit finished
+;   caught 1 WARNING condition
+;   caught 1 STYLE-WARNING condition
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.224
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 18 SEP 2016 12:20:24 AM):
+
+; file: /Users/dfields/src/genera/genera-src/gczm/zmi.lisp
+; in: DEFUN SINSTRUCTION-RET
+;     (ZMI::IGNOREABLE ZMI::VALUE)
+; 
+; caught WARNING:
+;   unrecognized declaration (IGNOREABLE VALUE)
+
+;     (DEFUN ZMI::SINSTRUCTION-RET (ZMI::INSTR ZMI::VALUE)
+;       (DECLARE (ZMI::IGNOREABLE ZMI::VALUE))
+;       (LET* ((ZMI::FRAME (ZMI::POP-CALL-STACK))
+;              (ZMI::FINST (ZMI::ZMRS-INSTR ZMI::FRAME))
+;              (ZMI::RETDEST (ZMI::DECODED-INSTRUCTION-STORE ZMI::FINST)))
+;         (ZMI::DBG T
+;                   "RET-internal: Returning 0x~x into variable 0x~x~ (caller address 0x~x)%"
+;                   ZMI::VALUE ZMI::RETDEST
+;                   (ZMI::DECODED-INSTRUCTION-MEMORY-LOCATION ZMI::FINST))
+;         (ZMI::VAR-WRITE ZMI::RETDEST ZMI::VALUE)
+;         (ZMI::SET-PC
+;          (+ (ZMI::DECODED-INSTRUCTION-MEMORY-LOCATION ZMI::FINST)
+;             (ZMI::DECODED-INSTRUCTION-LENGTH ZMI::FINST)))
+;         (VALUES T "Returned")))
+; --> PROGN SB-IMPL::%DEFUN SB-IMPL::%DEFUN SB-INT:NAMED-LAMBDA 
+; ==>
+;   #'(SB-INT:NAMED-LAMBDA ZMI::SINSTRUCTION-RET
+;         (ZMI::INSTR ZMI::VALUE)
+;       (DECLARE (ZMI::IGNOREABLE ZMI::VALUE))
+;       (BLOCK ZMI::SINSTRUCTION-RET
+;         (LET* ((ZMI::FRAME #) (ZMI::FINST #) (ZMI::RETDEST #))
+;           (ZMI::DBG T
+;                     "RET-internal: Returning 0x~x into variable 0x~x~ (caller address 0x~x)%"
+;                     ZMI::VALUE ZMI::RETDEST
+;                     (ZMI::DECODED-INSTRUCTION-MEMORY-LOCATION ZMI::FINST))
+;           (ZMI::VAR-WRITE ZMI::RETDEST ZMI::VALUE)
+;           (ZMI::SET-PC (+ # #))
+;           (VALUES T "Returned"))))
+; 
+; caught STYLE-WARNING:
+;   The variable INSTR is defined but never used.
+; 
+; compilation unit finished
+;   caught 1 WARNING condition
+;   caught 1 STYLE-WARNING condition
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.237
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 18 SEP 2016 12:20:35 AM):
+
+; file: /Users/dfields/src/genera/genera-src/gczm/zmi.lisp
+; in: DEFUN SINSTRUCTION-RET
+;     ((IGNORE ZMI::VALUE))
+; 
+; caught WARNING:
+;   unrecognized declaration ((IGNORE VALUE))
+
+;     (DEFUN ZMI::SINSTRUCTION-RET (ZMI::INSTR ZMI::VALUE)
+;       (DECLARE ((IGNORE ZMI::VALUE)))
+;       (LET* ((ZMI::FRAME (ZMI::POP-CALL-STACK))
+;              (ZMI::FINST (ZMI::ZMRS-INSTR ZMI::FRAME))
+;              (ZMI::RETDEST (ZMI::DECODED-INSTRUCTION-STORE ZMI::FINST)))
+;         (ZMI::DBG T
+;                   "RET-internal: Returning 0x~x into variable 0x~x~ (caller address 0x~x)%"
+;                   ZMI::VALUE ZMI::RETDEST
+;                   (ZMI::DECODED-INSTRUCTION-MEMORY-LOCATION ZMI::FINST))
+;         (ZMI::VAR-WRITE ZMI::RETDEST ZMI::VALUE)
+;         (ZMI::SET-PC
+;          (+ (ZMI::DECODED-INSTRUCTION-MEMORY-LOCATION ZMI::FINST)
+;             (ZMI::DECODED-INSTRUCTION-LENGTH ZMI::FINST)))
+;         (VALUES T "Returned")))
+; --> PROGN SB-IMPL::%DEFUN SB-IMPL::%DEFUN SB-INT:NAMED-LAMBDA 
+; ==>
+;   #'(SB-INT:NAMED-LAMBDA ZMI::SINSTRUCTION-RET
+;         (ZMI::INSTR ZMI::VALUE)
+;       (DECLARE ((IGNORE ZMI::VALUE)))
+;       (BLOCK ZMI::SINSTRUCTION-RET
+;         (LET* ((ZMI::FRAME #) (ZMI::FINST #) (ZMI::RETDEST #))
+;           (ZMI::DBG T
+;                     "RET-internal: Returning 0x~x into variable 0x~x~ (caller address 0x~x)%"
+;                     ZMI::VALUE ZMI::RETDEST
+;                     (ZMI::DECODED-INSTRUCTION-MEMORY-LOCATION ZMI::FINST))
+;           (ZMI::VAR-WRITE ZMI::RETDEST ZMI::VALUE)
+;           (ZMI::SET-PC (+ # #))
+;           (VALUES T "Returned"))))
+; 
+; caught STYLE-WARNING:
+;   The variable INSTR is defined but never used.
+; 
+; compilation unit finished
+;   caught 1 WARNING condition
+;   caught 1 STYLE-WARNING condition
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.272
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 18 SEP 2016 12:21:00 AM):
+
+; file: /Users/dfields/src/genera/genera-src/gczm/zmi.lisp
+; in: DEFUN SINSTRUCTION-RET
+;     ((ZMI::IGNOREABLE ZMI::INSTR))
+; 
+; caught WARNING:
+;   unrecognized declaration ((IGNOREABLE INSTR))
+
+;     (DEFUN ZMI::SINSTRUCTION-RET (ZMI::INSTR ZMI::VALUE)
+;       (DECLARE ((ZMI::IGNOREABLE ZMI::INSTR)))
+;       (LET* ((ZMI::FRAME (ZMI::POP-CALL-STACK))
+;              (ZMI::FINST (ZMI::ZMRS-INSTR ZMI::FRAME))
+;              (ZMI::RETDEST (ZMI::DECODED-INSTRUCTION-STORE ZMI::FINST)))
+;         (ZMI::DBG T
+;                   "RET-internal: Returning 0x~x into variable 0x~x~ (caller address 0x~x)%"
+;                   ZMI::VALUE ZMI::RETDEST
+;                   (ZMI::DECODED-INSTRUCTION-MEMORY-LOCATION ZMI::FINST))
+;         (ZMI::VAR-WRITE ZMI::RETDEST ZMI::VALUE)
+;         (ZMI::SET-PC
+;          (+ (ZMI::DECODED-INSTRUCTION-MEMORY-LOCATION ZMI::FINST)
+;             (ZMI::DECODED-INSTRUCTION-LENGTH ZMI::FINST)))
+;         (VALUES T "Returned")))
+; --> PROGN SB-IMPL::%DEFUN SB-IMPL::%DEFUN SB-INT:NAMED-LAMBDA 
+; ==>
+;   #'(SB-INT:NAMED-LAMBDA ZMI::SINSTRUCTION-RET
+;         (ZMI::INSTR ZMI::VALUE)
+;       (DECLARE ((ZMI::IGNOREABLE ZMI::INSTR)))
+;       (BLOCK ZMI::SINSTRUCTION-RET
+;         (LET* ((ZMI::FRAME #) (ZMI::FINST #) (ZMI::RETDEST #))
+;           (ZMI::DBG T
+;                     "RET-internal: Returning 0x~x into variable 0x~x~ (caller address 0x~x)%"
+;                     ZMI::VALUE ZMI::RETDEST
+;                     (ZMI::DECODED-INSTRUCTION-MEMORY-LOCATION ZMI::FINST))
+;           (ZMI::VAR-WRITE ZMI::RETDEST ZMI::VALUE)
+;           (ZMI::SET-PC (+ # #))
+;           (VALUES T "Returned"))))
+; 
+; caught STYLE-WARNING:
+;   The variable INSTR is defined but never used.
+; 
+; compilation unit finished
+;   caught 1 WARNING condition
+;   caught 1 STYLE-WARNING condition
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.242
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 18 SEP 2016 12:21:08 AM):
+
+; file: /Users/dfields/src/genera/genera-src/gczm/zmi.lisp
+; in: DEFUN SINSTRUCTION-RET
+;     ((IGNORE ZMI::INSTR))
+; 
+; caught WARNING:
+;   unrecognized declaration ((IGNORE INSTR))
+
+;     (DEFUN ZMI::SINSTRUCTION-RET (ZMI::INSTR ZMI::VALUE)
+;       (DECLARE ((IGNORE ZMI::INSTR)))
+;       (LET* ((ZMI::FRAME (ZMI::POP-CALL-STACK))
+;              (ZMI::FINST (ZMI::ZMRS-INSTR ZMI::FRAME))
+;              (ZMI::RETDEST (ZMI::DECODED-INSTRUCTION-STORE ZMI::FINST)))
+;         (ZMI::DBG T
+;                   "RET-internal: Returning 0x~x into variable 0x~x~ (caller address 0x~x)%"
+;                   ZMI::VALUE ZMI::RETDEST
+;                   (ZMI::DECODED-INSTRUCTION-MEMORY-LOCATION ZMI::FINST))
+;         (ZMI::VAR-WRITE ZMI::RETDEST ZMI::VALUE)
+;         (ZMI::SET-PC
+;          (+ (ZMI::DECODED-INSTRUCTION-MEMORY-LOCATION ZMI::FINST)
+;             (ZMI::DECODED-INSTRUCTION-LENGTH ZMI::FINST)))
+;         (VALUES T "Returned")))
+; --> PROGN SB-IMPL::%DEFUN SB-IMPL::%DEFUN SB-INT:NAMED-LAMBDA 
+; ==>
+;   #'(SB-INT:NAMED-LAMBDA ZMI::SINSTRUCTION-RET
+;         (ZMI::INSTR ZMI::VALUE)
+;       (DECLARE ((IGNORE ZMI::INSTR)))
+;       (BLOCK ZMI::SINSTRUCTION-RET
+;         (LET* ((ZMI::FRAME #) (ZMI::FINST #) (ZMI::RETDEST #))
+;           (ZMI::DBG T
+;                     "RET-internal: Returning 0x~x into variable 0x~x~ (caller address 0x~x)%"
+;                     ZMI::VALUE ZMI::RETDEST
+;                     (ZMI::DECODED-INSTRUCTION-MEMORY-LOCATION ZMI::FINST))
+;           (ZMI::VAR-WRITE ZMI::RETDEST ZMI::VALUE)
+;           (ZMI::SET-PC (+ # #))
+;           (VALUES T "Returned"))))
+; 
+; caught STYLE-WARNING:
+;   The variable INSTR is defined but never used.
+; 
+; compilation unit finished
+;   caught 1 WARNING condition
+;   caught 1 STYLE-WARNING condition
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.235
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 18 SEP 2016 12:21:13 AM):
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.224
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 18 SEP 2016 12:21:18 AM):
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.212
+; Evaluation aborted on #<MISSING-LOCAL-VARIABLE {10058018B3}>.
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 54B1
+   :FIRST-BYTE AB
+   :FORM SHORT
+   :OPERAND-COUNT 1OP
+   :OPERAND-TYPES (VARIABLE)
+   :OPCODE B
+   :OPCODE-INFO #S(OCI :NAME RET :STORE NIL :BRANCH NIL :TEXT NIL)
+   :OPERANDS (5)
+   :STORE NIL
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 2
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x54B1: #<FUNCTION INSTRUCTION-RET>
+Retrieving operands for (VARIABLE): (5)
+Error: Local 4 not available in #(8010 FFFF 0)
+; Evaluation aborted on #<MISSING-LOCAL-VARIABLE {1004F01EA3}>.
+ZMI> (load-story-file "zork1.z3")
+T
+"Loaded zork1.z3 release 88 serial 840726"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 4F05
+   :FIRST-BYTE E0
+   :FORM VARIABLE
+   :OPERAND-COUNT VAR
+   :OPERAND-TYPES (CONST-LARGE CONST-LARGE CONST-LARGE)
+   :OPCODE 0
+   :OPCODE-INFO #S(OCI :NAME CALL :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (2A39 8010 FFFF)
+   :STORE 0
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 9
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x4F05: #<FUNCTION INSTRUCTION-CALL>
+Retrieving operands for (CONST-LARGE CONST-LARGE CONST-LARGE): (2A39 8010 FFFF)
+Retrieved operands: (2A39 8010 FFFF)
+CALL: Routine address: 0x5472, # args: 2, # locals 3, routine start pc: 0x5479
+CALL: Default locals: (0 0 0)
+CALL: Starting locals: (8010 FFFF 0)
+T
+"Called"
+ZMI> *call-stack*
+(#S(ZMRS
+    :LOCALS #(8010 FFFF 0)
+    :STACK NIL
+    :INSTR #S(DECODED-INSTRUCTION
+              :MEMORY-LOCATION 4F05
+              :FIRST-BYTE E0
+              :FORM VARIABLE
+              :OPERAND-COUNT VAR
+              :OPERAND-TYPES (CONST-LARGE CONST-LARGE CONST-LARGE)
+              :OPCODE 0
+              :OPCODE-INFO #S(OCI :NAME CALL :STORE T :BRANCH NIL :TEXT NIL)
+              :OPERANDS (2A39 8010 FFFF)
+              :STORE 0
+              :BRANCH-IF NIL
+              :BRANCH-OFFSET NIL
+              :LENGTH 9
+              :TEXT-LOC NIL
+              :TEXT-DATA NIL
+              :TEXT-ASCII NIL))
+ #S(ZMRS :LOCALS #() :STACK NIL :INSTR NIL))
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5479
+   :FIRST-BYTE E0
+   :FORM VARIABLE
+   :OPERAND-COUNT VAR
+   :OPERAND-TYPES (CONST-LARGE VARIABLE)
+   :OPCODE 0
+   :OPCODE-INFO #S(OCI :NAME CALL :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (2A43 1)
+   :STORE 3
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 6
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5479: #<FUNCTION INSTRUCTION-CALL>
+Retrieving operands for (CONST-LARGE VARIABLE): (2A43 1)
+Retrieved operands: (2A43 8010)
+CALL: Routine address: 0x5486, # args: 1, # locals 5, routine start pc: 0x5491
+CALL: Default locals: (0 0 0 0 0)
+CALL: Starting locals: (8010 0 0 0 0)
+T
+"Called"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5491
+   :FIRST-BYTE 54
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE CONST-SMALL)
+   :OPCODE 14
+   :OPCODE-INFO #S(OCI :NAME ADD :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (94 B4)
+   :STORE 3
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5491: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE CONST-SMALL): (94 B4)
+Retrieved operands: (23E9 B4)
+ADD: 23E9 op B4 = 249D (0x249D -> var 0x3)
+T
+"ADD"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5495
+   :FIRST-BYTE 74
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE VARIABLE)
+   :OPCODE 14
+   :OPCODE-INFO #S(OCI :NAME ADD :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (94 92)
+   :STORE 4
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5495: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE VARIABLE): (94 92)
+Retrieved operands: (23E9 B4)
+ADD: 23E9 op B4 = 249D (0x249D -> var 0x4)
+T
+"ADD"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5499
+   :FIRST-BYTE 61
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE VARIABLE)
+   :OPCODE 1
+   :OPCODE-INFO #S(OCI :NAME JE :STORE NIL :BRANCH T :TEXT NIL)
+   :OPERANDS (4 3)
+   :STORE NIL
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET 18
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5499: #<FUNCTION INSTRUCTION-JE>
+Retrieving operands for (VARIABLE VARIABLE): (4 3)
+Retrieved operands: (249D 249D)
+JE: (249D 249D) if false to 18: Result true
+T
+"Branch not taken"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 549D
+   :FIRST-BYTE 55
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE CONST-SMALL)
+   :OPCODE 15
+   :OPCODE-INFO #S(OCI :NAME SUB :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (92 6)
+   :STORE 92
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x549D: #<FUNCTION INSTRUCTION-SUB>
+Retrieving operands for (VARIABLE CONST-SMALL): (92 6)
+Retrieved operands: (B4 6)
+SUB: B4 op 6 = AE (0xAE -> var 0x92)
+T
+"SUB"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 54A1
+   :FIRST-BYTE A0
+   :FORM SHORT
+   :OPERAND-COUNT 1OP
+   :OPERAND-TYPES (VARIABLE)
+   :OPCODE 0
+   :OPCODE-INFO #S(OCI :NAME JZ :STORE NIL :BRANCH T :TEXT NIL)
+   :OPERANDS (2)
+   :STORE NIL
+   :BRANCH-IF T
+   :BRANCH-OFFSET 6
+   :LENGTH 3
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x54A1: #<FUNCTION INSTRUCTION-JZ>
+Retrieving operands for (VARIABLE): (2)
+Retrieved operands: (0)
+JZ: (0) if true to 6: Result true
+T
+"Branched"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 54A8
+   :FIRST-BYTE 74
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE VARIABLE)
+   :OPCODE 14
+   :OPCODE-INFO #S(OCI :NAME ADD :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (94 92)
+   :STORE 5
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x54A8: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE VARIABLE): (94 92)
+Retrieved operands: (23E9 AE)
+ADD: 23E9 op AE = 2497 (0x2497 -> var 0x5)
+T
+"ADD"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 54AC
+   :FIRST-BYTE E1
+   :FORM VARIABLE
+   :OPERAND-COUNT VAR
+   :OPERAND-TYPES (VARIABLE CONST-SMALL VARIABLE)
+   :OPCODE 1
+   :OPCODE-INFO #S(OCI :NAME STOREW :STORE NIL :BRANCH NIL :TEXT NIL)
+   :OPERANDS (5 2 1)
+   :STORE NIL
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 5
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x54AC: #<FUNCTION INSTRUCTION-STOREW>
+Retrieving operands for (VARIABLE CONST-SMALL VARIABLE): (5 2 1)
+Retrieved operands: (2497 2 8010)
+STOREW: Writing 0x8010 to 0x249B (as 2497[2])
+T
+"Stored word"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 54B1
+   :FIRST-BYTE AB
+   :FORM SHORT
+   :OPERAND-COUNT 1OP
+   :OPERAND-TYPES (VARIABLE)
+   :OPCODE B
+   :OPCODE-INFO #S(OCI :NAME RET :STORE NIL :BRANCH NIL :TEXT NIL)
+   :OPERANDS (5)
+   :STORE NIL
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 2
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x54B1: #<FUNCTION INSTRUCTION-RET>
+Retrieving operands for (VARIABLE): (5)
+Retrieved operands: (2497)
+RET-internal: Returning 0x2497 into variable 0x3
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 18 SEP 2016 12:23:56 AM):
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.213
+; Evaluation aborted on #<SB-FORMAT:FORMAT-ERROR {1005B6D3C3}>.
+ZMI> *call-stack*
+(#S(ZMRS
+    :LOCALS #(8010 FFFF 0)
+    :STACK NIL
+    :INSTR #S(DECODED-INSTRUCTION
+              :MEMORY-LOCATION 4F05
+              :FIRST-BYTE E0
+              :FORM VARIABLE
+              :OPERAND-COUNT VAR
+              :OPERAND-TYPES (CONST-LARGE CONST-LARGE CONST-LARGE)
+              :OPCODE 0
+              :OPCODE-INFO #S(OCI :NAME CALL :STORE T :BRANCH NIL :TEXT NIL)
+              :OPERANDS (2A39 8010 FFFF)
+              :STORE 0
+              :BRANCH-IF NIL
+              :BRANCH-OFFSET NIL
+              :LENGTH 9
+              :TEXT-LOC NIL
+              :TEXT-DATA NIL
+              :TEXT-ASCII NIL))
+ #S(ZMRS :LOCALS #() :STACK NIL :INSTR NIL))
+ZMI> (load-story-file "zork1.z3")
+T
+"Loaded zork1.z3 release 88 serial 840726"
+ZMI> *call-stack*
+(#S(ZMRS :LOCALS #() :STACK NIL :INSTR NIL))
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 4F05
+   :FIRST-BYTE E0
+   :FORM VARIABLE
+   :OPERAND-COUNT VAR
+   :OPERAND-TYPES (CONST-LARGE CONST-LARGE CONST-LARGE)
+   :OPCODE 0
+   :OPCODE-INFO #S(OCI :NAME CALL :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (2A39 8010 FFFF)
+   :STORE 0
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 9
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x4F05: #<FUNCTION INSTRUCTION-CALL>
+Retrieving operands for (CONST-LARGE CONST-LARGE CONST-LARGE): (2A39 8010 FFFF)
+Retrieved operands: (2A39 8010 FFFF)
+CALL: Routine address: 0x5472, # args: 2, # locals 3, routine start pc: 0x5479
+CALL: Default locals: (0 0 0)
+CALL: Starting locals: (8010 FFFF 0)
+T
+"Called"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5479
+   :FIRST-BYTE E0
+   :FORM VARIABLE
+   :OPERAND-COUNT VAR
+   :OPERAND-TYPES (CONST-LARGE VARIABLE)
+   :OPCODE 0
+   :OPCODE-INFO #S(OCI :NAME CALL :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (2A43 1)
+   :STORE 3
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 6
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5479: #<FUNCTION INSTRUCTION-CALL>
+Retrieving operands for (CONST-LARGE VARIABLE): (2A43 1)
+Retrieved operands: (2A43 8010)
+CALL: Routine address: 0x5486, # args: 1, # locals 5, routine start pc: 0x5491
+CALL: Default locals: (0 0 0 0 0)
+CALL: Starting locals: (8010 0 0 0 0)
+T
+"Called"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5491
+   :FIRST-BYTE 54
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE CONST-SMALL)
+   :OPCODE 14
+   :OPCODE-INFO #S(OCI :NAME ADD :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (94 B4)
+   :STORE 3
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5491: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE CONST-SMALL): (94 B4)
+Retrieved operands: (23E9 B4)
+ADD: 23E9 op B4 = 249D (0x249D -> var 0x3)
+T
+"ADD"
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 18 SEP 2016 12:24:20 AM):
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.261
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5495
+   :FIRST-BYTE 74
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE VARIABLE)
+   :OPCODE 14
+   :OPCODE-INFO #S(OCI :NAME ADD :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (94 92)
+   :STORE 4
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5495: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE VARIABLE): (94 92)
+Retrieved operands: (23E9 B4)
+ADD: 23E9 op B4 = 249D (0x249D -> var 0x4)
+T
+"ADD"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5499
+   :FIRST-BYTE 61
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE VARIABLE)
+   :OPCODE 1
+   :OPCODE-INFO #S(OCI :NAME JE :STORE NIL :BRANCH T :TEXT NIL)
+   :OPERANDS (4 3)
+   :STORE NIL
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET 18
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5499: #<FUNCTION INSTRUCTION-JE>
+Retrieving operands for (VARIABLE VARIABLE): (4 3)
+Retrieved operands: (249D 249D)
+JE: (249D 249D) if false to 18: Result true
+T
+"Branch not taken"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 549D
+   :FIRST-BYTE 55
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE CONST-SMALL)
+   :OPCODE 15
+   :OPCODE-INFO #S(OCI :NAME SUB :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (92 6)
+   :STORE 92
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x549D: #<FUNCTION INSTRUCTION-SUB>
+Retrieving operands for (VARIABLE CONST-SMALL): (92 6)
+Retrieved operands: (B4 6)
+SUB: B4 op 6 = AE (0xAE -> var 0x92)
+T
+"SUB"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 54A1
+   :FIRST-BYTE A0
+   :FORM SHORT
+   :OPERAND-COUNT 1OP
+   :OPERAND-TYPES (VARIABLE)
+   :OPCODE 0
+   :OPCODE-INFO #S(OCI :NAME JZ :STORE NIL :BRANCH T :TEXT NIL)
+   :OPERANDS (2)
+   :STORE NIL
+   :BRANCH-IF T
+   :BRANCH-OFFSET 6
+   :LENGTH 3
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x54A1: #<FUNCTION INSTRUCTION-JZ>
+Retrieving operands for (VARIABLE): (2)
+Retrieved operands: (0)
+JZ: (0) if true to 6: Result true
+T
+"Branched"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 54A8
+   :FIRST-BYTE 74
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE VARIABLE)
+   :OPCODE 14
+   :OPCODE-INFO #S(OCI :NAME ADD :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (94 92)
+   :STORE 5
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x54A8: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE VARIABLE): (94 92)
+Retrieved operands: (23E9 AE)
+ADD: 23E9 op AE = 2497 (0x2497 -> var 0x5)
+T
+"ADD"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 54AC
+   :FIRST-BYTE E1
+   :FORM VARIABLE
+   :OPERAND-COUNT VAR
+   :OPERAND-TYPES (VARIABLE CONST-SMALL VARIABLE)
+   :OPCODE 1
+   :OPCODE-INFO #S(OCI :NAME STOREW :STORE NIL :BRANCH NIL :TEXT NIL)
+   :OPERANDS (5 2 1)
+   :STORE NIL
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 5
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x54AC: #<FUNCTION INSTRUCTION-STOREW>
+Retrieving operands for (VARIABLE CONST-SMALL VARIABLE): (5 2 1)
+Retrieved operands: (2497 2 8010)
+STOREW: Writing 0x8010 to 0x249B (as 2497[2])
+T
+"Stored word"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 54B1
+   :FIRST-BYTE AB
+   :FORM SHORT
+   :OPERAND-COUNT 1OP
+   :OPERAND-TYPES (VARIABLE)
+   :OPCODE B
+   :OPCODE-INFO #S(OCI :NAME RET :STORE NIL :BRANCH NIL :TEXT NIL)
+   :OPERANDS (5)
+   :STORE NIL
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 2
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x54B1: #<FUNCTION INSTRUCTION-RET>
+Retrieving operands for (VARIABLE): (5)
+Retrieved operands: (2497)
+RET-internal: Returning 0x2497 into variable 0x3 (caller address 0x5479)
+T
+"Returned"
+ZMI> *z-pc*
+547F
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 547F
+   :FIRST-BYTE E1
+   :FORM VARIABLE
+   :OPERAND-COUNT VAR
+   :OPERAND-TYPES (VARIABLE CONST-SMALL VARIABLE)
+   :OPCODE 1
+   :OPCODE-INFO #S(OCI :NAME STOREW :STORE NIL :BRANCH NIL :TEXT NIL)
+   :OPERANDS (3 1 2)
+   :STORE NIL
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 5
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x547F: #<FUNCTION INSTRUCTION-STOREW>
+Retrieving operands for (VARIABLE CONST-SMALL VARIABLE): (3 1 2)
+Retrieved operands: (2497 1 FFFF)
+STOREW: Writing 0xFFFF to 0x2499 (as 2497[1])
+T
+"Stored word"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5484
+   :FIRST-BYTE AB
+   :FORM SHORT
+   :OPERAND-COUNT 1OP
+   :OPERAND-TYPES (VARIABLE)
+   :OPCODE B
+   :OPCODE-INFO #S(OCI :NAME RET :STORE NIL :BRANCH NIL :TEXT NIL)
+   :OPERANDS (3)
+   :STORE NIL
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 2
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5484: #<FUNCTION INSTRUCTION-RET>
+Retrieving operands for (VARIABLE): (3)
+Retrieved operands: (2497)
+RET-internal: Returning 0x2497 into variable 0x0 (caller address 0x4F05)
+T
+"Returned"
+ZMI> *call-stack*
+(#S(ZMRS :LOCALS #() :STACK (2497) :INSTR NIL))
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 4F0E
+   :FIRST-BYTE E1
+   :FORM VARIABLE
+   :OPERAND-COUNT VAR
+   :OPERAND-TYPES (VARIABLE CONST-SMALL CONST-SMALL)
+   :OPCODE 1
+   :OPCODE-INFO #S(OCI :NAME STOREW :STORE NIL :BRANCH NIL :TEXT NIL)
+   :OPERANDS (0 0 1)
+   :STORE NIL
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 5
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x4F0E: #<FUNCTION INSTRUCTION-STOREW>
+Retrieving operands for (VARIABLE CONST-SMALL CONST-SMALL): (0 0 1)
+Retrieved operands: (2497 0 1)
+STOREW: Writing 0x1 to 0x2497 (as 2497[0])
+T
+"Stored word"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 4F13
+   :FIRST-BYTE E0
+   :FORM VARIABLE
+   :OPERAND-COUNT VAR
+   :OPERAND-TYPES (CONST-LARGE CONST-LARGE CONST-LARGE)
+   :OPCODE 0
+   :OPCODE-INFO #S(OCI :NAME CALL :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (2A39 807C FFFF)
+   :STORE 0
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 9
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x4F13: #<FUNCTION INSTRUCTION-CALL>
+Retrieving operands for (CONST-LARGE CONST-LARGE CONST-LARGE): (2A39 807C FFFF)
+Retrieved operands: (2A39 807C FFFF)
+CALL: Routine address: 0x5472, # args: 2, # locals 3, routine start pc: 0x5479
+CALL: Default locals: (0 0 0)
+CALL: Starting locals: (807C FFFF 0)
+T
+"Called"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5479
+   :FIRST-BYTE E0
+   :FORM VARIABLE
+   :OPERAND-COUNT VAR
+   :OPERAND-TYPES (CONST-LARGE VARIABLE)
+   :OPCODE 0
+   :OPCODE-INFO #S(OCI :NAME CALL :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (2A43 1)
+   :STORE 3
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 6
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5479: #<FUNCTION INSTRUCTION-CALL>
+Retrieving operands for (CONST-LARGE VARIABLE): (2A43 1)
+Retrieved operands: (2A43 807C)
+CALL: Routine address: 0x5486, # args: 1, # locals 5, routine start pc: 0x5491
+CALL: Default locals: (0 0 0 0 0)
+CALL: Starting locals: (807C 0 0 0 0)
+T
+"Called"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5491
+   :FIRST-BYTE 54
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE CONST-SMALL)
+   :OPCODE 14
+   :OPCODE-INFO #S(OCI :NAME ADD :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (94 B4)
+   :STORE 3
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5491: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE CONST-SMALL): (94 B4)
+Retrieved operands: (23E9 B4)
+ADD: 23E9 op B4 = 249D (0x249D -> var 0x3)
+T
+"ADD"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5495
+   :FIRST-BYTE 74
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE VARIABLE)
+   :OPCODE 14
+   :OPCODE-INFO #S(OCI :NAME ADD :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (94 92)
+   :STORE 4
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5495: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE VARIABLE): (94 92)
+Retrieved operands: (23E9 AE)
+ADD: 23E9 op AE = 2497 (0x2497 -> var 0x4)
+T
+"ADD"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5499
+   :FIRST-BYTE 61
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE VARIABLE)
+   :OPCODE 1
+   :OPCODE-INFO #S(OCI :NAME JE :STORE NIL :BRANCH T :TEXT NIL)
+   :OPERANDS (4 3)
+   :STORE NIL
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET 18
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5499: #<FUNCTION INSTRUCTION-JE>
+Retrieving operands for (VARIABLE VARIABLE): (4 3)
+Retrieved operands: (2497 249D)
+JE: (2497 249D) if false to 18: Result false
+T
+"Branched"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 54B3
+   :FIRST-BYTE 4F
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE CONST-SMALL)
+   :OPCODE F
+   :OPCODE-INFO #S(OCI :NAME LOADW :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (4 2)
+   :STORE 0
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x54B3: #<FUNCTION SINSTRUCTION-NYI>
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 18 SEP 2016 12:33:13 AM):
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.240
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 18 SEP 2016 12:43:59 AM):
+
+; file: /Users/dfields/src/genera/genera-src/gczm/zmi.lisp
+; in: DEFUN INSTRUCTION-RET
+;     (RESTART-CASE (ERROR 'ZMI::INVALID-OPERAND-COUNT :MESSAGE
+;                          (FORMAT NIL "Exactly one argument required, got: ~A"
+;                                  (LENGTH ZMI::OPERANDS)))
+;       (ZMI::RETURN-ZERO NIL :REPORT "Ignore, return 0" 0)
+;       (ZMI::USE-FIRST NIL :REPORT
+;        (FORMAT NIL "Ignore, using first operand: ~A" (CAR ZMI::OPERANDS))
+;        (CAR ZMI::OPERANDS))
+;       (USE-VALUE (ZMI::VALUE) :REPORT "Ignore, returning specified value"
+;                  :INTERACTIVE ZMI::RESTART-READ-NEW-VALUE ZMI::VALUE))
+; --> BLOCK LET TAGBODY RESTART-BIND LET CONS LIST 
+; --> SB-KERNEL:MAKE-RESTART 
+; ==>
+;   #'(FORMAT NIL "Ignore, using first operand: ~A" (CAR ZMI::OPERANDS))
+; 
+; caught ERROR:
+;   (FORMAT NIL "Ignore, using first operand: ~A" (|CAR| OPERANDS)) is not a legal function name.
+
+;     'ZMI::INVALID-OPERAND-COUNT
+; 
+; note: deleting unreachable code
+
+;     (RESTART-CASE (ERROR 'ZMI::INVALID-OPERAND-COUNT :MESSAGE
+;                          (FORMAT NIL "Exactly one argument required, got: ~A"
+;                                  (LENGTH ZMI::OPERANDS)))
+;       (ZMI::RETURN-ZERO NIL :REPORT "Ignore, return 0" 0)
+;       (ZMI::USE-FIRST NIL :REPORT
+;        (FORMAT NIL "Ignore, using first operand: ~A" (CAR ZMI::OPERANDS))
+;        (CAR ZMI::OPERANDS))
+;       (USE-VALUE (ZMI::VALUE) :REPORT "Ignore, returning specified value"
+;                  :INTERACTIVE ZMI::RESTART-READ-NEW-VALUE ZMI::VALUE))
+; --> BLOCK LET TAGBODY RETURN-FROM FUNCALL SB-C::%FUNCALL 
+; ==>
+;   ZMI::VALUE
+; 
+; note: deleting unreachable code
+
+;     (CAR ZMI::OPERANDS)
+; ==>
+;   ZMI::OPERANDS
+; 
+; note: deleting unreachable code
+; 
+; compilation unit finished
+;   caught 1 ERROR condition
+;   printed 3 notes
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.227
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 18 SEP 2016 12:43:59 AM):
+
+; file: /Users/dfields/src/genera/genera-src/gczm/zmi.lisp
+; in: DEFUN INSTRUCTION-RET
+;     (RESTART-CASE (ERROR 'ZMI::INVALID-OPERAND-COUNT :MESSAGE
+;                          (FORMAT NIL "Exactly one argument required, got: ~A"
+;                                  (LENGTH ZMI::OPERANDS)))
+;       (ZMI::RETURN-ZERO NIL :REPORT "Ignore, return 0" 0)
+;       (ZMI::USE-FIRST NIL :REPORT
+;        (FORMAT NIL "Ignore, using first operand: ~A" (CAR ZMI::OPERANDS))
+;        (CAR ZMI::OPERANDS))
+;       (USE-VALUE (ZMI::VALUE) :REPORT "Ignore, returning specified value"
+;                  :INTERACTIVE ZMI::RESTART-READ-NEW-VALUE ZMI::VALUE))
+; --> BLOCK LET TAGBODY RESTART-BIND LET CONS LIST 
+; --> SB-KERNEL:MAKE-RESTART 
+; ==>
+;   #'(FORMAT NIL "Ignore, using first operand: ~A" (CAR ZMI::OPERANDS))
+; 
+; caught ERROR:
+;   (FORMAT NIL "Ignore, using first operand: ~A" (|CAR| OPERANDS)) is not a legal function name.
+
+;     'ZMI::INVALID-OPERAND-COUNT
+; 
+; note: deleting unreachable code
+
+;     (RESTART-CASE (ERROR 'ZMI::INVALID-OPERAND-COUNT :MESSAGE
+;                          (FORMAT NIL "Exactly one argument required, got: ~A"
+;                                  (LENGTH ZMI::OPERANDS)))
+;       (ZMI::RETURN-ZERO NIL :REPORT "Ignore, return 0" 0)
+;       (ZMI::USE-FIRST NIL :REPORT
+;        (FORMAT NIL "Ignore, using first operand: ~A" (CAR ZMI::OPERANDS))
+;        (CAR ZMI::OPERANDS))
+;       (USE-VALUE (ZMI::VALUE) :REPORT "Ignore, returning specified value"
+;                  :INTERACTIVE ZMI::RESTART-READ-NEW-VALUE ZMI::VALUE))
+; --> BLOCK LET TAGBODY RETURN-FROM FUNCALL SB-C::%FUNCALL 
+; ==>
+;   ZMI::VALUE
+; 
+; note: deleting unreachable code
+
+;     (CAR ZMI::OPERANDS)
+; ==>
+;   ZMI::OPERANDS
+; 
+; note: deleting unreachable code
+; 
+; compilation unit finished
+;   caught 1 ERROR condition
+;   printed 3 notes
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.234
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 18 SEP 2016 12:47:52 AM):
+
+; file: /Users/dfields/src/genera/genera-src/gczm/zmi.lisp
+; in: DEFUN INSTRUCTION-RET
+;     (RESTART-CASE (ERROR 'ZMI::INVALID-OPERAND-COUNT :MESSAGE
+;                          (FORMAT NIL "Exactly one argument required, got: ~A"
+;                                  (LENGTH ZMI::OPERANDS)))
+;       (ZMI::RETURN-ZERO NIL :REPORT "Ignore, return 0" 0)
+;       (ZMI::USE-FIRST NIL :REPORT
+;        (FORMAT NIL "Ignore, using first operand: ~A" (CAR ZMI::OPERANDS))
+;        (CAR ZMI::OPERANDS))
+;       (USE-VALUE (ZMI::VALUE) :REPORT "Ignore, returning specified value"
+;                  :INTERACTIVE ZMI::RESTART-READ-NEW-VALUE ZMI::VALUE))
+; --> BLOCK LET TAGBODY RESTART-BIND LET CONS LIST 
+; --> SB-KERNEL:MAKE-RESTART 
+; ==>
+;   #'(FORMAT NIL "Ignore, using first operand: ~A" (CAR ZMI::OPERANDS))
+; 
+; caught ERROR:
+;   (FORMAT NIL "Ignore, using first operand: ~A" (|CAR| OPERANDS)) is not a legal function name.
+
+;     'ZMI::INVALID-OPERAND-COUNT
+; 
+; note: deleting unreachable code
+
+;     (RESTART-CASE (ERROR 'ZMI::INVALID-OPERAND-COUNT :MESSAGE
+;                          (FORMAT NIL "Exactly one argument required, got: ~A"
+;                                  (LENGTH ZMI::OPERANDS)))
+;       (ZMI::RETURN-ZERO NIL :REPORT "Ignore, return 0" 0)
+;       (ZMI::USE-FIRST NIL :REPORT
+;        (FORMAT NIL "Ignore, using first operand: ~A" (CAR ZMI::OPERANDS))
+;        (CAR ZMI::OPERANDS))
+;       (USE-VALUE (ZMI::VALUE) :REPORT "Ignore, returning specified value"
+;                  :INTERACTIVE ZMI::RESTART-READ-NEW-VALUE ZMI::VALUE))
+; --> BLOCK LET TAGBODY RETURN-FROM FUNCALL SB-C::%FUNCALL 
+; ==>
+;   ZMI::VALUE
+; 
+; note: deleting unreachable code
+
+;     (CAR ZMI::OPERANDS)
+; ==>
+;   ZMI::OPERANDS
+; 
+; note: deleting unreachable code
+; 
+; compilation unit finished
+;   caught 1 ERROR condition
+;   printed 3 notes
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.242
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 18 SEP 2016 12:51:29 AM):
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.313
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 18 SEP 2016 12:59:21 AM):
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.270
+; Evaluation aborted on #<INSTR-ERROR {100646A613}>.
+ZMI> (load-story-file "zork1.z3")
+T
+"Loaded zork1.z3 release 88 serial 840726"
+ZMI> (run-next-instruction)
+Executing instruction: 0x4F05: #<FUNCTION INSTRUCTION-CALL>
+Retrieving operands for (CONST-LARGE CONST-LARGE CONST-LARGE): (2A39 8010 FFFF)
+Retrieved operands: (2A39 8010 FFFF)
+CALL: Routine address: 0x5472, # args: 2, # locals 3, routine start pc: 0x5479
+CALL: Default locals: (0 0 0)
+CALL: Starting locals: (8010 FFFF 0)
+T
+"Called"
+ZMI> (run-next-instruction)
+Executing instruction: 0x5479: #<FUNCTION INSTRUCTION-CALL>
+Retrieving operands for (CONST-LARGE VARIABLE): (2A43 1)
+Retrieved operands: (2A43 8010)
+CALL: Routine address: 0x5486, # args: 1, # locals 5, routine start pc: 0x5491
+CALL: Default locals: (0 0 0 0 0)
+CALL: Starting locals: (8010 0 0 0 0)
+T
+"Called"
+ZMI> (run-next-instruction)
+Executing instruction: 0x5491: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE CONST-SMALL): (94 B4)
+Retrieved operands: (23E9 B4)
+ADD: 23E9 op B4 = 249D (0x249D -> var 0x3)
+T
+"ADD"
+ZMI> (run-next-instruction)
+Executing instruction: 0x5495: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE VARIABLE): (94 92)
+Retrieved operands: (23E9 B4)
+ADD: 23E9 op B4 = 249D (0x249D -> var 0x4)
+T
+"ADD"
+ZMI> (run-next-instruction)
+Executing instruction: 0x5499: #<FUNCTION INSTRUCTION-JE>
+Retrieving operands for (VARIABLE VARIABLE): (4 3)
+Retrieved operands: (249D 249D)
+JE: (249D 249D) if false to 18: Result true
+T
+"Branch not taken"
+ZMI> (run-next-instruction)
+Executing instruction: 0x549D: #<FUNCTION INSTRUCTION-SUB>
+Retrieving operands for (VARIABLE CONST-SMALL): (92 6)
+Retrieved operands: (B4 6)
+SUB: B4 op 6 = AE (0xAE -> var 0x92)
+T
+"SUB"
+ZMI> (run-next-instruction)
+Executing instruction: 0x54A1: #<FUNCTION INSTRUCTION-JZ>
+Retrieving operands for (VARIABLE): (2)
+Retrieved operands: (0)
+JZ: (0) if true to 6: Result true
+T
+"Branched"
+ZMI> (run-next-instruction)
+Executing instruction: 0x54A8: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE VARIABLE): (94 92)
+Retrieved operands: (23E9 AE)
+ADD: 23E9 op AE = 2497 (0x2497 -> var 0x5)
+T
+"ADD"
+ZMI> (run-next-instruction)
+Executing instruction: 0x54AC: #<FUNCTION INSTRUCTION-STOREW>
+Retrieving operands for (VARIABLE CONST-SMALL VARIABLE): (5 2 1)
+Retrieved operands: (2497 2 8010)
+STOREW: Writing 0x8010 to 0x249B (as 2497[2])
+T
+"Stored word"
+ZMI> (run-next-instruction)
+Executing instruction: 0x54B1: #<FUNCTION INSTRUCTION-RET>
+Retrieving operands for (VARIABLE): (5)
+Retrieved operands: (2497)
+RET-internal: Returning 0x2497 into variable 0x3 (caller address 0x5479)
+T
+"Returned"
+ZMI> (run-next-instruction)
+Executing instruction: 0x547F: #<FUNCTION INSTRUCTION-STOREW>
+Retrieving operands for (VARIABLE CONST-SMALL VARIABLE): (3 1 2)
+Retrieved operands: (2497 1 FFFF)
+STOREW: Writing 0xFFFF to 0x2499 (as 2497[1])
+T
+"Stored word"
+ZMI> (run-next-instruction)
+Executing instruction: 0x5484: #<FUNCTION INSTRUCTION-RET>
+Retrieving operands for (VARIABLE): (3)
+Retrieved operands: (2497)
+RET-internal: Returning 0x2497 into variable 0x0 (caller address 0x4F05)
+T
+"Returned"
+ZMI> (run-next-instruction)
+Executing instruction: 0x4F0E: #<FUNCTION INSTRUCTION-STOREW>
+Retrieving operands for (VARIABLE CONST-SMALL CONST-SMALL): (0 0 1)
+Retrieved operands: (2497 0 1)
+STOREW: Writing 0x1 to 0x2497 (as 2497[0])
+T
+"Stored word"
+ZMI> (run-next-instruction)
+Executing instruction: 0x4F13: #<FUNCTION INSTRUCTION-CALL>
+Retrieving operands for (CONST-LARGE CONST-LARGE CONST-LARGE): (2A39 807C FFFF)
+Retrieved operands: (2A39 807C FFFF)
+CALL: Routine address: 0x5472, # args: 2, # locals 3, routine start pc: 0x5479
+CALL: Default locals: (0 0 0)
+CALL: Starting locals: (807C FFFF 0)
+T
+"Called"
+ZMI> (run-next-instruction)
+Executing instruction: 0x5479: #<FUNCTION INSTRUCTION-CALL>
+Retrieving operands for (CONST-LARGE VARIABLE): (2A43 1)
+Retrieved operands: (2A43 807C)
+CALL: Routine address: 0x5486, # args: 1, # locals 5, routine start pc: 0x5491
+CALL: Default locals: (0 0 0 0 0)
+CALL: Starting locals: (807C 0 0 0 0)
+T
+"Called"
+ZMI> (run-next-instruction)
+Executing instruction: 0x5491: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE CONST-SMALL): (94 B4)
+Retrieved operands: (23E9 B4)
+ADD: 23E9 op B4 = 249D (0x249D -> var 0x3)
+T
+"ADD"
+ZMI> (run-next-instruction)
+Executing instruction: 0x5495: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE VARIABLE): (94 92)
+Retrieved operands: (23E9 AE)
+ADD: 23E9 op AE = 2497 (0x2497 -> var 0x4)
+T
+"ADD"
+ZMI> (run-next-instruction)
+Executing instruction: 0x5499: #<FUNCTION INSTRUCTION-JE>
+Retrieving operands for (VARIABLE VARIABLE): (4 3)
+Retrieved operands: (2497 249D)
+JE: (2497 249D) if false to 18: Result false
+T
+"Branched"
+ZMI> (run-next-instruction)
+Executing instruction: 0x54B3: #<FUNCTION SINSTRUCTION-NYI>
+; Evaluation aborted on #<INSTR-ERROR {100610D883}>.
+ZMI> (decode-instruction *z-pc*)
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 54B3
+   :FIRST-BYTE 4F
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE CONST-SMALL)
+   :OPCODE F
+   :OPCODE-INFO #S(OCI :NAME LOADW :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (4 2)
+   :STORE 0
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 18 SEP 2016 10:32:22 AM):
+
+; file: /Users/dfields/src/genera/genera-src/gczm/zmi.lisp
+; in: DEFUN INSTRUCTION-LOADW
+;     (ZMI::DBG T "LOADW: Loaded 0x~x from 0x~x (as ~x[~x]) into VAR 0x~x~%"
+;               ZMI::VALUE ZMI::ML-DEST ZMI::ARRAY-BASE ZMI::ARRAY-INDEX
+;               ZMI::VAR-DEST)
+; 
+; caught WARNING:
+;   undefined variable: ML-DEST
+; 
+; compilation unit finished
+;   Undefined variable:
+;     ML-DEST
+;   caught 1 WARNING condition
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.250
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 18 SEP 2016 10:32:33 AM):
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.248
+ZMI> (load-story-file "zork1.z3")
+T
+"Loaded zork1.z3 release 88 serial 840726"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 4F05
+   :FIRST-BYTE E0
+   :FORM VARIABLE
+   :OPERAND-COUNT VAR
+   :OPERAND-TYPES (CONST-LARGE CONST-LARGE CONST-LARGE)
+   :OPCODE 0
+   :OPCODE-INFO #S(OCI :NAME CALL :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (2A39 8010 FFFF)
+   :STORE 0
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 9
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x4F05: #<FUNCTION INSTRUCTION-CALL>
+Retrieving operands for (CONST-LARGE CONST-LARGE CONST-LARGE): (2A39 8010 FFFF)
+Retrieved operands: (2A39 8010 FFFF)
+CALL: Routine address: 0x5472, # args: 2, # locals 3, routine start pc: 0x5479
+CALL: Default locals: (0 0 0)
+CALL: Starting locals: (8010 FFFF 0)
+T
+"Called"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5479
+   :FIRST-BYTE E0
+   :FORM VARIABLE
+   :OPERAND-COUNT VAR
+   :OPERAND-TYPES (CONST-LARGE VARIABLE)
+   :OPCODE 0
+   :OPCODE-INFO #S(OCI :NAME CALL :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (2A43 1)
+   :STORE 3
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 6
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5479: #<FUNCTION INSTRUCTION-CALL>
+Retrieving operands for (CONST-LARGE VARIABLE): (2A43 1)
+Retrieved operands: (2A43 8010)
+CALL: Routine address: 0x5486, # args: 1, # locals 5, routine start pc: 0x5491
+CALL: Default locals: (0 0 0 0 0)
+CALL: Starting locals: (8010 0 0 0 0)
+T
+"Called"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5491
+   :FIRST-BYTE 54
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE CONST-SMALL)
+   :OPCODE 14
+   :OPCODE-INFO #S(OCI :NAME ADD :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (94 B4)
+   :STORE 3
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5491: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE CONST-SMALL): (94 B4)
+Retrieved operands: (23E9 B4)
+ADD: 23E9 op B4 = 249D (0x249D -> var 0x3)
+T
+"ADD"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5495
+   :FIRST-BYTE 74
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE VARIABLE)
+   :OPCODE 14
+   :OPCODE-INFO #S(OCI :NAME ADD :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (94 92)
+   :STORE 4
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5495: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE VARIABLE): (94 92)
+Retrieved operands: (23E9 B4)
+ADD: 23E9 op B4 = 249D (0x249D -> var 0x4)
+T
+"ADD"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5499
+   :FIRST-BYTE 61
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE VARIABLE)
+   :OPCODE 1
+   :OPCODE-INFO #S(OCI :NAME JE :STORE NIL :BRANCH T :TEXT NIL)
+   :OPERANDS (4 3)
+   :STORE NIL
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET 18
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5499: #<FUNCTION INSTRUCTION-JE>
+Retrieving operands for (VARIABLE VARIABLE): (4 3)
+Retrieved operands: (249D 249D)
+JE: (249D 249D) if false to 18: Result true
+T
+"Branch not taken"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 549D
+   :FIRST-BYTE 55
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE CONST-SMALL)
+   :OPCODE 15
+   :OPCODE-INFO #S(OCI :NAME SUB :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (92 6)
+   :STORE 92
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x549D: #<FUNCTION INSTRUCTION-SUB>
+Retrieving operands for (VARIABLE CONST-SMALL): (92 6)
+Retrieved operands: (B4 6)
+SUB: B4 op 6 = AE (0xAE -> var 0x92)
+T
+"SUB"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 54A1
+   :FIRST-BYTE A0
+   :FORM SHORT
+   :OPERAND-COUNT 1OP
+   :OPERAND-TYPES (VARIABLE)
+   :OPCODE 0
+   :OPCODE-INFO #S(OCI :NAME JZ :STORE NIL :BRANCH T :TEXT NIL)
+   :OPERANDS (2)
+   :STORE NIL
+   :BRANCH-IF T
+   :BRANCH-OFFSET 6
+   :LENGTH 3
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x54A1: #<FUNCTION INSTRUCTION-JZ>
+Retrieving operands for (VARIABLE): (2)
+Retrieved operands: (0)
+JZ: (0) if true to 6: Result true
+T
+"Branched"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 54A8
+   :FIRST-BYTE 74
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE VARIABLE)
+   :OPCODE 14
+   :OPCODE-INFO #S(OCI :NAME ADD :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (94 92)
+   :STORE 5
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x54A8: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE VARIABLE): (94 92)
+Retrieved operands: (23E9 AE)
+ADD: 23E9 op AE = 2497 (0x2497 -> var 0x5)
+T
+"ADD"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 54AC
+   :FIRST-BYTE E1
+   :FORM VARIABLE
+   :OPERAND-COUNT VAR
+   :OPERAND-TYPES (VARIABLE CONST-SMALL VARIABLE)
+   :OPCODE 1
+   :OPCODE-INFO #S(OCI :NAME STOREW :STORE NIL :BRANCH NIL :TEXT NIL)
+   :OPERANDS (5 2 1)
+   :STORE NIL
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 5
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x54AC: #<FUNCTION INSTRUCTION-STOREW>
+Retrieving operands for (VARIABLE CONST-SMALL VARIABLE): (5 2 1)
+Retrieved operands: (2497 2 8010)
+STOREW: Writing 0x8010 to 0x249B (as 2497[2])
+T
+"Stored word"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 54B1
+   :FIRST-BYTE AB
+   :FORM SHORT
+   :OPERAND-COUNT 1OP
+   :OPERAND-TYPES (VARIABLE)
+   :OPCODE B
+   :OPCODE-INFO #S(OCI :NAME RET :STORE NIL :BRANCH NIL :TEXT NIL)
+   :OPERANDS (5)
+   :STORE NIL
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 2
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x54B1: #<FUNCTION INSTRUCTION-RET>
+Retrieving operands for (VARIABLE): (5)
+Retrieved operands: (2497)
+RET-internal: Returning 0x2497 into variable 0x3 (caller address 0x5479)
+T
+"Returned"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 547F
+   :FIRST-BYTE E1
+   :FORM VARIABLE
+   :OPERAND-COUNT VAR
+   :OPERAND-TYPES (VARIABLE CONST-SMALL VARIABLE)
+   :OPCODE 1
+   :OPCODE-INFO #S(OCI :NAME STOREW :STORE NIL :BRANCH NIL :TEXT NIL)
+   :OPERANDS (3 1 2)
+   :STORE NIL
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 5
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x547F: #<FUNCTION INSTRUCTION-STOREW>
+Retrieving operands for (VARIABLE CONST-SMALL VARIABLE): (3 1 2)
+Retrieved operands: (2497 1 FFFF)
+STOREW: Writing 0xFFFF to 0x2499 (as 2497[1])
+T
+"Stored word"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5484
+   :FIRST-BYTE AB
+   :FORM SHORT
+   :OPERAND-COUNT 1OP
+   :OPERAND-TYPES (VARIABLE)
+   :OPCODE B
+   :OPCODE-INFO #S(OCI :NAME RET :STORE NIL :BRANCH NIL :TEXT NIL)
+   :OPERANDS (3)
+   :STORE NIL
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 2
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5484: #<FUNCTION INSTRUCTION-RET>
+Retrieving operands for (VARIABLE): (3)
+Retrieved operands: (2497)
+RET-internal: Returning 0x2497 into variable 0x0 (caller address 0x4F05)
+T
+"Returned"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 4F0E
+   :FIRST-BYTE E1
+   :FORM VARIABLE
+   :OPERAND-COUNT VAR
+   :OPERAND-TYPES (VARIABLE CONST-SMALL CONST-SMALL)
+   :OPCODE 1
+   :OPCODE-INFO #S(OCI :NAME STOREW :STORE NIL :BRANCH NIL :TEXT NIL)
+   :OPERANDS (0 0 1)
+   :STORE NIL
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 5
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x4F0E: #<FUNCTION INSTRUCTION-STOREW>
+Retrieving operands for (VARIABLE CONST-SMALL CONST-SMALL): (0 0 1)
+Retrieved operands: (2497 0 1)
+STOREW: Writing 0x1 to 0x2497 (as 2497[0])
+T
+"Stored word"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 4F13
+   :FIRST-BYTE E0
+   :FORM VARIABLE
+   :OPERAND-COUNT VAR
+   :OPERAND-TYPES (CONST-LARGE CONST-LARGE CONST-LARGE)
+   :OPCODE 0
+   :OPCODE-INFO #S(OCI :NAME CALL :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (2A39 807C FFFF)
+   :STORE 0
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 9
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x4F13: #<FUNCTION INSTRUCTION-CALL>
+Retrieving operands for (CONST-LARGE CONST-LARGE CONST-LARGE): (2A39 807C FFFF)
+Retrieved operands: (2A39 807C FFFF)
+CALL: Routine address: 0x5472, # args: 2, # locals 3, routine start pc: 0x5479
+CALL: Default locals: (0 0 0)
+CALL: Starting locals: (807C FFFF 0)
+T
+"Called"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5479
+   :FIRST-BYTE E0
+   :FORM VARIABLE
+   :OPERAND-COUNT VAR
+   :OPERAND-TYPES (CONST-LARGE VARIABLE)
+   :OPCODE 0
+   :OPCODE-INFO #S(OCI :NAME CALL :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (2A43 1)
+   :STORE 3
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 6
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5479: #<FUNCTION INSTRUCTION-CALL>
+Retrieving operands for (CONST-LARGE VARIABLE): (2A43 1)
+Retrieved operands: (2A43 807C)
+CALL: Routine address: 0x5486, # args: 1, # locals 5, routine start pc: 0x5491
+CALL: Default locals: (0 0 0 0 0)
+CALL: Starting locals: (807C 0 0 0 0)
+T
+"Called"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5491
+   :FIRST-BYTE 54
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE CONST-SMALL)
+   :OPCODE 14
+   :OPCODE-INFO #S(OCI :NAME ADD :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (94 B4)
+   :STORE 3
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5491: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE CONST-SMALL): (94 B4)
+Retrieved operands: (23E9 B4)
+ADD: 23E9 op B4 = 249D (0x249D -> var 0x3)
+T
+"ADD"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5495
+   :FIRST-BYTE 74
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE VARIABLE)
+   :OPCODE 14
+   :OPCODE-INFO #S(OCI :NAME ADD :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (94 92)
+   :STORE 4
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5495: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE VARIABLE): (94 92)
+Retrieved operands: (23E9 AE)
+ADD: 23E9 op AE = 2497 (0x2497 -> var 0x4)
+T
+"ADD"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 5499
+   :FIRST-BYTE 61
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE VARIABLE)
+   :OPCODE 1
+   :OPCODE-INFO #S(OCI :NAME JE :STORE NIL :BRANCH T :TEXT NIL)
+   :OPERANDS (4 3)
+   :STORE NIL
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET 18
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x5499: #<FUNCTION INSTRUCTION-JE>
+Retrieving operands for (VARIABLE VARIABLE): (4 3)
+Retrieved operands: (2497 249D)
+JE: (2497 249D) if false to 18: Result false
+T
+"Branched"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 54B3
+   :FIRST-BYTE 4F
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE CONST-SMALL)
+   :OPCODE F
+   :OPCODE-INFO #S(OCI :NAME LOADW :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (4 2)
+   :STORE 0
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x54B3: #<FUNCTION INSTRUCTION-LOADW>
+Retrieving operands for (VARIABLE CONST-SMALL): (4 2)
+Retrieved operands: (2497 2)
+LOADW: Loaded 0x8010 from 0x249B (as 2497[2]) into VAR 0x0
+T
+"Loaded word"
+ZMI> *call-stack*
+(#S(ZMRS
+    :LOCALS #(807C 0 249D 2497 0)
+    :STACK (8010)
+    :INSTR #S(DECODED-INSTRUCTION
+              :MEMORY-LOCATION 5479
+              :FIRST-BYTE E0
+              :FORM VARIABLE
+              :OPERAND-COUNT VAR
+              :OPERAND-TYPES (CONST-LARGE VARIABLE)
+              :OPCODE 0
+              :OPCODE-INFO #S(OCI :NAME CALL :STORE T :BRANCH NIL :TEXT NIL)
+              :OPERANDS (2A43 1)
+              :STORE 3
+              :BRANCH-IF NIL
+              :BRANCH-OFFSET NIL
+              :LENGTH 6
+              :TEXT-LOC NIL
+              :TEXT-DATA NIL
+              :TEXT-ASCII NIL))
+ #S(ZMRS
+    :LOCALS #(807C FFFF 0)
+    :STACK NIL
+    :INSTR #S(DECODED-INSTRUCTION
+              :MEMORY-LOCATION 4F13
+              :FIRST-BYTE E0
+              :FORM VARIABLE
+              :OPERAND-COUNT VAR
+              :OPERAND-TYPES (CONST-LARGE CONST-LARGE CONST-LARGE)
+              :OPCODE 0
+              :OPCODE-INFO #S(OCI :NAME CALL :STORE T :BRANCH NIL :TEXT NIL)
+              :OPERANDS (2A39 807C FFFF)
+              :STORE 0
+              :BRANCH-IF NIL
+              :BRANCH-OFFSET NIL
+              :LENGTH 9
+              :TEXT-LOC NIL
+              :TEXT-DATA NIL
+              :TEXT-ASCII NIL))
+ #S(ZMRS :LOCALS #() :STACK NIL :INSTR NIL))
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 54B7
+   :FIRST-BYTE 61
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE VARIABLE)
+   :OPCODE 1
+   :OPCODE-INFO #S(OCI :NAME JE :STORE NIL :BRANCH T :TEXT NIL)
+   :OPERANDS (0 1)
+   :STORE NIL
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET 4
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x54B7: #<FUNCTION INSTRUCTION-JE>
+Retrieving operands for (VARIABLE VARIABLE): (0 1)
+Retrieved operands: (8010 807C)
+JE: (8010 807C) if false to 4: Result false
+T
+"Branched"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 54BD
+   :FIRST-BYTE 54
+   :FORM LONG
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE CONST-SMALL)
+   :OPCODE 14
+   :OPCODE-INFO #S(OCI :NAME ADD :STORE T :BRANCH NIL :TEXT NIL)
+   :OPERANDS (4 6)
+   :STORE 4
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 4
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x54BD: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE CONST-SMALL): (4 6)
+Retrieved operands: (2497 6)
+ADD: 2497 op 6 = 249D (0x249D -> var 0x4)
+T
+"ADD"
+ZMI> (progn (format t "~A~%" (decode-instruction *z-pc*)) (run-next-instruction))
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 54C1
+   :FIRST-BYTE 8C
+   :FORM SHORT
+   :OPERAND-COUNT 1OP
+   :OPERAND-TYPES (CONST-LARGE)
+   :OPCODE C
+   :OPCODE-INFO #S(OCI :NAME JUMP :STORE NIL :BRANCH NIL :TEXT NIL)
+   :OPERANDS (FFD7)
+   :STORE NIL
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET NIL
+   :LENGTH 3
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+Executing instruction: 0x54C1: #<FUNCTION SINSTRUCTION-NYI>
+; Evaluation aborted on #<INSTR-ERROR {10056625E3}>.
+ZMI> (with-slots (form first-byte) (decode-instruction *z-pc*) (values form first-byte))
+SHORT
+8C
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 18 SEP 2016 10:56:10 AM):
+; 
+; compilation unit aborted
+;   caught 1 fatal ERROR condition
+; compilation aborted after 0:00:09.561
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 18 SEP 2016 10:56:27 AM):
+
+; file: /Users/dfields/src/genera/genera-src/gczm/zmi.lisp
+; in: DEFUN DISASSEMBLE-INSTR
+;     (STRING-UPCASE ZMI::INSTR-NAME)
+; 
+; caught WARNING:
+;   undefined variable: INSTR-NAME
+; 
+; compilation unit finished
+;   Undefined variable:
+;     INSTR-NAME
+;   caught 1 WARNING condition
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.322
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 18 SEP 2016 10:56:54 AM):
+
+; file: /Users/dfields/src/genera/genera-src/gczm/zmi.lisp
+; in: DEFUN DISASSEMBLE-INSTR
+;     (STRING-UPCASE ZMI::INSTR-NAME)
+; 
+; caught WARNING:
+;   undefined variable: INSTR-NAME
+; 
+; compilation unit finished
+;   Undefined variable:
+;     INSTR-NAME
+;   caught 1 WARNING condition
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.285
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 18 SEP 2016 10:57:08 AM):
+
+; file: /Users/dfields/src/genera/genera-src/gczm/zmi.lisp
+; in: DEFUN DISASSEMBLE-INSTR
+;     (STRING-UPCASE ZMI::INSTR-NAME)
+; 
+; caught WARNING:
+;   undefined variable: INSTR-NAME
+; 
+; compilation unit finished
+;   Undefined variable:
+;     INSTR-NAME
+;   caught 1 WARNING condition
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.295
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 18 SEP 2016 10:58:04 AM):
+
+; file: /Users/dfields/src/genera/genera-src/gczm/zmi.lisp
+; in: DEFUN DISASSEMBLE-INSTR
+;     (STRING-UPCASE ZMI::INSTR-NAME)
+; 
+; caught WARNING:
+;   undefined variable: INSTR-NAME
+; 
+; compilation unit finished
+;   Undefined variable:
+;     INSTR-NAME
+;   caught 1 WARNING condition
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.351
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 18 SEP 2016 10:58:25 AM):
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.288
+ZMI> (disassemble-instr (decode-instruction *z-pc*))
+"54C1: JUMP            "
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 18 SEP 2016 11:07:34 AM):
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.246
+ZMI> (disassemble-instr (decode-instruction *z-pc*))
+"54C1: JUMP            #FFD7 "
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 18 SEP 2016 11:16:16 AM):
+
+; file: /Users/dfields/src/genera/genera-src/gczm/zmi.lisp
+; in: DEFUN DISASSEMBLE-INSTR
+;     (MAP 'LIST #'ZMI::DISASSEMBLE-OPERAND ZMI::OPERAND-TYPES ZMI::OPERANDS T)
+; 
+; note: deleting unreachable code
+
+;     (FORMAT ZMI::STR "-> ~A "
+;             (ZMI::DISASSEMBLE-OPERAND 'VARIABLE ZMI::STORE-LOC ZMI::F))
+; ==>
+;   ZMI::STR
+; 
+; note: deleting unreachable code
+
+;     (FORMAT ZMI::STR "[~A] ~A "
+;             (IF ZMI::BRANCH-IF
+;                 "TRUE"
+;                 "FALSE")
+;             (ZMI::DISASSEMBLE-BRANCH-DEST ZMI::INSTR))
+; ==>
+;   ZMI::STR
+; 
+; note: deleting unreachable code
+
+;     (IF ZMI::BRANCH-IF
+;         "TRUE"
+;         "FALSE")
+; ==>
+;   "TRUE"
+; 
+; note: deleting unreachable code
+
+; ==>
+;   "FALSE"
+; 
+; note: deleting unreachable code
+
+;     (ZMI::DISASSEMBLE-BRANCH-DEST ZMI::INSTR)
+; ==>
+;   ZMI::INSTR
+; 
+; note: deleting unreachable code
+
+;     (FORMAT ZMI::STR "\"~A\"" ZMI::TEXT-ASCII)
+; ==>
+;   ZMI::STR
+; 
+; note: deleting unreachable code
+
+;     (GET-OUTPUT-STREAM-STRING ZMI::STR)
+; ==>
+;   ZMI::STR
+; 
+; note: deleting unreachable code
+
+;     (MAP 'LIST #'ZMI::DISASSEMBLE-OPERAND ZMI::OPERAND-TYPES ZMI::OPERANDS T)
+; 
+; caught WARNING:
+;   Constant T conflicts with its asserted type SEQUENCE.
+;   See also:
+;     The SBCL Manual, Node "Handling of Types"
+
+;     (ZMI::DISASSEMBLE-OPERAND 'VARIABLE ZMI::STORE-LOC ZMI::F)
+; 
+; caught WARNING:
+;   undefined variable: |F|
+; 
+; compilation unit finished
+;   Undefined variable:
+;     |F|
+;   caught 2 WARNING conditions
+;   printed 8 notes
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.314
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 18 SEP 2016 11:17:23 AM):
+
+; file: /Users/dfields/src/genera/genera-src/gczm/zmi.lisp
+; in: DEFUN DISASSEMBLE-INSTR
+;     (ZMI::DISASSEMBLE-OPERAND 'VARIABLE ZMI::STORE-LOC ZMI::F)
+; 
+; caught WARNING:
+;   undefined variable: |F|
+; 
+; compilation unit finished
+;   Undefined variable:
+;     |F|
+;   caught 1 WARNING condition
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.277
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 18 SEP 2016 11:18:00 AM):
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.311
+ZMI> (disassemble-instr (decode-instruction *z-pc*))
+"54C1: JUMP            #FFD7 "
+ZMI> (progn (format t "~A~%" (disassemble-instr (decode-instruction *z-pc*))) (run-next-instruction))
+
+54C1: JUMP            #FFD7 
+Executing instruction: 0x54C1: #<FUNCTION SINSTRUCTION-NYI>
+; Evaluation aborted on #<INSTR-ERROR {1007FC29F3}>.
+ZMI> (load-story-file "zork1.z3")
+T
+"Loaded zork1.z3 release 88 serial 840726"
+ZMI> (progn (format t "~A~%" (disassemble-instr (decode-instruction *z-pc*))) (run-next-instruction))
+
+4F05: CALL            #2A39,#8010,#FFFF -> -(SP 
+Executing instruction: 0x4F05: #<FUNCTION INSTRUCTION-CALL>
+Retrieving operands for (CONST-LARGE CONST-LARGE CONST-LARGE): (2A39 8010 FFFF)
+Retrieved operands: (2A39 8010 FFFF)
+CALL: Routine address: 0x5472, # args: 2, # locals 3, routine start pc: 0x5479
+CALL: Default locals: (0 0 0)
+CALL: Starting locals: (8010 FFFF 0)
+T
+"Called"
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 18 SEP 2016 11:22:16 AM):
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.335
+ZMI> (progn (format t "~A~%" (disassemble-instr (decode-instruction *z-pc*))) (run-next-instruction))
+
+5479: CALL            5486 L00 -> L02 
+Executing instruction: 0x5479: #<FUNCTION INSTRUCTION-CALL>
+Retrieving operands for (CONST-LARGE VARIABLE): (2A43 1)
+Retrieved operands: (2A43 8010)
+CALL: Routine address: 0x5486, # args: 1, # locals 5, routine start pc: 0x5491
+CALL: Default locals: (0 0 0 0 0)
+CALL: Starting locals: (8010 0 0 0 0)
+T
+"Called"
+; compiling file "/Users/dfields/src/genera/genera-src/gczm/zmi.lisp" (written 18 SEP 2016 11:32:14 AM):
+
+; /Users/dfields/src/genera/genera-src/gczm/zmi.fasl written
+; compilation finished in 0:00:00.269
+ZMI> (load-story-file "zork1.z3")
+T
+"Loaded zork1.z3 release 88 serial 840726"
+ZMI> (debug-run)
+4F05: CALL            5472 #8010,#FFFF -> -(SP) 
+[N]ext, [Q]uit: n
+Executing instruction: 0x4F05: #<FUNCTION INSTRUCTION-CALL>
+Retrieving operands for (CONST-LARGE CONST-LARGE CONST-LARGE): (2A39 8010 FFFF)
+Retrieved operands: (2A39 8010 FFFF)
+CALL: Routine address: 0x5472, # args: 2, # locals 3, routine start pc: 0x5479
+CALL: Default locals: (0 0 0)
+CALL: Starting locals: (8010 FFFF 0)
+[N]ext, [Q]uit: n
+5479: CALL            5486 L00 -> L02 
+[N]ext, [Q]uit: n
+
+Executing instruction: 0x5479: #<FUNCTION INSTRUCTION-CALL>
+Retrieving operands for (CONST-LARGE VARIABLE): (2A43 1)
+Retrieved operands: (2A43 8010)
+CALL: Routine address: 0x5486, # args: 1, # locals 5, routine start pc: 0x5491
+CALL: Default locals: (0 0 0 0 0)
+CALL: Starting locals: (8010 0 0 0 0)
+[N]ext, [Q]uit: 5491: ADD             G84,#B4 -> L02 
+[N]ext, [Q]uit: n
+Executing instruction: 0x5491: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE CONST-SMALL): (94 B4)
+Retrieved operands: (23E9 B4)
+ADD: 23E9 op B4 = 249D (0x249D -> var 0x3)[N]ext, [Q]uit: n
+
+5495: ADD             G84,G82 -> L03 
+[N]ext, [Q]uit: Executing instruction: 0x5495: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE VARIABLE): (94 92)
+Retrieved operands: (23E9 B4)
+ADD: 23E9 op B4 = 249D (0x249D -> var 0x4)[N]ext, [Q]uit: n
+5499: JE              L03,L02 [FALSE] 54B3 
+[N]ext, [Q]uit: n
+Executing instruction: 0x5499: #<FUNCTION INSTRUCTION-JE>
+Retrieving operands for (VARIABLE VARIABLE): (4 3)
+Retrieved operands: (249D 249D)
+JE: (249D 249D) if false to 18: Result true
+[N]ext, [Q]uit: n
+549D: SUB             G82,#06 -> G82 
+[N]ext, [Q]uit: n
+Executing instruction: 0x549D: #<FUNCTION INSTRUCTION-SUB>
+Retrieving operands for (VARIABLE CONST-SMALL): (92 6)
+Retrieved operands: (B4 6)
+SUB: B4 op 6 = AE (0xAE -> var 0x92)[N]ext, [Q]uit: n
+54A1: JZ              L01 [TRUE] 54A8 
+[N]ext, [Q]uit: n
+Executing instruction: 0x54A1: #<FUNCTION INSTRUCTION-JZ>
+Retrieving operands for (VARIABLE): (2)
+Retrieved operands: (0)
+JZ: (0) if true to 6: Result true
+[N]ext, [Q]uit: n
+54A8: ADD             G84,G82 -> L04 
+[N]ext, [Q]uit: n
+Executing instruction: 0x54A8: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE VARIABLE): (94 92)
+Retrieved operands: (23E9 AE)
+ADD: 23E9 op AE = 2497 (0x2497 -> var 0x5)[N]ext, [Q]uit: n
+54AC: STOREW          L04,#02,L00 
+[N]ext, [Q]uit: n
+Executing instruction: 0x54AC: #<FUNCTION INSTRUCTION-STOREW>
+Retrieving operands for (VARIABLE CONST-SMALL VARIABLE): (5 2 1)
+Retrieved operands: (2497 2 8010)
+STOREW: Writing 0x8010 to 0x249B (as 2497[2])
+[N]ext, [Q]uit: n
+54B1: RET             L04 
+[N]ext, [Q]uit: n
+Executing instruction: 0x54B1: #<FUNCTION INSTRUCTION-RET>
+Retrieving operands for (VARIABLE): (5)
+Retrieved operands: (2497)
+RET-internal: Returning 0x2497 into variable 0x3 (caller address 0x5479)
+[N]ext, [Q]uit: n
+547F: STOREW          L02,#01,L01 
+[N]ext, [Q]uit: n
+Executing instruction: 0x547F: #<FUNCTION INSTRUCTION-STOREW>
+Retrieving operands for (VARIABLE CONST-SMALL VARIABLE): (3 1 2)
+Retrieved operands: (2497 1 FFFF)
+STOREW: Writing 0xFFFF to 0x2499 (as 2497[1])
+[N]ext, [Q]uit: n
+5484: RET             L02 
+[N]ext, [Q]uit: n
+Executing instruction: 0x5484: #<FUNCTION INSTRUCTION-RET>
+Retrieving operands for (VARIABLE): (3)
+Retrieved operands: (2497)
+RET-internal: Returning 0x2497 into variable 0x0 (caller address 0x4F05)
+[N]ext, [Q]uit: n
+4F0E: STOREW          (SP)+,#00,#01 
+[N]ext, [Q]uit: n
+Executing instruction: 0x4F0E: #<FUNCTION INSTRUCTION-STOREW>
+Retrieving operands for (VARIABLE CONST-SMALL CONST-SMALL): (0 0 1)
+Retrieved operands: (2497 0 1)
+STOREW: Writing 0x1 to 0x2497 (as 2497[0])
+[N]ext, [Q]uit: n
+4F13: CALL            5472 #807C,#FFFF -> -(SP) 
+[N]ext, [Q]uit: n
+Executing instruction: 0x4F13: #<FUNCTION INSTRUCTION-CALL>
+Retrieving operands for (CONST-LARGE CONST-LARGE CONST-LARGE): (2A39 807C FFFF)
+Retrieved operands: (2A39 807C FFFF)
+CALL: Routine address: 0x5472, # args: 2, # locals 3, routine start pc: 0x5479
+CALL: Default locals: (0 0 0)
+CALL: Starting locals: (807C FFFF 0)
+[N]ext, [Q]uit: n
+5479: CALL            5486 L00 -> L02 
+[N]ext, [Q]uit: n
+Executing instruction: 0x5479: #<FUNCTION INSTRUCTION-CALL>
+Retrieving operands for (CONST-LARGE VARIABLE): (2A43 1)
+Retrieved operands: (2A43 807C)
+CALL: Routine address: 0x5486, # args: 1, # locals 5, routine start pc: 0x5491
+CALL: Default locals: (0 0 0 0 0)
+CALL: Starting locals: (807C 0 0 0 0)
+[N]ext, [Q]uit: n
+5491: ADD             G84,#B4 -> L02 
+[N]ext, [Q]uit: n
+Executing instruction: 0x5491: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE CONST-SMALL): (94 B4)
+Retrieved operands: (23E9 B4)
+ADD: 23E9 op B4 = 249D (0x249D -> var 0x3)[N]ext, [Q]uit: n
+5495: ADD             G84,G82 -> L03 
+[N]ext, [Q]uit: n
+Executing instruction: 0x5495: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE VARIABLE): (94 92)
+Retrieved operands: (23E9 AE)
+ADD: 23E9 op AE = 2497 (0x2497 -> var 0x4)[N]ext, [Q]uit: n
+5499: JE              L03,L02 [FALSE] 54B3 
+[N]ext, [Q]uit: n
+Executing instruction: 0x5499: #<FUNCTION INSTRUCTION-JE>
+Retrieving operands for (VARIABLE VARIABLE): (4 3)
+Retrieved operands: (2497 249D)
+JE: (2497 249D) if false to 18: Result false
+[N]ext, [Q]uit: n
+54B3: LOADW           L03,#02 -> -(SP) 
+[N]ext, [Q]uit: n
+Executing instruction: 0x54B3: #<FUNCTION INSTRUCTION-LOADW>
+Retrieving operands for (VARIABLE CONST-SMALL): (4 2)
+Retrieved operands: (2497 2)
+LOADW: Loaded 0x8010 from 0x249B (as 2497[2]) into VAR 0x0
+[N]ext, [Q]uit: n
+54B7: JE              (SP)+,L00 [FALSE] 54BD 
+[N]ext, [Q]uit: n
+Executing instruction: 0x54B7: #<FUNCTION INSTRUCTION-JE>
+Retrieving operands for (VARIABLE VARIABLE): (0 1)
+Retrieved operands: (8010 807C)
+JE: (8010 807C) if false to 4: Result false
+[N]ext, [Q]uit: n
+54BD: ADD             L03,#06 -> L03 
+[N]ext, [Q]uit: n
+Executing instruction: 0x54BD: #<FUNCTION INSTRUCTION-ADD>
+Retrieving operands for (VARIABLE CONST-SMALL): (4 6)
+Retrieved operands: (2497 6)
+ADD: 2497 op 6 = 249D (0x249D -> var 0x4)[N]ext, [Q]uit: n
+54C1: JUMP            #FFD7 
+[N]ext, [Q]uit: n
+Executing instruction: 0x54C1: #<FUNCTION SINSTRUCTION-NYI>
+Ending due to condition: Instruction error: Unimplemented: Loc 0x54C1, first byte: 0x8C, opcode: JUMP
+NIL
+ZMI> 
