@@ -722,10 +722,16 @@
             (op-types operand-types))
         (format str "~4,'0X: ~15A " memory-location (string-upcase instr-name))
         ;; Special instructions -------------
-        (when (eql instr-name 'call)
-          (format str "~4,'0X " (* 2 (car ops)))
-          (setf ops (cdr ops))
-          (setf op-types (cdr op-types)))
+        (cond
+          ((eql instr-name 'call)
+           (format str "~4,'0X " (* 2 (car ops)))
+           (setf ops (cdr ops))
+           (setf op-types (cdr op-types)))
+          ((eql instr-name 'jump)
+           (format str "~4,'0X " (jump-destination instr))
+           (setf ops (cdr ops))
+           (setf op-types (cdr op-types)))
+          ) ; cond
         ;; End special instructions ---------
         (format str "~{~A~^,~} "
                 (map 'list #'disassemble-operand op-types ops))
@@ -1595,6 +1601,44 @@
       (t
        (set-pc (+ i-pc i-len offset -2))
        (values t "Branched")))))
+
+
+;; JUMP INSTRUCTION -----------------------------------------------------
+
+;; Calculates the jump destination for this instruction
+;; ASSERT: It's a JUMP
+;; XXX: What if there are a wrong number of operands?
+;; XXX: What if the operand isn't a 'const-large?
+(defun jump-destination (instr)
+  (let* ((i-pc  (decoded-instruction-memory-location instr))
+         (i-len (decoded-instruction-length instr))
+         (operands (retrieve-operands instr))
+         (unsigned-offset (car operands))
+         (signed-offset (us-to-s unsigned-offset 16)))
+    (+ i-pc i-len signed-offset -2)))
+         
+
+;; JUMP: Jump unconditionally to signed offset from current PC
+;; (Spec, page 87, 161)
+;; Destination: address after instruction + offset - 2
+;; Legal to jump between routines (!) without changing call frame
+;; XXX: Check if we're jumping somewhere within memory
+(defun instruction-jump (instr)
+  (let* ((op-types (decoded-instruction-operand-types instr)))
+    (cond
+      ((not (= 1 (length op-types)))
+       ;; No restarts!
+       (error 'invalid-operand-count :message
+              (format nil "Exactly one argument required, got: ~A"
+                      (length op-types))))
+      ((not (eql 'const-large (car op-types)))
+       (error 'instr-error :message
+              (format nil "JUMP: Operand type not implemented: ~A"
+                      (car op-types))))))
+  (let* ((ml-dest (jump-destination instr)))
+    ;; XXX: Check destination is within memory
+    (dbg t "JUMP: Jumping to 0x~4,'0x~%" ml-dest)
+    (set-pc ml-dest)))
 
 
 ;; MEMORY INSTRUCTIONS --------------------------------------------------
