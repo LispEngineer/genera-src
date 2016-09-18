@@ -878,12 +878,19 @@
         (format str "~4,'0X: ~15A " memory-location (string-upcase instr-name))
         ;; Special instructions -------------
         (cond
+          ;; First operand in CALL is the destination as a word-address
           ((eql instr-name 'call)
            (format str "~4,'0X " (* 2 (car ops)))
            (setf ops (cdr ops))
            (setf op-types (cdr op-types)))
+          ;; Jump destination is relative to instruction
           ((eql instr-name 'jump)
            (format str "~4,'0X " (jump-destination instr))
+           (setf ops (cdr ops))
+           (setf op-types (cdr op-types)))
+          ;; First operand in STORE is a variable location
+          ((eql instr-name 'store)
+           (format str "~A," (disassemble-operand 'variable (car ops)))
            (setf ops (cdr ops))
            (setf op-types (cdr op-types)))
           ) ; cond
@@ -1813,6 +1820,7 @@
           (error 'invalid-operand-count :message
                  (format nil "STOREW: Got ~A operands, expected 3" (length operands)))
         (ignore () :report "Ignore; store nothing"))
+      ;; XXX: This doesn't seem like it will work, it doesn't advance PC
       (return-from instruction-storew (values nil "Invalid # of args")))
     (let* ((array-base (first operands))
            (array-index (second operands))
@@ -1823,6 +1831,19 @@
       (mem-word-write ml-dest value)
       (advance-pc instr)
       (values t "Stored word"))))
+
+;; STORE (variable) value (Spec page 102)
+;; Set the variable referenced by the first operand to the specified value
+(defun instruction-store (instr)
+  (let ((operands (retrieve-operands instr)))
+    (when (not (= 2 (length operands)))
+      ;; Raise condition for invalid number of args.
+      (error 'invalid-operand-count :message
+             (format nil "STOREW: Got ~A operands, expected 2" (length operands))))
+    (var-write (first operands) (second operands))
+    (dbg t "STORE: Wrote 0x~4,'0x to variable ~X~%" (second operands) (first operands))
+    (advance-pc instr)
+    (values t "Stored value in variable")))
 
 ;; Loadw (Spec page 88)
 ;; Operands: array word-index
