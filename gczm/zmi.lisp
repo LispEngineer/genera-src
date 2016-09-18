@@ -587,7 +587,7 @@
     ;; Screen-splitting available: header byte 1 bit 5           0
     ;; Variable pitch font not default: header byte 1 bit 6      0
     ;; So we need to clear bits 4-5-6
-    (mem-byte-write
+    (mem-byte-write +ml-flags-1+
      (logand (mem-byte +ml-flags-1+) #x1F))
     ;; XXX: Set standard revision number, header byte 32
     ;; Success
@@ -1688,6 +1688,10 @@
 (defun instruction-sub (instr)
   (sinstruction-math instr #'-))
 
+;; AND: Bitwise AND. (Spec p79)
+(defun instruction-and (instr)
+  (sinstruction-math-unsigned instr #'logand))
+
 ;; Generalize math instruction. Takes a function and implements
 ;; the rest of the instruction.
 (defun sinstruction-math (instr func)
@@ -1702,6 +1706,22 @@
     (var-write dest unsigned-result)
     (dbg t "~A: ~A op ~A = ~A (0x~x -> var 0x~x)~%"
          inst-name a b result unsigned-result dest)
+    (advance-pc instr)
+    (values t inst-name)))
+
+;; Generalize math instruction. Takes a function and implements
+;; the rest of the instruction, without doing sign conversion.
+(defun sinstruction-math-unsigned (instr func)
+  (let* ((operands (retrieve-operands instr))
+         (a (first operands))
+         (b (second operands))
+         (result (funcall func a b))
+         (inst-name (string-upcase (oci-name (decoded-instruction-opcode-info instr))))
+         (dest (decoded-instruction-store instr)))
+    (warn-16-bit-size result)
+    (var-write dest result)
+    (dbg t "~A: ~A op ~A = ~A (-> var 0x~x)~%"
+         inst-name a b result dest)
     (advance-pc instr)
     (values t inst-name)))
 
