@@ -197,6 +197,19 @@
   (:report (lambda (condition stream)
 	     (format stream "Missing global variable: ~A" (message condition)))))
 
+;; Attempt to use an omitted operand (Spec 4.2)
+(define-condition use-omitted-operand (error)
+  ((message :initarg :message :reader message))
+  ;; Below required by Genera
+  (:report (lambda (condition stream)
+	     (format stream "Attempt to use omitted operand: ~A" (message condition)))))
+
+;; Incorrect number of operands
+(define-condition invalid-operand-count (error)
+  ((message :initarg :message :reader message))
+  ;; Below required by Genera
+  (:report (lambda (condition stream)
+	     (format stream "Wrong number of operands: ~A" (message condition)))))
 
 
 ;; Program Counter --------------------------------------------------------
@@ -1266,12 +1279,27 @@
             collect
               (cond
                 ;; Handle each operand type
-                ((eq type 'const-small) opval)
-                ((eq type 'const-large) opval)
-                ((eq type 'variable) (var-read opval)) ;; Can raise a condition
-                (t 0))))) ;; XXX: Raise a condition with restarts
+                ((eql type 'const-small) opval)
+                ((eql type 'const-large) opval)
+                ((eql type 'variable) (var-read opval)) ;; Can raise a condition
+                (t (raise-omitted-operand instr)))))) ;; Should never happen (!)
     (dbg t "Retrieved operands: ~A~%" retval)
     retval))
+
+;; We attempted to use an omitted operand
+(defun raise-omitted-operand (instr)
+  (restart-case
+      (error 'use-omitted-operand
+             :message
+             (format nil "Instruction at 0x~x"
+                     (decoded-instruction-memory-location instr)))
+    (return-zero ()
+      :report "Ignore error, use 0 for operand"
+      0)
+    (use-value (value)
+      :report "Ignore error, use specified value for operand"
+      :interactive restart-read-new-value
+      value)))
 
 ;; CALL FRAME INSTRUCTIONS ---------------------------------------------------
 
@@ -1328,10 +1356,11 @@
             raddr (length arguments) numlocals r-pc)
     (dbg t "CALL: Default locals: ~A~%" localdefaults)
     (dbg t "CALL: Starting locals: ~A~%" locals)
-    ;; XXX: CODE ME: Call to packed address 0 should do nothing and just
+    ;; Call to packed address 0 should do nothing and just
     ;; return false (0). Spec 6.4.3
     (when (= praddr 0)
-      (return-from instruction-call (sinstruction-nyi instr)))
+      (return-from instruction-call
+        (sinstruction-ret instr 0)))
     ;; Set up our new stack frame
     (setf (zmrs-instr newframe) instr)
     (loop for l in locals do (vector-push-extend l (zmrs-locals newframe)))
@@ -1363,9 +1392,29 @@
 
 ;; RET: Returns specified value from routine (Spec page 97)
 (defun instruction-ret (instr)
-  (let* ((operands (retrieve-operands instr)))
-    ;; XXX: Error if not exactly one operand
-    (sinstruction-ret instr (car operands))))
+  (let* ((operands (retrieve-operands instr))
+         (retval
+          (if (= 1 (length operands))
+              ;; Correct number of operands
+              (car operands)
+              (restart-case
+                  (error 'invalid-operand-count :message
+                         (format nil "Exactly one argument required, got: ~A"
+                                 (length operands)))
+                (return-zero ()
+                  :report "Ignore, return 0"
+                  0)
+                (use-first ()
+                  ;; FIXME: Only display this if there are >0 operands
+                  :report (lambda (stream)
+                            (format stream "Ignore, using first operand: ~A" (car operands)))
+                  (car operands))
+                (use-value (value)
+                  :report "Ignore, returning specified value"
+                  :interactive restart-read-new-value
+                  value)))))
+    ;; And do our actual return
+    (sinstruction-ret instr retval)))
          
 
 ;; MATH INSTRUCTIONS ------------------------------------------------------------
@@ -1424,8 +1473,12 @@
           (cond
             ((null operands)) ; No args are always equal to each other
             ((= (length operands) 1)
-             ;; XXX: CODE ME - raise condition for invalid # of args
-             t)
+             ;; raise condition for invalid # of args
+             (restart-case
+                 (error 'invalid-operand-count :message
+                        "JE provided exactly one arg (needs 0 or 2+)")
+               (return-true  () :report "Consider it equal" t)
+               (return-false () :report "Consider it unequal" nil)))
             (t
              (every (lambda (b) (= (car operands) b)) (cdr operands))))))
     (sinstruction-jx instr #'test-je)))
@@ -1436,8 +1489,12 @@
   (flet ((test-jz (operands)
            (cond
              ((not (= (length operands) 1))
-              ;; XXX: CODE ME - raise condition for invalid # of args
-              t)
+              ;; raise condition for invalid # of args
+              (restart-case
+                  (error 'invalid-operand-count :message
+                         "JZ not provided exactly one arg")
+                (return-true  () :report "Consider it zero" t)
+                (return-false () :report "Consider it nonzero" nil)))
              (t
               (= (car operands) 0)))))
     (sinstruction-jx instr #'test-jz)))
@@ -1462,15 +1519,9 @@
       ((not (do-branch? result br-if))
        (advance-pc instr)
        (values t "Branch not taken"))
-      ;; Return from current return with 0/false
-      ((= offset 0)
-       ;; XXX: CODE ME - return false
-       (sinstruction-nyi instr))
-      ;; Return from current routine with 1/true
-      ((= offset 1)
-       (values nil "Branch return 1 - not yet implemented")
-       ;; XXX: CODE ME - return true
-       (sinstruction-nyi instr))
+      ;; Return from current routine with 0/false or 1/true
+      ((or (= offset 0) (= offset 1))
+       (sinstruction-ret instr offset))
       ;; Take branch - calculate new location
       (t
        (set-pc (+ i-pc i-len offset -2))
@@ -1488,7 +1539,12 @@
 (defun instruction-storew (instr)
   (let ((operands (retrieve-operands instr)))
     (when (not (= 3 (length operands)))
-      ;; XXX: Raise condition for invalid number of args
+      ;; Raise condition for invalid number of args.
+      ;; This should really just crash the whole program
+      (restart-case
+          (error 'invalid-operand-count :message
+                 (format nil "Got ~A operands, expected 3" (length operands)))
+        (ignore () :report "Ignore; store nothing"))
       (return-from instruction-storew (values nil "Invalid # of args")))
     (let* ((array-base (first operands))
            (array-index (second operands))
