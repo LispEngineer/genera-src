@@ -1746,6 +1746,21 @@
   (advance-pc instr)
   (values t "NEW_LINE"))
 
+;; PRINT_NUM (Spec page 92)
+;; XXX: This initial implementation only outputs to *z-output*
+;; XXX: Do buffering (reset the buffering count)
+(defun instruction-print_num (instr)
+  (let ((operands (retrieve-operands instr)))
+    (when (not (= 1 (length operands)))
+      ;; Raise condition for invalid number of args.
+      ;; This should really just crash the whole program
+      (error 'invalid-operand-count :message
+             (format nil "PRINT_NUM: Got ~A operands, expected 1" (length operands))))
+    (format *z-output* "~d" (us-to-s (first operands) 16))
+    (dbg t "PRINT_NUM: 0x~X as ~d~%" (first operands) (us-to-s (first operands) 16))
+    (advance-pc instr)
+    (values t "PRINT_NUM")))
+
 
 ;; BRANCH INSTRUCTIONS -----------------------------------------------------
 
