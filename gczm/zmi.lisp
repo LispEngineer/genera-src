@@ -83,17 +83,16 @@
 ;; The starting routine is the lowest state, and has no parameters,
 ;; and a zero return address.
 (defstruct zmrs     ; Z-Machine Routine State
-  ;; XXX: parameters are arguments to the "call" instruction,
-  ;; and are overlaid on top of locals, so this shouldn't be needed...
-  params            ; 8-size array of words with fill-pointer to actual #
   locals            ; 15-size array of words (set in routine header)
                     ;   with fill-pointer to actual # of locals
   stack             ; list (of words)
   instr)            ; Calling instruction (including store and return PC)
 ;; Maxmimum number of parameters that a routine can have, although in
-;; v3 we can really only have up to 3
+;; v3 we can really only have up to 3 - this is a limitation of the
+;; number of arguments to a CALL instruction/opcode. Parameters are
+;; copied over the locals (if enough locals are present).
 (defparameter +zmrs-max-params+ 8)
-;; Maximum number of locals a parameter can have
+;; Maximum number of locals a routine (stack frame) can have
 (defparameter +zmrs-max-locals+ 15)
 ;; Our call stack - pile of ZMRS records as a list
 (defvar *call-stack* '())
@@ -329,11 +328,6 @@
 ;; the fields of the structure
 (defun new-zmrs ()
   (let ((retval (make-zmrs)))
-    (setf (zmrs-params retval)
-          (make-array +zmrs-max-params+
-                      :element-type '(unsigned-byte 16)
-                      :adjustable t
-                      :fill-pointer 0))
     (setf (zmrs-locals retval)
           (make-array +zmrs-max-locals+
                       :element-type '(unsigned-byte 16)
@@ -1252,6 +1246,10 @@
 ;; Possible errors:
 ;; 1. Reading from an empty stack
 ;; 2. Accessing non-existent local variable
+;; Note clarification on Spec p161:
+;; Operands are always evaluated from first to last, so if the stack
+;; is read twice, it's popped twice IN ORDER, e.g.,
+;; SUB SP SP means subtract 2nd top stack item from top stack item
 (defun retrieve-operands (instr)
   (dbg t "Retrieving operands for ~A: ~A~%"
        (decoded-instruction-operand-types instr)
@@ -1324,12 +1322,14 @@
              collect (if a (car a) l)))
          ;; Create our next stack frame
          (newframe (new-zmrs)))
-    ;; XXX: CODE ME: Call to packed address 0 should do nothing and just
-    ;; return false (0). Spec 6.4.3
     (dbg t "CALL: Routine address: 0x~x, # args: ~A, # locals ~A, routine start pc: 0x~x~%"
             raddr (length arguments) numlocals r-pc)
     (dbg t "CALL: Default locals: ~A~%" localdefaults)
     (dbg t "CALL: Starting locals: ~A~%" locals)
+    ;; XXX: CODE ME: Call to packed address 0 should do nothing and just
+    ;; return false (0). Spec 6.4.3
+    (when (= praddr 0)
+      (return-from instruction-call (sinstruction-nyi instr)))
     ;; Set up our new stack frame
     (setf (zmrs-instr newframe) instr)
     (loop for l in locals do (vector-push-extend l (zmrs-locals newframe)))
@@ -1339,7 +1339,7 @@
     ;; Update our PC to be at the new location
     (set-pc r-pc)
     ;; And we're done
-    (values t nil)))
+    (values t "Called")))
 
 ;; Prints a warning if the number is outside the
 ;; range of a normal 16-bit number
@@ -1353,14 +1353,29 @@
   (let* ((operands (retrieve-operands instr))
          (a (us-to-s (first operands) 16))
          (b (us-to-s (second operands) 16))
-         (sum (+ a b))
-         (unsigned-sum (s-to-us-16 sum))
+         (result (+ a b))
+         (unsigned-result (s-to-us-16 result))
          (dest (decoded-instruction-store instr)))
-    (warn-16-bit-size sum)
-    (var-write dest unsigned-sum)
-    (dbg t "ADD: ~A + ~A = ~A (0x~x -> var 0x~x)" a b sum unsigned-sum dest)
+    (warn-16-bit-size result)
+    (var-write dest unsigned-result)
+    (dbg t "ADD: ~A + ~A = ~A (0x~x -> var 0x~x)" a b result unsigned-result dest)
     (advance-pc instr)
-    (values t nil)))
+    (values t "Added")))
+
+;; ADD: Signed 16-bit addition (Spec p102, 15.3)
+;; Signed info: Spec 2.2-2.3
+(defun instruction-sub (instr)
+  (let* ((operands (retrieve-operands instr))
+         (a (us-to-s (first operands) 16))
+         (b (us-to-s (second operands) 16))
+         (result (- a b))
+         (unsigned-result (s-to-us-16 result))
+         (dest (decoded-instruction-store instr)))
+    (warn-16-bit-size result)
+    (var-write dest unsigned-result)
+    (dbg t "SUB: ~A - ~A = ~A (0x~x -> var 0x~x)" a b result unsigned-result dest)
+    (advance-pc instr)
+    (values t "Subtracted")))
 
 ;; Tells us if we should take the branch
 ;; given the result of the comparison and the "branch-if" bit.
@@ -1401,13 +1416,12 @@
       ;; Return from current return with 0/false
       ((= offset 0)
        ;; XXX: CODE ME - return false
-       (values nil "Branch return 0 - not yet implemented")
-       )
+       (sinstruction-nyi instr))
       ;; Return from current routine with 1/true
       ((= offset 1)
        (values nil "Branch return 1 - not yet implemented")
        ;; XXX: CODE ME - return true
-       )
+       (sinstruction-nyi instr))
       ;; Take branch - calculate new location
       (t
        (set-pc (+ i-pc i-len offset -2))
