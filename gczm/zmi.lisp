@@ -1341,6 +1341,8 @@
     ;; And we're done
     (values t "Called")))
 
+
+
 ;; Prints a warning if the number is outside the
 ;; range of a normal 16-bit number
 (defun warn-16-bit-size (num)
@@ -1399,7 +1401,17 @@
     (sinstruction-jx instr #'test-je)))
 
 ;; JZ: Jump if the argument is zero. (Spec page 87)
-;; SEE instruction-je for more details.
+;; SEE sinstruction-jz for more details.
+(defun instruction-jz (instr)
+  (flet ((test-jz (operands)
+           (cond
+             ((not (= (length operands) 1))
+              ;; XXX: CODE ME - raise condition for invalid # of args
+              t)
+             (t
+              (= (car operands) 0)))))
+    (sinstruction-jx instr #'test-jz)))
+
 
 ;; Implements all jump-if instructions by taking a test
 ;; function. The text function takes one argument, which is
