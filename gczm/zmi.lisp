@@ -233,6 +233,13 @@
 (defun get-pc ()
   *z-pc*)
 
+
+;; Output streams ---------------------------------------------------------
+
+;; The default output for text printing
+(defvar *z-output* *standard-output*)
+
+
 ;; Memory -----------------------------------------------------------------
 
 ;; Loads a story file into the memory vector
@@ -1691,6 +1698,26 @@
     (values t inst-name)))
 
 
+;; OUTPUT INSTRUCTIONS -----------------------------------------------------
+
+;; PRINT (Spec page 91, Chapter 7)
+;; XXX: This initial implementation only outputs to *z-output*
+;; XXX: Do buffering
+(defun instruction-print (instr)
+  (write-string (decoded-instruction-text-ascii instr) *z-output*)
+  (dbg t "PRINT: \"~A\"~%" (decoded-instruction-text-ascii instr))
+  (advance-pc instr)
+  (values t "PRINT"))
+
+;; NEWLINE (Spec page 89)
+;; XXX: This initial implementation only outputs to *z-output*
+;; XXX: Do buffering (reset the buffering count)
+(defun instruction-new_line (instr)
+  (write-char #\Newline *z-output*)
+  (dbg t "NEW_LINE~%")
+  (advance-pc instr)
+  (values t "NEW_LINE"))
+
 
 ;; BRANCH INSTRUCTIONS -----------------------------------------------------
 
@@ -2076,14 +2103,15 @@
   (trace-run-until 'no-such-instruction-name-will-be-found))
 
 ;; Runs the program with tracing until we get to a specified instruction
-(defun trace-run-until (inst-name)
+(defun trace-run-until (inst-name &optional (show-disassembly t))
   (let ((+debug+ nil))
     (loop
        (handler-case
            (let* ((next-instr (decode-instruction *z-pc*))
                   (disass-instr (disassemble-instr next-instr))
                   (name-instr (oci-name (decoded-instruction-opcode-info next-instr))))
-             (format t "~A~%" disass-instr)
+             (when show-disassembly
+               (format t "~A~%" disass-instr))
              (when (eql inst-name name-instr)
                (format t "Ending due to instruction found: ~A~%" name-instr)
                (return))
@@ -2092,7 +2120,6 @@
            (progn
              (format t "Ending due to condition: ~A~%" e)
              (return)))))))
-    
 
 #|
 ;; Some tests of breaking strings
