@@ -211,6 +211,13 @@
   (:report (lambda (condition stream)
 	     (format stream "Wrong number of operands: ~A" (message condition)))))
 
+;; Request for a missing propery
+(define-condition invalid-property (error)
+  ((message :initarg :message :reader message))
+  ;; Below required by Genera
+  (:report (lambda (condition stream)
+	     (format stream "Invalid property: ~A" (message condition)))))
+
 
 ;; Program Counter --------------------------------------------------------
 
@@ -334,6 +341,32 @@
 ;; Fixed 16-bit version of the above
 (defun s-to-us-16 (anum)
   (logand anum #xffff))
+
+
+;; Memory: Object Handing Routines ----------------------------------------
+
+;; See: zmach06e.pdf Chapter 3.4
+;; See: Spec Chapter 12
+
+;; Gets the object table start location
+;; Spec 12.1
+;; See: +ml-loc-obj+
+(defun object-table-loc ()
+  (mem-word +ml-loc-obj+))
+
+;; Gets a default property value (word) (Spec 12.2)
+;; Property defaults table starts at the object table location.
+;; Properties are numbered 1-31 
+(defun get-property-default (prop)
+  (when (or (< prop 1) (> prop 31))
+    ;; XXX: Add restarts (return 0, return value)
+    (error 'invalid-property
+           :message (format nil "Cannot get default for property ~A" prop)))
+  (let* ((prop-loc (+ (object-table-loc) (* 2 (1- prop))))
+         (def-val (mem-word prop-loc)))
+    (dbg t "Default property ~A: 0x~x~%" prop def-val)
+    def-val))
+
   
 ;; Routine Frames ---------------------------------------------------------
 
@@ -1696,6 +1729,31 @@
 
 
 
+;; PROPERTY INSTRUCTIONS ------------------------------------------------
+
+
+;; PUT_PROP object property value
+;; (Spec page 94, Chapter 12)
+;; (zmach06e.pdf Chapter 3.4)
+;;
+;; From spec: Writes the given value to the given property of the given object.
+;; If the property does not exist for that object, the interpreter should halt
+;; with a suitable error message. If the property length is 1, then the interpreter
+;; should store only the least significant byte of the value. (For instance,
+;; storing -1 into a 1-byte property results in the property value 255.) As with
+;; get_prop the property length must not be more than 2: if it is, the behaviour
+;; of the opcode is undefined.
+;;
+;; Notes:
+;; Objects are numbered from 1; there is no object 0 (no name, attribs, props).
+;; There are at most 255 objects. It's an error to reference a non-existent object.
+;; Properties are numbered 1-31.
+;; Each property present has 1-8 bytes of data.
+;; THIS INSTRUCTION only deals with properties of 1-2 bytes of data.
+
+
+
+
 ;; META-INSTRUCTIONS ----------------------------------------------------
 
 ;; No instruction provided (should never happen)
@@ -1830,11 +1888,20 @@
 
 ;; Run the program with tracing but no debugging
 (defun trace-run ()
+  (trace-run-until 'no-such-instruction-name-will-be-found))
+
+;; Runs the program with tracing until we get to a specified instruction
+(defun trace-run-until (inst-name)
   (let ((+debug+ nil))
     (loop
        (handler-case
-           (progn
-             (format t "~A~%" (disassemble-instr (decode-instruction *z-pc*)))
+           (let* ((next-instr (decode-instruction *z-pc*))
+                  (disass-instr (disassemble-instr next-instr))
+                  (name-instr (oci-name (decoded-instruction-opcode-info next-instr))))
+             (format t "~A~%" disass-instr)
+             (when (eql inst-name name-instr)
+               (format t "Ending due to instruction found: ~A~%" name-instr)
+               (return))
              (run-next-instruction))
          (error (e)
            (progn

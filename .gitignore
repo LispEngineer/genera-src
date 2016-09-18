@@ -5,3 +5,6 @@
 
 **/*.fasl
 # The above is for SBCL compiled files
+
+# Sometimes I save the slime buffer...
+**/\*slime-repl\ sbcl\*
