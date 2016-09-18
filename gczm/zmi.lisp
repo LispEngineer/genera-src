@@ -1350,32 +1350,31 @@
 ;; ADD: Signed 16-bit addition (Spec p79, 15.3)
 ;; Signed info: Spec 2.2-2.3
 (defun instruction-add (instr)
-  (let* ((operands (retrieve-operands instr))
-         (a (us-to-s (first operands) 16))
-         (b (us-to-s (second operands) 16))
-         (result (+ a b))
-         (unsigned-result (s-to-us-16 result))
-         (dest (decoded-instruction-store instr)))
-    (warn-16-bit-size result)
-    (var-write dest unsigned-result)
-    (dbg t "ADD: ~A + ~A = ~A (0x~x -> var 0x~x)" a b result unsigned-result dest)
-    (advance-pc instr)
-    (values t "Added")))
+  (sinstruction-math instr #'+))
 
 ;; ADD: Signed 16-bit addition (Spec p102, 15.3)
 ;; Signed info: Spec 2.2-2.3
 (defun instruction-sub (instr)
+  (sinstruction-math instr #'-))
+
+;; Generalize math instruction. Takes a function and implements
+;; the rest of the instruction.
+(defun sinstruction-math (instr func)
   (let* ((operands (retrieve-operands instr))
          (a (us-to-s (first operands) 16))
          (b (us-to-s (second operands) 16))
-         (result (- a b))
+         (result (funcall func a b))
          (unsigned-result (s-to-us-16 result))
+         (inst-name (string-upcase (oci-name (decoded-instruction-opcode-info instr))))
          (dest (decoded-instruction-store instr)))
     (warn-16-bit-size result)
     (var-write dest unsigned-result)
-    (dbg t "SUB: ~A - ~A = ~A (0x~x -> var 0x~x)" a b result unsigned-result dest)
+    (dbg t "~A: ~A op ~A = ~A (0x~x -> var 0x~x)"
+         inst-name a b result unsigned-result dest)
     (advance-pc instr)
-    (values t "Subtracted")))
+    (values t inst-name)))
+
+
 
 ;; Tells us if we should take the branch
 ;; given the result of the comparison and the "branch-if" bit.
