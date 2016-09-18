@@ -903,8 +903,8 @@
            (format str "~4,'0X " (jump-destination instr))
            (setf ops (cdr ops))
            (setf op-types (cdr op-types)))
-          ;; First operand in STORE is a variable location
-          ((eql instr-name 'store)
+          ;; First operand in STORE, INC_CHK is a variable location
+          ((member instr-name '(store inc_chk))
            (format str "~A," (disassemble-operand 'variable (car ops)))
            (setf ops (cdr ops))
            (setf op-types (cdr op-types)))
@@ -1821,8 +1821,36 @@
               (logand (zobj-attributes obj)
                       (ash 1 shift-amt))))))
     (sinstruction-jx instr #'test-test_attr)))
-         
 
+;; INC_CHK (variable) value ?(label) - Spec page 86
+;; Increment a variable and branch if it exceeds the
+;; specified value.
+;; Page 161: In the seven opcodes that take indirect variable references
+;; (inc, dec, inc_chk, dec_chk, load, store, pull), an indirect reference
+;; to the stack pointer does not push or pull the top item of the stack -
+;; it is read or written in place.
+(defun instruction-inc_chk (instr)
+  ;; XXX: Check # of operands
+  (let* ((operands (retrieve-operands instr))
+         ;; FIXME: These local variable names suck
+         (var (first operands))
+         (value (second operands))
+         (varval (var-read var))
+         (incvarval (logand #xFFFF (1+ varval))))
+    ;; Do the increment
+    ;; Note: If we pop the stack with the read, we immediately re-push it
+    ;; with the write, so it's all good.
+    (var-write var incvarval)
+    (dbg t "INC_CHK: Incremented ~A (newval: ~A) and tested against ~A~%"
+         (disassemble-operand 'variable var) incvarval value)
+    ;; Now run the test
+    (flet ((test-inc_chk (operands)
+             ;; We ignore the operands and just return the test
+             ;; of our captured variables.
+             (> incvarval value)))
+      (sinstruction-jx instr #'test-inc_chk))))
+
+    
 ;; Implements all jump-if instructions by taking a test
 ;; function. The text function takes one argument, which is
 ;; the list of operands, and returns true if the test passes,
