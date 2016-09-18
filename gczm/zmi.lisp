@@ -233,6 +233,19 @@
   (+ (ash (aref *z-mem* loc) 8) ;; Positive ASH amounts are to the left
      (aref *z-mem* (1+ loc))))
 
+;; Write an (unsigned, 8-bit) byte to memory
+;; XXX: Make this safe for the actual memory size
+;; XXX: Check if the location is allowed to be written (Spec 1.1)
+(defun mem-byte-write (loc val)
+  (setf (aref *z-mem* loc) val))
+
+;; Write an (unsigned, 16-bit max) word to memory - MSB first
+;; XXX: Check the value fits into 16-bit unsigned size
+(defun mem-word-write (loc val)
+  ;; XXX: Assert val is 0-65535
+  (mem-byte-write loc (ash (logand val #xff00) -8)) ;; Negative is to the right
+  (mem-byte-write (1+ loc) (logand val #xff)))
+
 ;; Return a subset of memory as a vector starting at specified
 ;; location and including N bytes. This shares space with the
 ;; main z-machine memory so BE CAREFUL!!!
@@ -293,6 +306,22 @@
         ;; Reminder: XOR anything with 1 will invert it.
         (- (1+ (boole boole-xor num mask))))))
 
+;; Convert the signed "bits"-bit integer to an unsigned
+;; "bits"-bit two's compliment version. It omits any bits
+;; beyond the necessary ones.
+;; Some examples with 16-bits:
+;; -1     -> #xffff
+;; -32768 -> #x8000
+;; 32767  -> #x7fff
+;; 32768  -> #x8000
+;; http://clhs.lisp.se/Body/f_logand.htm
+(defun s-to-us (anum bits)
+  (let* ((mask (1- (ash 1 bits)))) ; An all 1's bit mask of bits bits
+    (logand anum mask)))
+
+;; Fixed 16-bit version of the above
+(defun s-to-us-16 (anum)
+  (logand anum #xffff))
   
 ;; Routine Frames ---------------------------------------------------------
 
@@ -1101,6 +1130,28 @@
             :interactive restart-read-new-value
             value)))))
 
+;; Writes a local variable from the current stack frame.
+;; which must be between 0 and 14.
+;; Signals a condition if there is no such local variable.
+;; XXX: Validate variable within 16-bit range
+(defun var-local-write (which value)
+  (let* ((frame (cur-zmrs))
+         (locals (zmrs-locals frame)))
+    (if (and (< which (length locals)) (>= which 0))
+        (setf (aref locals which) value)
+        (restart-case
+            (progn
+              (dbg t "Error: Cannot write ~A to unavailable local ~A in ~A~%"
+                   value which locals)
+              (error 'missing-local-variable
+                     :message
+                     (format nil "Cannot write ~A to non-exitent local ~A" value which)))
+          (ignore ()
+            :report "Ignore"
+            nil)
+          ;; TODO: Add more restarts? Pick different local to write to?
+          ))))
+
 ;; Reads a global variable (Spec 6.2)
 ;; which must be between 0 and 239 (0xEF)
 (defun var-global-read (which)
@@ -1121,6 +1172,27 @@
             :interactive restart-read-new-value
             value)))))
 
+;; Writes a global variable (Spec 6.2) MSB first
+;; Variable number must be between 0 and 239 (0xEF)
+;; Value must be 0-65535
+;; Conditions could be raised...
+(defun var-global-write (which value)
+  ;; TODO: Precalculate and cache the base
+  (let* ((global-base (mem-word +ml-loc-globals+)))
+    (if (and (>= which 0) (<= which #xEF))
+        (mem-word-write (+ global-base (* 2 which)) value)
+        (restart-case
+            (progn
+              (dbg t "Error: No such global variable 0x~x to write 0x~x~%" which value)
+              (error 'missing-global-variable
+                     :message (format nil "No such global variable: 0x~x to write 0x~x"
+                                      which value)))
+          (ignore ()
+            :report "Ignore"
+            0)
+          ;; TODO: Other possible restarts
+          ))))
+
 ;; Reads the specified variable (single byte) and returns it.
 ;; Spec 4.2.2
 ;; This can raise several conditions:
@@ -1140,6 +1212,22 @@
     (t
      (var-global-read (- which #x10)))))
 
+;; Writes to a variable location (Spec 4.6)
+;; 00      - pushes onto the stack
+;; 01 - 0f - local variables
+;; 10 - ff - global variables
+;; This can signal conditions.
+(defun var-write (which value)
+  (cond
+    ;; Push the stack
+    ((= which 0)
+     (push-stack value))
+    ;; Write a local variable from the current frame
+    ((and (>= which #x01) (<= which #x0f))
+     (var-local-write (1- which) value))
+    ;; Write a global variable
+    (t
+     (var-global-write (- which #x10) value))))
 
 ;; Instruction Implementations ----------------------------------
 
@@ -1231,6 +1319,8 @@
              collect (if a (car a) l)))
          ;; Create our next stack frame
          (newframe (new-zmrs)))
+    ;; XXX: CODE ME: Call to packed address 0 should do nothing and just
+    ;; return false (0). Spec 6.4.3
     (dbg t "CALL: Routine address: 0x~x, # args: ~A, # locals ~A, routine start pc: 0x~x~%"
             raddr (length arguments) numlocals r-pc)
     (dbg t "CALL: Default locals: ~A~%" localdefaults)
@@ -1246,11 +1336,22 @@
     ;; And we're done
     (values t nil)))
 
+;; Prints a warning if the number is outside the
+;; range of a normal 16-bit number
+(defun warn-16-bit-size (num)
+  (when (or (< num -32768) (> num 32767))
+    (dbg t "Warning: Value outside of signed 16-bit range: ~A~%" num)))
+
 ;; ADD: Signed 16-bit addition (Spec p79, 15.3)
-#|
+;; Signed info: Spec 2.2-2.3
 (defun instruction-add (instr)
-  )
-|#
+  (let* ((operands (retrieve-operands instr))
+         (a (us-to-s (first operands) 16))
+         (b (us-to-s (second operands) 16))
+         (sum (+ a b))
+         (unsigned-sum (s-to-us-16 sum)))
+    (warn-16-bit-size sum)
+    (var-write (decoded-instruction-store instr) unsigned-sum)))
 
 ;; No instruction provided (should never happen)
 (defun sinstruction-nil (instr)
