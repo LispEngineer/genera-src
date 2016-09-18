@@ -8,3 +8,4 @@
 
 # Sometimes I save the slime buffer...
 **/\*slime-repl\ sbcl\*
+**/.#\*slime-repl\ sbcl\*

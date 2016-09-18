@@ -1736,6 +1736,23 @@
               (= (car operands) 0)))))
     (sinstruction-jx instr #'test-jz)))
 
+;; TEST_ATTR: Branch if object has attribute. (Spec page 103)
+;; Operands: object attribute
+(defun instruction-test_attr (instr)
+  ;; XXX: Check # of operands for exactly 2
+  (flet ((test-test_attr (operands)
+           (let* ((obj-id (first operands))
+                  (attrib (second operands))
+                  (obj    (load-object obj-id))
+                  (shift-amt (- 31 attrib)))
+                   
+             ;; Attribute 0 is the top bit but 31 is the bottom bit.
+             (nonzerop
+              (logand (zobj-attributes obj)
+                      (ash 1 shift-amt))))))
+    (sinstruction-jx instr #'test-test_attr)))
+         
+
 ;; Implements all jump-if instructions by taking a test
 ;; function. The text function takes one argument, which is
 ;; the list of operands, and returns true if the test passes,
