@@ -1270,6 +1270,11 @@
     (dbg t "Retrieved operands: ~A~%" retval)
     retval))
 
+;; Moves to the next instruction assuming no branches, etc.
+(defun advance-pc (instr)
+  (set-pc (+ (decoded-instruction-memory-location instr)
+             (decoded-instruction-length instr))))
+
 ;; The first instruction in Zork 1: CALL
 ;; If the routine is 0, we do nothing and "return"/store false/zero.
 ;; The routine address is a "packed address" which is located at
@@ -1349,9 +1354,14 @@
          (a (us-to-s (first operands) 16))
          (b (us-to-s (second operands) 16))
          (sum (+ a b))
-         (unsigned-sum (s-to-us-16 sum)))
+         (unsigned-sum (s-to-us-16 sum))
+         (dest (decoded-instruction-store instr)))
     (warn-16-bit-size sum)
-    (var-write (decoded-instruction-store instr) unsigned-sum)))
+    (var-write dest unsigned-sum)
+    (dbg t "Add: ~A + ~A = ~A (0x~x -> var 0x~x)" a b sum unsigned-sum dest)
+    (advance-pc instr)
+    (values t nil)))
+  
 
 ;; No instruction provided (should never happen)
 (defun sinstruction-nil (instr)
