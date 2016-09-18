@@ -1344,6 +1344,30 @@
     (values t "Called")))
 
 
+;; Handles returning the specified value, storing it in the
+;; location in the stack frame's caller's instruction,
+;; unwinding the stack frame and setting the PC to the
+;; proper location (from the caller's instruction).
+(defun sinstruction-ret (instr value)
+  (declare (ignore instr))
+  (let* ((frame (pop-call-stack)) ; Our removed frame
+         (finst (zmrs-instr frame)) ; Our calling instruction
+         (retdest (decoded-instruction-store finst))) ; Where to store return value
+    ;; XXX: Returning from the last frame is an error
+    (dbg t "RET-internal: Returning 0x~x into variable 0x~x (caller address 0x~x)~%"
+         value retdest (decoded-instruction-memory-location finst))
+    (var-write retdest value)
+    (set-pc (+ (decoded-instruction-memory-location finst)
+               (decoded-instruction-length finst)))
+    (values t "Returned")))
+
+;; RET: Returns specified value from routine (Spec page 97)
+(defun instruction-ret (instr)
+  (let* ((operands (retrieve-operands instr)))
+    ;; XXX: Error if not exactly one operand
+    (sinstruction-ret instr (car operands))))
+         
+
 ;; MATH INSTRUCTIONS ------------------------------------------------------------
 
 
