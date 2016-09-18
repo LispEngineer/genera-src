@@ -1387,30 +1387,39 @@
 ;; JE: Check if all args are equal to the first one (or there are no args).
 ;; Errors if there is exactly one arg
 ;; (Spec page 86, 161)
-;; Branches - Spec 4.7
-;; Offset of 0 = Return false (0) (Spec 4.7.1)
-;; Offset of 1 = Return true (1)
-;; Otherwise, if branch, PC = instr-pc + instr-length + Offset - 2 (Spec 4.7.2)
 (defun instruction-je (instr)
-  (let* ((operands (retrieve-operands instr))
-         (a (first operands))
-         (i-pc  (decoded-instruction-memory-location instr))
-         (i-len (decoded-instruction-length instr))
-         (br-if (decoded-instruction-branch-if instr))
-         (offset (decoded-instruction-branch-offset instr)) ; Signed (!!!)
-         (all-equal
+  (flet ((test-je (operands)
+          ;; Implement the JE test here
           (cond
-            ((null a)) ; No args are always equal
+            ((null operands)) ; No args are always equal to each other
             ((= (length operands) 1)
              ;; XXX: CODE ME - raise condition for invalid # of args
              t)
             (t
-             (every (lambda (b) (= a b)) (cdr operands))))))
-    (dbg t "JE: ~A == ~A if ~A to ~A: Result ~A~%" a (cdr operands)
-         (if br-if "true" "false") offset (if all-equal "true" "false"))
+             (every (lambda (b) (= (car operands) b)) (cdr operands))))))
+    (sinstruction-jx instr #'test-je)))
+
+;; JZ: Jump if the argument is zero. (Spec page 87)
+;; SEE instruction-je for more details.
+
+;; Implements all jump-if instructions by taking a test
+;; function. The text function takes one argument, which is
+;; the list of operands, and returns true if the test passes,
+;; false otherwise. The test function is allowed to (and is
+;; encouraged to) raise conditions.
+(defun sinstruction-jx (instr testfunc)
+  (let* ((operands (retrieve-operands instr))
+         (i-pc  (decoded-instruction-memory-location instr))
+         (i-len (decoded-instruction-length instr))
+         (br-if (decoded-instruction-branch-if instr))
+         (offset (decoded-instruction-branch-offset instr)) ; Signed (!!!)
+         (inst-name (oci-name (decoded-instruction-opcode-info instr)))
+         (result (funcall testfunc operands)))
+    (dbg t "~A: ~A if ~A to ~A: Result ~A~%" (string-upcase inst-name) operands
+         (if br-if "true" "false") offset (if result "true" "false"))
     (cond
       ;; Don't branch
-      ((not (do-branch? all-equal br-if))
+      ((not (do-branch? result br-if))
        (advance-pc instr)
        (values t "Branch not taken"))
       ;; Return from current return with 0/false
