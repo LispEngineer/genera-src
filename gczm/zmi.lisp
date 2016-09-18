@@ -1543,7 +1543,7 @@
       ;; This should really just crash the whole program
       (restart-case
           (error 'invalid-operand-count :message
-                 (format nil "Got ~A operands, expected 3" (length operands)))
+                 (format nil "STOREW: Got ~A operands, expected 3" (length operands)))
         (ignore () :report "Ignore; store nothing"))
       (return-from instruction-storew (values nil "Invalid # of args")))
     (let* ((array-base (first operands))
@@ -1555,7 +1555,31 @@
       (mem-word-write ml-dest value)
       (advance-pc instr)
       (values t "Stored word"))))
-      
+
+;; Loadw (Spec page 88)
+;; Operands: array word-index
+;; Loads word value from memory at (array + 2 * word-index)
+;; and stores into specified variable
+(defun instruction-loadw (instr)
+  (let ((operands (retrieve-operands instr)))
+    (when (not (= 2 (length operands)))
+      ;; Raise condition for invalid number of args.
+      ;; This should really just crash the whole program
+      (restart-case
+          (error 'invalid-operand-count :message
+                 (format nil "LOADW: Got ~A operands, expected 2" (length operands)))
+        (ignore () :report "Ignore; load nothing"))
+      (return-from instruction-loadw (values nil "Invalid # of args")))
+    (let* ((array-base (first operands))
+           (array-index (second operands))
+           (var-dest (decoded-instruction-store instr))
+           (ml-source (+ array-base (* 2 array-index)))
+           (value (mem-word ml-source)))
+      (dbg t "LOADW: Loaded 0x~x from 0x~x (as ~x[~x]) into VAR 0x~x~%"
+           value ml-source array-base array-index var-dest)
+      (var-write var-dest value)
+      (advance-pc instr)
+      (values t "Loaded word"))))
 
 
 
