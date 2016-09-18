@@ -1358,10 +1358,60 @@
          (dest (decoded-instruction-store instr)))
     (warn-16-bit-size sum)
     (var-write dest unsigned-sum)
-    (dbg t "Add: ~A + ~A = ~A (0x~x -> var 0x~x)" a b sum unsigned-sum dest)
+    (dbg t "ADD: ~A + ~A = ~A (0x~x -> var 0x~x)" a b sum unsigned-sum dest)
     (advance-pc instr)
     (values t nil)))
-  
+
+;; Tells us if we should take the branch
+;; given the result of the comparison and the "branch-if" bit.
+;; Returns true if both are true or both are false
+(defun do-branch? (result branch-if)
+  (or (and result branch-if)
+      (and (not result) (not branch-if))))
+
+;; JE: Check if all args are equal to the first one (or there are no args).
+;; Errors if there is exactly one arg
+;; (Spec page 86, 161)
+;; Branches - Spec 4.7
+;; Offset of 0 = Return false (0) (Spec 4.7.1)
+;; Offset of 1 = Return true (1)
+;; Otherwise, if branch, PC = instr-pc + instr-length + Offset - 2 (Spec 4.7.2)
+(defun instruction-je (instr)
+  (let* ((operands (retrieve-operands instr))
+         (a (first operands))
+         (i-pc  (decoded-instruction-memory-location instr))
+         (i-len (decoded-instruction-length instr))
+         (br-if (decoded-instruction-branch-if instr))
+         (offset (decoded-instruction-branch-offset instr)) ; Signed (!!!)
+         (all-equal
+          (cond
+            ((null a)) ; No args are always equal
+            ((= (length operands) 1)
+             ;; XXX: CODE ME - raise condition for invalid # of args
+             t)
+            (t
+             (every (lambda (b) (= a b)) (cdr operands))))))
+    (dbg t "JE: ~A == ~A if ~A to ~A: Result ~A~%" a (cdr operands)
+         (if br-if "true" "false") offset (if all-equal "true" "false"))
+    (cond
+      ;; Don't branch
+      ((not (do-branch? all-equal br-if))
+       (advance-pc instr)
+       (values t "Branch not taken"))
+      ;; Return from current return with 0/false
+      ((= offset 0)
+       ;; XXX: CODE ME - return false
+       (values nil "Branch return 0 - not yet implemented")
+       )
+      ;; Return from current routine with 1/true
+      ((= offset 1)
+       (values nil "Branch return 1 - not yet implemented")
+       ;; XXX: CODE ME - return true
+       )
+      ;; Take branch - calculate new location
+      (t
+       (set-pc (+ i-pc i-len offset -2))
+       (values t "Branched")))))
 
 ;; No instruction provided (should never happen)
 (defun sinstruction-nil (instr)
