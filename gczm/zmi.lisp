@@ -582,6 +582,14 @@
     (initialize-call-stack)
     ;; Set the initial Program Counter (Spec 5.5)
     (set-pc init-pc)
+    ;; Set the initial flags (Spec 11.1) (p52 of zmach06.pdf)
+    ;; Status line NOT available: header byte 1 bit 4            0
+    ;; Screen-splitting available: header byte 1 bit 5           0
+    ;; Variable pitch font not default: header byte 1 bit 6      0
+    ;; So we need to clear bits 4-5-6
+    (mem-byte-write
+     (logand (mem-byte +ml-flags-1+) #x1F))
+    ;; XXX: Set standard revision number, header byte 32
     ;; Success
     (values t (format nil "Loaded ~A release ~D serial ~A" filename rel serial))))
 
@@ -1915,6 +1923,25 @@
       (advance-pc instr)
       (values t "Loaded word"))))
 
+;; LOADB array byte (Spec page 88)
+;; Loads byte value into memory from (array + byte) to the result variable
+(defun instruction-loadb (instr)
+  (let ((operands (retrieve-operands instr)))
+    (when (not (= 2 (length operands)))
+      ;; Raise condition for invalid number of args.
+      ;; This should really just crash the whole program
+      (error 'invalid-operand-count :message
+             (format nil "LOADB: Got ~A operands, expected 2" (length operands))))
+    (let* ((array-base (first operands))
+           (array-index (second operands))
+           (var-dest (decoded-instruction-store instr))
+           (ml-source (+ array-base (* array-index)))
+           (value (mem-byte ml-source)))
+      (dbg t "LOADB: Loaded 0x~x from 0x~x (as ~x[~x]) into VAR 0x~x~%"
+           value ml-source array-base array-index var-dest)
+      (var-write var-dest value)
+      (advance-pc instr)
+      (values t "Loaded byte"))))
 
 
 ;; PROPERTY INSTRUCTIONS ------------------------------------------------
