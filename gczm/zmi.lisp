@@ -2110,6 +2110,32 @@
       (values t "Loaded byte"))))
 
 
+;; PUSH value (Spec page 93)
+;; "Pushes a value onto the game stack."
+;; Presumably it means the current call frame's stack
+(defun instruction-push (instr)
+  (let* ((operands (retrieve-check-operands instr 1))
+         (value (car operands)))
+    (push-stack value)
+    (advance-pc instr)
+    (dbg t "PUSH: ~A~%" value)
+    (values t "Pushed")))
+
+;; PULL value (Spec page 77, 93, 161)
+;; The operand is a variable ID to write the pull'd value from
+(defun instruction-pull (instr)
+  (let* ((operands (retrieve-check-operands instr 1))
+         (variable (car operands))
+         (value    (pop-stack)))
+    (var-write variable value)
+    (advance-pc instr)
+    (dbg t "PULL: ~A -> VAR 0x~x~%" value variable)
+    (values t "Pulled")))
+
+
+  
+
+
 ;; PROPERTY INSTRUCTIONS ------------------------------------------------
 
 
