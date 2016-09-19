@@ -1667,7 +1667,15 @@
                   value)))))
     ;; And do our actual return
     (sinstruction-ret instr retval)))
-         
+
+;; RTRUE: Returns true (1) from current routine (Spec page 98)
+(defun instruction-rtrue (instr)
+  (sinstruction-ret instr 1))
+
+;; RFALSE: Returns false (0) from current routine (Spec page 98)
+(defun instruction-rfalse (instr)
+  (sinstruction-ret instr 0))
+
 
 ;; MATH INSTRUCTIONS ------------------------------------------------------------
 
@@ -1760,6 +1768,22 @@
     (dbg t "PRINT_NUM: 0x~X as ~d~%" (first operands) (us-to-s (first operands) 16))
     (advance-pc instr)
     (values t "PRINT_NUM")))
+
+;; PRINT_CHAR char-code (Spec page 92, 7.1.2.2.1)
+;; char-code is a ZSCII character that must be in the range 0-1023.
+;; We're going to assume ZSCII is just ASCII for the time being.
+(defun instruction-print_char (instr)
+  (let ((operands (retrieve-operands instr)))
+    (when (not (= 1 (length operands)))
+      ;; Raise condition for invalid number of args.
+      ;; This should really just crash the whole program
+      (error 'invalid-operand-count :message
+             (format nil "PRINT_CHAR: Got ~A operands, expected 1" (length operands))))
+    (write-char (code-char (first operands)) *z-output*)
+    (dbg t "PRINT_CHAR: 0x~X as ~A~%" (first operands) (code-char (first operands)))
+    (advance-pc instr)
+    (values t "PRINT_NUM")))
+
 
 
 ;; BRANCH INSTRUCTIONS -----------------------------------------------------
