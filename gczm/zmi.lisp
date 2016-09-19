@@ -1876,6 +1876,18 @@
     (advance-pc instr)
     (values t "PRINT_NUM")))
 
+;; PRINT_OBJ (Spec page 92)
+;; Prints the short-name of the specified object
+;; XXX: This initial implementation only outputs to *z-output*
+;; XXX: Do buffering (reset the buffering count)
+(defun instruction-print_obj (instr)
+  (let* ((operands (retrieve-check-operands instr 1))
+         (object-id (first operands))
+         (object (load-object object-id)))
+    (write-string (zobj-short-name object) *z-output*)
+    (dbg t "PRINT_OBJ: Object ~d as \"~A\"~%" object-id (zobj-short-name object))
+    (advance-pc instr)
+    (values t "PRINT_OBJ")))
 
 
 ;; BRANCH INSTRUCTIONS -----------------------------------------------------
@@ -1937,6 +1949,16 @@
               (logand (zobj-attributes obj)
                       (ash 1 shift-amt))))))
     (sinstruction-jx instr #'test-test_attr)))
+
+;; JIN obj1 obj2 (Spec page 87)
+;; Jump if obj1 is a direct child of obj2
+;; (i.e., obj1.parent == obj2)
+(defun instruction-jin (instr)
+  (flet ((test-jin (operands)
+           (let* ((obj1    (load-object (first operands)))
+                  (obj2-id (second operands)))
+             (= obj2-id (zobj-parent obj1)))))
+    (sinstruction-jx instr #'test-jin)))
 
 ;; INC_CHK (variable) value ?(label) - Spec page 86
 ;; Increment a variable and branch if it exceeds the
@@ -2150,7 +2172,7 @@
   
 
 
-;; PROPERTY INSTRUCTIONS ------------------------------------------------
+;; OBJECT INSTRUCTIONS --------------------------------------------------
 
 
 ;; PUT_PROP object property value
@@ -2290,6 +2312,18 @@
     (dbg t "SET_ATTR: Set attribute ~d on object ~d~%" attribute object-id)
     (values t "SET_ATTR")))
 
+
+;; GET_PARENT object -> (result) (Spec page 85)
+(defun instruction-get_parent (instr)
+  (let* ((operands  (retrieve-check-operands instr 1))
+         (object-id (first operands))
+         (object    (load-object object-id))
+         (parent-id (zobj-parent object)))
+    (var-write (decoded-instruction-store instr) parent-id)
+    (advance-pc instr)
+    (dbg t "GET_PARENT: Got parent ~d of object ~d stored into VAR 0x~x~%"
+         parent-id object-id (decoded-instruction-store instr))))
+           
 
 ;; META-INSTRUCTIONS ----------------------------------------------------
 
