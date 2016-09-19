@@ -2079,6 +2079,48 @@
   
 
 
+;; INSERT_OBJ object destination (Spec page 86)
+;;
+;; From Spec:
+;; Moves object O to become the first child of the destination object D.
+;; (Thus, after the operation the child of D is O, and the sibling of O
+;; is whatever was previously the child of D.) All children of O move
+;; with it. (Initially O can be at any point in the object tree; it may
+;; legally have parent zero.)
+;;
+;; From zmach06e.pdf page 41:
+;; remove_obj obj — 1OP:$9
+;; Remove obj from its current location in the object tree; all its children move with it.
+;;   The given object is removed from between its siblings (closing the sibling chain
+;; again), and is changed to have no parent and no siblings. If obj has no parent –
+;; and therefore no siblings – nothing happens.
+;;
+;; insert_obj obj1 obj2 — 2OP:$E
+;; Remove obj1 from its current location in the object tree, and insert it
+;; as the first child of obj 2, before all other children. All obj1’s children move with it.
+;;  Object obj1 is first removed from its current location, as with remove_obj obj1.
+;; It is then made the (first) child of obj2, with the formerly first child as its
+;; (next) sibling.
+;;   Note that a consistent non-recursive object tree is made recursive by this
+;; instruction if and only if obj 1 occurs in the (finite) parent chain that begins
+;; with obj 2. In this case the emulator might print a warning message, since this
+;; is probably a bug.
+;;
+;; Algorithm: (note that each of these steps needs to be broken down further)
+;; 0. 
+;; 1. Delink "object" from its parent
+;;    a. If "object"'s parent's child is "object", then just set "object"'s
+;;       parent's child to "object"'s sibling (i.e., it's the parent's first child)
+;;       IF object.parent.child == object THEN object.parent.child = object.sibling
+;; 2. Change the parent of "object" to "destination"
+;;    object.parent = destination
+;; 3. Make "object" the first child of "destination"
+;;    a. Set the sibling of "object" to the (first) child of "destination"
+;;       object.sibling = destination.child
+;;    b. Set the child of the "destination" to "object"
+;;       destination.child = object
+
+
 
 ;; META-INSTRUCTIONS ----------------------------------------------------
 
