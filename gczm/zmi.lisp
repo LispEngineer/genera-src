@@ -362,6 +362,11 @@
 ;; See: zmach06e.pdf Chapter 3.4
 ;; See: Spec Chapter 12
 
+;; NOTE CONVENTION:
+;;    obj- takes an object ID
+;; object- takes an object ID
+;;   zobj- takes a zobj
+
 ;; A structure which holds information about a z-object's properties
 ;; Spec 12.4.1
 (defstruct zprop
@@ -390,6 +395,12 @@
   first-prop-loc  ; Where the first actual property is in memory
   properties      ; An list of properties (zprops)
   )
+
+;; Offsets from the start of an object's location in the object tree
+;; for the various pieces (Spec 12.3.1)
+(defparameter +zobj-parent-ml-offset+  4)
+(defparameter +zobj-sibling-ml-offset+ 5)
+(defparameter +zobj-child-ml-offset+   6)
 
 ;; Loads a property from the specified location,
 ;; or returns nil if the size byte at the location is 0.
@@ -496,7 +507,74 @@
     (error 'invalid-object :message
            (format nil "No such object number: ~A" which)))
   (+ (object-tree-loc) (* +object-tree-entry-size+ (1- which))))
-  
+
+
+;; Sets the child (parent, sibling) of the zobj to child-id
+;; Spec 12.3.1
+(defun zobj-set-child (zo id)
+  ;; XXX: Validate id is in allowable range
+  ;; Update the zobj (just in case)
+  (setf (zobj-child zo) id)
+  ;; Update memory
+  (mem-byte-write (+ (zobj-tree-loc zo) +zobj-child-ml-offset+) id))
+(defun zobj-set-parent (zo id)
+  ;; XXX: Validate id is in allowable range
+  (setf (zobj-parent zo) id)
+  (mem-byte-write (+ (zobj-tree-loc zo) +zobj-parent-ml-offset+) id))
+(defun zobj-set-sibling (zo id)
+  ;; XXX: Validate id is in allowable range
+  (setf (zobj-sibling zo) id)
+  (mem-byte-write (+ (zobj-tree-loc zo) +zobj-sibling-ml-offset+) id))
+
+;; Removes the specified object from its parent (or parent's sibling chain).
+;; Optionally (but by default) sets the object's parent and siblings to none.
+;; This is not remotely efficient.
+;; Returns nothing.
+;; TESTS:
+;;   1. Object is child of parent
+;;      a. With/without siblings
+;;   2. Object is in sibling-chain of parent
+;;   3. Object is at the end of sibling-chain of parent
+(defun object-remove (object-id &optional (and-clear t))
+  (when (= object-id 0)
+    ;; XXX: Give an alert?
+    (return-from object-remove))
+  (let* ((object (load-object object-id))
+         (parent-id (zobj-parent object))
+         (i nil)) ; An object we use to iterate
+    (when (= 0 parent-id)
+      ;; Object already has no parent, so nothing to do
+      (return-from object-remove))
+    ;; Load the parent
+    (setf i (load-object parent-id))
+    ;; If the parent's child is us, it's easy
+    ;; Otherwise it's not as easy
+    (if (= object-id (zobj-child i))
+        ;; Set the parent's child to the object's sibling
+        (zobj-set-child i (zobj-sibling object))
+        ;; Otherwise, we need to walk the sibling chain <sigh>
+        ;; and find the sibling who's sibling is object-id
+        (progn
+          ;; Load the first sibling in the chain (the parent's child)
+          ;; XXX: Check if the parent's child is 0!
+          (setf i (load-object (zobj-child i)))
+          (loop
+             (when (= (zobj-sibling i) object-id)
+               ;; We found the sibling containing object, bypass object
+               (zobj-set-sibling i (zobj-sibling object))
+               (return))
+             (when (= (zobj-sibling i) 0)
+               ;; ERROR: We're not in our parent's sibling chain!
+               ;; XXX: Raise a condition, but ignore
+               (return))
+             ;; Try the next sibling
+             (setf i (load-object (zobj-sibling i))))))
+    (when and-clear
+      ;; Clear the object's parent and sibling to be safe
+      (zobj-set-parent  object 0)
+      (zobj-set-sibling object 0))))
+
+
 ;; Routine Frames ---------------------------------------------------------
 
 ;; Creates a new zmrs structure and sets up appropriate empty values of all
@@ -1869,6 +1947,7 @@
          (disassemble-operand 'variable var) incvarval value)
     ;; Now run the test
     (flet ((test-inc_chk (operands)
+             (declare (ignore operands))
              ;; We ignore the operands and just return the test
              ;; of our captured variables.
              (> incvarval value)))
@@ -2076,7 +2155,19 @@
            value obj-id prop-id)
       (advance-pc instr)
       (values t "PUT_PROP"))))
-  
+
+;; Helper: Checks that we have the right number of operands.
+;; Returns the decoded operands.
+(defun retrieve-check-operands (instr numops)
+  (let ((operands (retrieve-operands instr)))
+    (when (not (= numops (length operands)))
+      ;; Raise condition for invalid number of args.
+      ;; This should really just crash the whole program.
+      (error 'invalid-operand-count :message
+             (format nil "~A: Got ~A operands, expected ~A"
+                     (string-upcase (oci-name (decoded-instruction-opcode-info instr)))
+                     (length operands) numops)))
+    operands))
 
 
 ;; INSERT_OBJ object destination (Spec page 86)
@@ -2112,6 +2203,9 @@
 ;;    a. If "object"'s parent's child is "object", then just set "object"'s
 ;;       parent's child to "object"'s sibling (i.e., it's the parent's first child)
 ;;       IF object.parent.child == object THEN object.parent.child = object.sibling
+;;    b. Otherwise, walk the sibling-chain of the parent to find which object has
+;;       "object" as a sibling, and set that object's sibling to "object"'s sibling
+;;       (hard to put in a simple x.y.z = a.b.c)
 ;; 2. Change the parent of "object" to "destination"
 ;;    object.parent = destination
 ;; 3. Make "object" the first child of "destination"
@@ -2119,7 +2213,32 @@
 ;;       object.sibling = destination.child
 ;;    b. Set the child of the "destination" to "object"
 ;;       destination.child = object
-
+(defun instruction-insert_obj (instr)
+  (let* ((operands (retrieve-check-operands instr 2))
+         (object-id (first operands))
+         (dest-id   (second operands))
+         (object    nil)  ; Will load later
+         (dest      nil)) ; Will load later
+    ;; XXX: Validate that the objects are within range 0-255
+    ;; Handle the 0 destination specially... Maybe an error?
+    ;; Otherwise it's just like remove_obj I think.
+    (if (= 0 dest-id)
+        (object-remove object-id)
+        ;; Otherwise, do the full algo above
+        (progn
+          ;; 1. First remove "object-id" from it's parent
+          (object-remove object-id nil) ; We'll set the parent and siblings next
+          (setf object (load-object object-id))
+          (setf dest   (load-object dest-id))
+          ;; 2. Change the object's parent to the destination
+          (zobj-set-parent object dest-id)
+          ;; 3. Change the object's parent to have the object
+          (zobj-set-sibling object (zobj-child dest))
+          (zobj-set-child   dest   object-id)))
+    (dbg t "INSERT_OBJ: Moved object ~A to parent ~A~%" object-id dest-id)
+    (advance-pc instr)
+    (values t "INSERT_OBJ")))
+    
 
 
 ;; META-INSTRUCTIONS ----------------------------------------------------
@@ -2259,8 +2378,8 @@
   (trace-run-until 'no-such-instruction-name-will-be-found))
 
 ;; Runs the program with tracing until we get to a specified instruction
-(defun trace-run-until (inst-name &optional (show-disassembly t))
-  (let ((+debug+ nil))
+(defun trace-run-until (inst-name &optional (show-disassembly t) (show-debug nil))
+  (let ((+debug+ show-debug))
     (loop
        (handler-case
            (let* ((next-instr (decode-instruction *z-pc*))
