@@ -943,6 +943,14 @@
   text-loc          ; If has string: start memory location (Spec 4.8)
   text-data         ; If has string: raw string binary as vector
   text-ascii        ; If has string: this is the local computer text (ASCII?) form
+  ;; ------------------------------------------------------------------------
+  ;; Everything below here is context dependent and used by the z-machine
+  ;; interpreter. Populating these values CAN HAVE SIDE EFFECTS on the
+  ;; global state of the z-machine, most specifically, due to popping
+  ;; values off the local call frame stack.
+  ;; See: retrieve-operands function
+  rop-cache%        ; Retrieved operand cache
+  rop-is-cached%    ; Have we retrieved our operands? nil if not, t if so
   )
 
 
@@ -1613,7 +1621,6 @@
   (set-pc (+ (decoded-instruction-memory-location instr)
              (decoded-instruction-length instr))))
 
-
 ;; Returns a list of all the operands by value, i.e.,
 ;; dereference any variable operands. (Spec 4.2.X)
 ;; For const-large and const-small, this means just return their
@@ -1629,7 +1636,21 @@
 ;; Operands are always evaluated from first to last, so if the stack
 ;; is read twice, it's popped twice IN ORDER, e.g.,
 ;; SUB SP SP means subtract 2nd top stack item from top stack item
+;;
+;; If we have already retrieved the operands for this instruction
+;; before, we return the cached ones. Otherwise, we retrieve them,
+;; cache them, and return them.
 (defun retrieve-operands (instr)
+  ;; Check cache first
+  (when (decoded-instruction-rop-is-cached% instr)
+    (let ((retval (decoded-instruction-rop-cache% instr)))
+      (dbg t "Retrieved (cached) operands ~A ~A: ~A~%"
+           (decoded-instruction-operand-types instr)
+           (decoded-instruction-operands      instr)
+           retval)
+      (return-from retrieve-operands retval)))
+
+  ;; Load operands and cache them
   (dbg t "Retrieving operands for ~A: ~A~%"
        (decoded-instruction-operand-types instr)
        (decoded-instruction-operands      instr))
@@ -1644,7 +1665,9 @@
                 ((eql type 'const-large) opval)
                 ((eql type 'variable) (var-read opval)) ;; Can raise a condition
                 (t (raise-omitted-operand instr)))))) ;; Should never happen (!)
-    (dbg t "Retrieved operands: ~A~%" retval)
+    (dbg t "Retrieved and cached operands: ~A~%" retval)
+    (setf (decoded-instruction-rop-cache% instr) retval)
+    (setf (decoded-instruction-rop-is-cached% instr) t)
     retval))
 
 ;; We attempted to use an omitted operand
@@ -1661,6 +1684,22 @@
       :report "Ignore error, use specified value for operand"
       :interactive restart-read-new-value
       value)))
+
+
+;; Helper: Checks that we have the right number of operands.
+;; Returns the decoded operands.
+(defun retrieve-check-operands (instr numops)
+  (let ((operands (retrieve-operands instr)))
+    (when (not (= numops (length operands)))
+      ;; Raise condition for invalid number of args.
+      ;; This should really just crash the whole program.
+      (error 'invalid-operand-count :message
+             (format nil "~A: Got ~A operands, expected ~A"
+                     (string-upcase (oci-name (decoded-instruction-opcode-info instr)))
+                     (length operands) numops)))
+    operands))
+
+
 
 ;; CALL FRAME INSTRUCTIONS ---------------------------------------------------
 
@@ -2295,19 +2334,6 @@
            value obj-id prop-id)
       (advance-pc instr)
       (values t "PUT_PROP"))))
-
-;; Helper: Checks that we have the right number of operands.
-;; Returns the decoded operands.
-(defun retrieve-check-operands (instr numops)
-  (let ((operands (retrieve-operands instr)))
-    (when (not (= numops (length operands)))
-      ;; Raise condition for invalid number of args.
-      ;; This should really just crash the whole program.
-      (error 'invalid-operand-count :message
-             (format nil "~A: Got ~A operands, expected ~A"
-                     (string-upcase (oci-name (decoded-instruction-opcode-info instr)))
-                     (length operands) numops)))
-    operands))
 
 
 ;; INSERT_OBJ object destination (Spec page 86)
