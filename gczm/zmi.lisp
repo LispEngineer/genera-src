@@ -1733,12 +1733,12 @@
 ;; unwinding the stack frame and setting the PC to the
 ;; proper location (from the caller's instruction).
 (defun sinstruction-ret (instr value)
-  (declare (ignore instr))
   (let* ((frame (pop-call-stack)) ; Our removed frame
          (finst (zmrs-instr frame)) ; Our calling instruction
          (retdest (decoded-instruction-store finst))) ; Where to store return value
     ;; XXX: Returning from the last frame is an error
-    (dbg t "RET-internal: Returning 0x~x into variable 0x~x (caller address 0x~x)~%"
+    (dbg t "~A: Returning 0x~x into variable 0x~x (caller address 0x~x)~%"
+         (string-upcase (oci-name (decoded-instruction-opcode-info instr)))
          value retdest (decoded-instruction-memory-location finst))
     (var-write retdest value)
     (set-pc (+ (decoded-instruction-memory-location finst)
@@ -1770,6 +1770,13 @@
                   value)))))
     ;; And do our actual return
     (sinstruction-ret instr retval)))
+
+;; RET_POPPED (Spec page 98)
+;; Pops top of stack and returns that.
+;; (This is equivalent to ret sp, but is one byte cheaper.)
+(defun instruction-ret_popped (instr)
+  ;; Reading variable 0 will pop the stack, so just do that.
+  (sinstruction-ret instr (var-read #x00)))
 
 ;; RTRUE: Returns true (1) from current routine (Spec page 98)
 (defun instruction-rtrue (instr)
@@ -2027,6 +2034,17 @@
              (> incvarval value)))
       (sinstruction-jx instr #'test-inc_chk))))
 
+
+;; JL a b ?(label) - Spec page 87
+;; Jump if a < b (using a signed 16-bit comparison).
+(defun instruction-jl (instr)
+  ;; FIXME: Ugly - incorporate the op # check into sinstruction-jx?
+  (retrieve-check-operands instr 2) ; Discard result, just check for 2 operands
+  (flet ((test-jl (operands)
+           (let* ((a (us-to-s (first  operands) 16))
+                  (b (us-to-s (second operands) 16)))
+             (< a b))))
+    (sinstruction-jx instr #'test-jl)))
     
 ;; Implements all jump-if instructions by taking a test
 ;; function. The text function takes one argument, which is
