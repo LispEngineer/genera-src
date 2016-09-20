@@ -1803,6 +1803,28 @@
 (defun instruction-and (instr)
   (sinstruction-math-unsigned instr #'logand))
 
+;; INC (variable) value ?(label) - Spec page 86
+;; Increment variable by 1. (This is signed, so -1 increments to 0.)
+;; See page 77 for notes on the variable (which is encoded as a small constant).
+;; Page 161: In the seven opcodes that take indirect variable references
+;; (inc, dec, inc_chk, dec_chk, load, store, pull), an indirect reference
+;; to the stack pointer does not push or pull the top item of the stack -
+;; it is read or written in place.
+(defun instruction-inc (instr)
+  (let* ((operands (retrieve-check-operands instr 1))
+         ;; FIXME: These local variable names suck
+         (var (first operands))
+         (varval (var-read var))
+         (incvarval (logand #xFFFF (1+ varval)))) ; SIGNED
+    ;; Do the increment
+    ;; Note: If we pop the stack with the read, we immediately re-push it
+    ;; with the write, so it's all good.
+    (var-write var incvarval)
+    (dbg t "INC: Incremented ~A (newval: ~A)~%"
+         (disassemble-operand 'variable var) incvarval)
+    (advance-pc instr)
+    (values t "INC")))
+
 ;; Generalize math instruction. Takes a function and implements
 ;; the rest of the instruction.
 (defun sinstruction-math (instr func)
@@ -2340,14 +2362,14 @@
     (dbg t "GET_PARENT: Got parent ~d of object ~d stored into VAR 0x~x~%"
          parent-id object-id (decoded-instruction-store instr))))
 
-;; GET_child object -> (result) ?(label) (Spec page 84)
+;; GET_CHILD object -> (result) ?(label) (Spec page 84)
 ;; Get first object contained in given object, branching if this exists,
 ;; i.e. is not nothing (i.e., is not 0).
 (defun instruction-get_child (instr)
   (let* ((operands  (retrieve-check-operands instr 1))
          (object-id (first operands))
          (object    (load-object object-id))
-         (child-id  (zobj-parent object))
+         (child-id  (zobj-child object))
          (result-v  (decoded-instruction-store instr)))
     (dbg t "GET_CHILD: Got child ~d of object ~d stored into VAR 0x~x~%"
          child-id object-id result-v)
@@ -2357,6 +2379,24 @@
              (declare (ignore operands))
              (nonzerop child-id)))
       (sinstruction-jx instr #'test-get_child))))
+
+;; GET_SIBLING object -> (result) ?(label) (Spec page 85)
+;; Get next object in tree, branching if this exists, i.e. is not 0.
+;; (Note, nigh identical to get_child.)
+(defun instruction-get_sibling (instr)
+  (let* ((operands  (retrieve-check-operands instr 1))
+         (object-id (first operands))
+         (object    (load-object object-id))
+         (sib-id    (zobj-sibling object))
+         (result-v  (decoded-instruction-store instr)))
+    (dbg t "GET_SIBLING: Got sibling ~d of object ~d stored into VAR 0x~x~%"
+         sib-id object-id result-v)
+    (var-write result-v sib-id)
+    ;; This is a branch too, so let's do the branch test
+    (flet ((test-get_sibling (operands)
+             (declare (ignore operands))
+             (nonzerop sib-id)))
+      (sinstruction-jx instr #'test-get_sibling))))
 
 ;; GET_PROP object-id property -> (result) (Spec page 85)
 ;; Read property from object (resulting in the default value if it had
