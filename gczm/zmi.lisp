@@ -2323,7 +2323,59 @@
     (advance-pc instr)
     (dbg t "GET_PARENT: Got parent ~d of object ~d stored into VAR 0x~x~%"
          parent-id object-id (decoded-instruction-store instr))))
-           
+
+;; GET_child object -> (result) ?(label) (Spec page 84)
+;; Get first object contained in given object, branching if this exists,
+;; i.e. is not nothing (i.e., is not 0).
+(defun instruction-get_child (instr)
+  (let* ((operands  (retrieve-check-operands instr 1))
+         (object-id (first operands))
+         (object    (load-object object-id))
+         (child-id  (zobj-parent object))
+         (result-v  (decoded-instruction-store instr)))
+    (dbg t "GET_CHILD: Got child ~d of object ~d stored into VAR 0x~x~%"
+         child-id object-id result-v)
+    (var-write result-v child-id)
+    ;; This is a branch too, so let's do the branch test
+    (flet ((test-get_child (operands)
+             (declare (ignore operands))
+             (nonzerop child-id)))
+      (sinstruction-jx instr #'test-get_child))))
+
+;; GET_PROP object-id property -> (result) (Spec page 85)
+;; Read property from object (resulting in the default value if it had
+;; no such declared property). If the property has length 1, the value
+;; is only that byte. If it has length 2, the first two bytes of the
+;; property are taken as a word value. It is illegal for the opcode to
+;; be used if the property has length greater than 2, and the result is
+;; unspecified.
+;;
+;; NOTE: This is not very efficient.
+(defun instruction-get_prop (instr)           
+  (let* ((operands    (retrieve-check-operands instr 2))
+         (object-id   (first operands))
+         (property-id (second operands))
+         (object      (load-object object-id))
+         (property    (zobj-prop object property-id))
+         ;; Wish CL was lazy like Haskell sometimes
+         (property-def (get-property-default property-id))
+         (result-var   (decoded-instruction-store instr))
+         (prop-val
+          (cond
+            ((null property) property-def)
+            ((> (zprop-data-size property) 2)
+             ;; XXX: Add a restart-case that allows use of property-def
+             (error 'invalid-property :message
+                    (format nil "Cannot get property ~d of size ~d from obj ~d~%"
+                            property-id object-id (zprop-data-size property))))
+            ((zprop-data-val property)))))
+    (var-write result-var prop-val)
+    (advance-pc instr)
+    (dbg t "GET_PROP: Prop ~d of object ~d is 0x~x into VAR 0x~x~%"
+         property-id object-id prop-val result-var)
+    (values t "GET_PROP")))
+      
+    
 
 ;; META-INSTRUCTIONS ----------------------------------------------------
 
