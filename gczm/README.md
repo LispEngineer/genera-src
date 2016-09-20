@@ -111,6 +111,92 @@ structure to reflect that this isn't really an opcode count, but rather
 a selector for which opcode table (0OP, 1OP, 2OP, VAR or, if we were emulating
 V4+, EXT) we should be using.
 
+## commit 2553f32bfbd18b1de6640c995264d56e931802a4
+
+Zork 1 now runs until the first SREAD instruction (command input).
+
+Clearly, there's a bug. The output of running Zork 1 is:
+
+``` text
+ZORK I: The Great Underground Empire
+Copyright (c) 1981, 1982, 1983 Infocom, Inc. All rights reserved.
+ZORK is a registered trademark of Infocom, Inc.
+Revision 88 / Serial number 840726
+
+West of House
+You are standing in an open field west of a white house, with a boarded front door.
+
+>
+```
+
+Whereas,
+[Interactive Fiction Archive](http://www.ifiction.org/games/playz.php?cat=&game=3&mode=html)
+has different output:
+
+``` text
+ZORK I: The Great Underground Empire
+Copyright (c) 1981, 1982, 1983 Infocom, Inc. All rights reserved.
+ZORK is a registered trademark of Infocom, Inc.
+Revision 88 / Serial number 840726
+
+West of House
+You are standing in an open field west of a white house, with a boarded front
+door.
+There is a small mailbox here.
+
+>
+```
+
+There are only two differences: wrapping the long line (which we don't do yet)
+and "There is a small mailbox here." is missing. That says that there's a bug in
+my object/property/attribute handling.
+
+The small mailbox is object number 160. It's parent is 180 ("West of House") and
+it is a sibling of 181 ("door").
+
+Instruction 8F3E is a GET_SIBLING that sees the sibling 160 of object 181.
+
+Spec 12.1 says the properties are numbered from 1 upward. What does that mean
+about property 0? Is the default for property 1 at the first memory location?
+
+Instruction 8F08 gets property 0x0E for object number 160. There is no property
+0x0E (14) on that object.
+
+My function `get-property-default` is assuming that the property default table
+is indexed by the property number MINUS ONE. This seems like it could be a misplaced
+assumption, but I can't find anything in either spec document about it. I may
+need to try it both ways. Changing it to use the exact property number
+didn't work (but did get me to implement PRINT_PADDR).
+
+Looks like routine 0x8D92 is what prints the inventory of a place. The only call
+to there is from 0x8FA7. This is in routine 0x8EAA, which contains a lot of
+child, parent, get_prop and test_attr calls. I may have to reverse engineer
+this and see which of my functions is wrong. My next guess will probably be
+test_attr. (Routine 0x8EAA seems to be recursive; see instruction at 8F5B.)
+
+Attributes being tested are: 1B, 07, 03, 0E
+Properties being gotten are: 0E, 09
+
+```text
+160. Attributes: 13, 19
+     Parent object: 180  Sibling object:   0  Child object: 161
+     Property address: 1a38
+         Description: "small mailbox"
+          Properties:
+              [18] 45 3f 3d 20
+              [17] 6e 94
+              [16] f4
+              [10] 00 0a
+```
+
+Ah, shoot. I just realized (tangentially): If we retrieve operands
+twice, then we'll pop variables twice, which could/will mess things
+up. I have to make sure retrieve-operands is never called more than
+once. That definitely means `get_child` is broken, as it retrieves the
+operands and then so does `sinstruction-jx`. Same thing with `jl`. I
+need to review every instruction and ensure exactly one call to
+`retrieve-operands` (or `retrieve-check-operands`) is made.
+
 # Information
 
 ## `zork1.z3`

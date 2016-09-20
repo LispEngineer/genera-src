@@ -434,9 +434,9 @@
     (setf (zobj-attributes r)
           (+ (ash (mem-word tloc) 16)
              (mem-word (+ 2 tloc))))
-    (setf (zobj-parent    r) (mem-byte (+ 4 tloc)))
-    (setf (zobj-sibling   r) (mem-byte (+ 5 tloc)))
-    (setf (zobj-child     r) (mem-byte (+ 6 tloc)))
+    (setf (zobj-parent    r) (mem-byte (+ +zobj-parent-ml-offset+  tloc)))
+    (setf (zobj-sibling   r) (mem-byte (+ +zobj-sibling-ml-offset+ tloc)))
+    (setf (zobj-child     r) (mem-byte (+ +zobj-child-ml-offset+   tloc)))
     (setf (zobj-props-loc r) (mem-word (+ 7 tloc)))
     ;; Get the name of the object (Spec 12.4)
     (setf (zobj-text-length r) (mem-byte (zobj-props-loc r)))
@@ -487,7 +487,13 @@
     ;; XXX: Add restarts (return 0, return value)
     (error 'invalid-property
            :message (format nil "Cannot get default for property ~A" prop)))
-  (let* ((prop-loc (+ (object-table-loc) (* 2 (1- prop))))
+  ;; XXX: FIXME: Spec is not clear if the property defaults are indexed
+  ;; by the property number or one less (since properties start at 1).
+  ;; It says the defaults table contains 31 words, which would imply that
+  ;; property 31 would not have a default...
+  (let* ((prop-loc (+ (object-table-loc)
+                      ;; (* 2 prop)))
+                      (* 2 (1- prop))))
          (def-val (mem-word prop-loc)))
     (dbg t "Default property ~A: 0x~x~%" prop def-val)
     def-val))
@@ -1929,6 +1935,22 @@
     (advance-pc instr)
     (values t "PRINT_OBJ")))
 
+;; PRINT_PADDR paddr (Spec page 92)
+;; Print the (Z-encoded) string at the given packed address in high memory.
+;; Packed addresses are 2* the given number. (Spec 1.2.3)
+;; XXX: This initial implementation only outputs to *z-output*
+;; XXX: Do buffering (reset the buffering count)
+(defun instruction-print_paddr (instr)
+  (let* ((operands (retrieve-check-operands instr 1))
+         (paddr  (first operands))
+         (addr   (* 2 paddr))
+         (zchars (mem-string addr))
+         (str    (z-characters-to-string (break-zchar-string zchars))))
+    (write-string str *z-output*)
+    (dbg t "PRINT_PADDR: Packed address 0x~x as \"~A\"~%" paddr str)
+    (advance-pc instr)
+    (values t "PRINT_PADDR")))
+
 
 ;; BRANCH INSTRUCTIONS -----------------------------------------------------
 
@@ -2575,7 +2597,7 @@
         (run-next-instruction)
       (error (e)
         (progn
-          (format t "Ending due to condition: ~A~%" e)
+          (format t "~%Ending due to condition: ~A~%" e)
           (return-from debug-run nil))))
     (format t "[N]ext, [Q]uit: ")
     (setf cmd (read-line))
@@ -2598,12 +2620,12 @@
              (when show-disassembly
                (format t "~A~%" disass-instr))
              (when (eql inst-name name-instr)
-               (format t "Ending due to instruction found: ~A~%" name-instr)
+               (format t "~%Ending due to instruction found: ~A~%" name-instr)
                (return))
              (run-next-instruction))
          (error (e)
            (progn
-             (format t "Ending due to condition: ~A~%" e)
+             (format t "~%Ending due to condition: ~A~%" e)
              (return)))))))
 
 #|
