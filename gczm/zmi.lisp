@@ -901,23 +901,30 @@
 ;; Example:
 ;; E0 = 1110_0000 = call
 ;;      11        = Variable instruction form decoder (4.3)
-;;        1       = VAR number of arguments (4.3.3)
+;;        1       = VAR opcode table ... VAR number of arguments (4.3.3)
 ;;         0_0000 = Opcode ("call") (14 page 73)
 ;; BB = 1011_1011 = new_line (0OP:187)
 ;;      10        = Short instruction form decoder
-;;        11      = Operand type - omitted -> 0OP
+;;        11      = Operand type - omitted -> 0OP (opcode-table?)
 ;;           1011 = Opcode ("new_line")
 ;; 54 = 0101_0100 = add
-;;      0         = Long form decoder (4.3)
+;;      0         = Long form decoder (4.3) (2OP opcode-table?)
 ;;       1        = First operand is a variable (4.4.2)
 ;;        0       = Second operand is a small constant (4.4.2)
 ;;         1_0100 = Opcode ("add") (4.3.2)
+;; C1 = 1100_0001 = JE
+;;      11        = Variable instruction form decoder
+;;        0       = opcode table is 2OP (still uses variable operand byte)
+;;         0_0001 = Opcode (JE)
 
 
 (defstruct decoded-instruction
   memory-location   ; Where this instruction starts
   first-byte        ; What the first byte of the instruction is
   form              ; 'long, 'short, 'variable (Spec 4.3)
+  ;; XXX: operand-count should really be called opcode-table, as this
+  ;; sometimes has nothing to do with the number of operands
+  ;; FIXME: Rename operand-count to opcode-table?
   operand-count     ; '0OP, 1OP, 2OP, VAR (Spec 4.3)
   operand-types     ; list of 'const-large, 'const-small, 'variable
   opcode            ; The actual opcode (within the operand-count)
@@ -1115,7 +1122,11 @@
 ;; Decode a variable form instruction (Spec 4.3.3, 4.4.3)
 (defun di-decode-variable (retval)
   (let ()
-    ;; If bit 5 is 0, then 2OP, otherwise VAR (Spec 4.3.3)
+    ;; If bit 5 is 0, then use the 2OP instruction table, otherwise VAR (Spec 4.3.3)
+    ;; NOTE: This doesn't actually tell us the number of operands; that still
+    ;; seems to come from the opcode-type byte!!!
+    ;; Example from txd and zork1.z3:
+    ;;  8edc:  c1 ab 7f 01 00 48       JE              G6f,L00,(SP)+ [FALSE] 8ee8
     (setf (decoded-instruction-operand-count retval)
           (if (zerop (get-bit (decoded-instruction-first-byte retval) 5))
               '2OP
@@ -1148,12 +1159,12 @@
                         (get-bits op-types 1 2)))))
     ;; If we have a type byte, our instruction is one longer
     (incf (decoded-instruction-length retval) 1)
-    ;; Only VARIABLE forms will have a types byte. If it's a 2OP version, then
-    ;; we should cut the list its two items.
+    ;; Only VARIABLE forms will have a types byte.
+    ;; NOTE: If it's a 2OP opcode, then we should NOT cut the list its two items.
+    ;; See decode for example of this instruction from tzd and zork1.z3
+    ;;  8edc:  c1 ab 7f 01 00 48       JE              G6f,L00,(SP)+ [FALSE] 8ee8
     (setf (decoded-instruction-operand-types retval)
-          (if (eq (decoded-instruction-operand-count retval) '2OP)
-              (subseq otlist 0 2) ; First two operands
-              (subseq otlist 0 (position 'omitted otlist)))) ; Operands before 1st omitted
+          (subseq otlist 0 (position 'omitted otlist))) ; Operands before 1st omitted
     retval))
 
 ;; Loads the operands of the instruction per the
@@ -1902,6 +1913,11 @@
 ;; JE: Check if all args are equal to the first one (or there are no args).
 ;; Errors if there is exactly one arg
 ;; (Spec page 86, 161)
+;; Per page 161:
+;; je can take between 2 and 4 operands. je with just 1 operand is not permitted.
+;; Per page 86:
+;; Thus @je a never jumps.
+;; SO... WHAT TO DO? Error or silently ignore (never jump) with 1 arg?
 (defun instruction-je (instr)
   (flet ((test-je (operands)
           ;; Implement the JE test here

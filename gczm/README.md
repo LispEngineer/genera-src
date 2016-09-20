@@ -39,6 +39,78 @@ The initial plan is:
 2. Implement z-machine minimally
 3. Implement test scripts
 
+# Interesting Bugs
+
+## commit 8c5f6a98858d4bc029b3e1e8829ab53b933bc1e4
+
+```text
+ZMI> (load-story-file "zork1.z3")
+T
+"Loaded zork1.z3 release 88 serial 840726"
+ZMI> (mem-slice #x8EDC 6)
+
+#(C1 AB 7F 1 0 48)
+ZMI> (disassemble-instr (decode-instruction #x8EDC))
+
+"8EDC: JE              G6F,L00 [FALSE] 8F28 "
+ZMI>
+```
+
+This is being decoded differently than `./txd -d -n`:
+
+```text
+ 8edc:  c1 ab 7f 01 00 48       JE              G6f,L00,(SP)+ [FALSE] 8ee8
+```
+
+Indeed, 0x8F28 is not even a valid instruction destination per
+the `txd` disassembly. However, if the JE destination is two bytes
+0x0048, it's a correct, positive offset (= 8EDC + 6 - 2 + 48).
+
+I'm not sure what the "(SP)+" in the disassembly is about. The full
+(but apparently incorrectly decoded) instruction is:
+
+``` lisp
+#S(DECODED-INSTRUCTION
+   :MEMORY-LOCATION 8EDC
+   :FIRST-BYTE C1
+   :FORM VARIABLE
+   :OPERAND-COUNT 2OP
+   :OPERAND-TYPES (VARIABLE VARIABLE)
+   :OPCODE 1
+   :OPCODE-INFO #S(OCI :NAME JE :STORE NIL :BRANCH T :TEXT NIL)
+   :OPERANDS (7F 1)
+   :STORE NIL
+   :BRANCH-IF NIL
+   :BRANCH-OFFSET 48
+   :LENGTH 6
+   :TEXT-LOC NIL
+   :TEXT-DATA NIL
+   :TEXT-ASCII NIL)
+```
+
+This is showing it as a 2OP, but C1 (1100_0001) is wrong... C1 = 193,
+which per page 72, says "Opcode numbers 192 to 223: VAR forms of 2OP:0 to 2OP:31."
+So, this is very odd.
+
+0xAB as a VARIABLE byte = 1010_1010, which means three variable operands
+(Spec 4.2). So, why are we showing only two, yet somehow we get the
+length correct nonetheless? Evidently the branch size is also wrong (2 bytes
+instead of one). Hm.
+
+As it turns out, function di-decode-op-type-byte had a mistaken assumption:
+if we're a VARIABLE form instruction, using the 2OP opcode table, we were
+limiting our arguments to only the first two. That's expressly NOT the case.
+It's a VARIABLE form instruction (with a 4-field operand type byte) using
+the 2OP opcode table.
+
+The file `zmach06e.pdf` contains Chapter 7, "The Structure of Instructions,"
+which seems to be a better reference than the newer specification I was using
+(`zspec10.pdf`).
+I should also rename the `opcode-count` field of the `decoded-instruction`
+structure to reflect that this isn't really an opcode count, but rather
+a selector for which opcode table (0OP, 1OP, 2OP, VAR or, if we were emulating
+V4+, EXT) we should be using.
+
 # Information
 
 ## `zork1.z3`
