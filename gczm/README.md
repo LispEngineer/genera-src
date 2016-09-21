@@ -224,6 +224,11 @@ a very difficult task. Debugging said interpreter is even harder.
 Anyway, at this point, Zork I now runs (seemingly properly) until the
 first SREAD instruction, with expected output.
 
+# Misc Notes
+
+From `nyef` in `#clim`: It turns out that if you hardcode the random number
+generator to return some constant, you can't get past the dwarf.
+
 # Information
 
 ## `zork1.z3`

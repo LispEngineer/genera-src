@@ -622,7 +622,81 @@
     (mem-byte-write bloc
      (logior (mem-byte bloc) ; "inclusive" or
              (ash 1 bbit)))))
-  
+
+
+;; Dictionary -------------------------------------------------------------
+
+;; The ASCII-length of entries in the dictionary (v3)
+(defparameter +dict-str-len+ 6)
+
+;; Dictionary header plus entries (Spec 13.2)
+(defstruct zdict
+  word-seps    ; String of all the keyboard input codes usually ".,\""
+  entry-len    ; Byte length of each entry (4+ bytes in v3)
+  num-entries  ; Number of entries in the dictionary
+  entries      ; Array of zdentries
+  )
+
+(defstruct zdentry
+  zchars       ; The z-characters of the entry, padded with 5's (byte vector)
+  text         ; The ASCII decoded text of the entry (up to 6 characters)
+  data         ; The data (byte vector)
+  addr         ; The (byte) address of this entry
+  )
+
+;; The dictionary, fully parsed out of memory
+(defvar *zdict* nil)
+
+;; Parses out the dictionary from memory and into the zdict structure
+;; for ease of later use, and stores it in *zdict*.
+(defun parse-zdict ()
+  (let* ((dict-loc (mem-word +ml-loc-dict+))
+         ;; First, parse the header
+         (ws-len (mem-byte dict-loc))
+         (num-entries (mem-word (+ dict-loc 1 ws-len 1)))
+         ;; (FIXME: Should I make an initial entry? We're going to set each one...)
+         (entries (make-array num-entries :element-type 'zdentry
+                              :initial-element (make-zdentry)))
+         (entry-base (+ dict-loc 1 ws-len 1 2)) ; Where entries start
+         (entry-len (mem-byte (+ dict-loc 1 ws-len)))
+         (zd (make-zdict
+              :word-seps   (mem-ascii (1+ dict-loc) ws-len)
+              :entry-len   entry-len
+              :num-entries num-entries
+              :entries     entries)))
+    (dbg t nil "Dictionary: Word seps: ~A, entries: ~A, entry-len: ~A~%"
+         ws-len num-entries entry-len)
+    ;; Now, create the zdentries
+    (loop
+       for i from 0 below num-entries do
+         (let* ((el (+ entry-base (* entry-len i))) ; entry-loc
+                (zchars (mem-slice el 4))
+                (data (mem-slice (+ el 4) (- entry-len 4)))
+                (ascii (z-characters-to-string (break-zchar-string zchars)))
+                (zde (make-zdentry :addr   el
+                                   :zchars zchars
+                                   :text   ascii
+                                   :data   data)))
+           (setf (aref entries i) zde)))
+    ;; And store it all in our global
+    (setf *zdict* zd)))
+
+;; Searches the dictionary for the (ASCII) string.
+;; Returns the byte address of the dictionary entry if found.
+;; FIXME: Modify this to a binary search from the current
+;; super inefficient but easy to code linear search.
+(defun zdict-find (str)
+  (let* ((str (subseq str 0 (min +dict-str-len+ (length str))))
+         (zdes (zdict-entries *zdict*))
+         (found (find str zdes :test #'equal :key #'zdentry-text)))
+    (if found
+        (zdentry-addr found)
+        0)))
+         
+    ;;(flet ((is-e-str (str e)
+    ;;         (equal str (zdentry-text e))))
+    ;;  (find str zdes :test #'is-e-str))))
+         
 
 
 ;; Routine Frames ---------------------------------------------------------
@@ -718,6 +792,9 @@
     (mem-byte-write +ml-flags-1+
      (logand (mem-byte +ml-flags-1+) #x1F))
     ;; XXX: Set standard revision number, header byte 32
+    ;;
+    ;; Parse the dictionary into *zdict* for later use
+    (parse-zdict)
     ;; Success
     (values t (format nil "Loaded ~A release ~D serial ~A" filename rel serial))))
 
@@ -2027,6 +2104,34 @@
     (dbg t instr "PRINT_PADDR: Packed address 0x~x as \"~A\"~%" paddr str)
     (advance-pc instr)
     (values t "PRINT_PADDR")))
+
+
+;; INPUT INSTRUCTIONS ------------------------------------------------------
+
+;; SREAD: baddr1 baddr2 (zmach06e.pdf 8.9, Spec p94-96)
+;; SREAD: text parse
+;; 1. Show/refresh/paint the status bar
+;; 2. Read a command, echoing it to the screen as if it were print_char'd
+;;    (but sending nothing to any output streams), until newline (13)
+;;    which is also echoed
+;; 3. Store downcased input characters at bytes starting at (baddr1 + 1)
+;;    and ending with a 0 byte, with at most (N - 1) bytes (where N = the byte
+;;    at baddr1, which is the buffer size). No terminating character (like
+;;    newline) should be put into the buffer.
+;; 4. Lexical analysis is performed.
+;;    a. byte 0 of parse contains max # of textual words which can be parsed
+;;    b. the buffer must be at least 2 + 4*n bytes long
+;;    c. interpreter divides text into words and looks them up in dictionary
+;;    d. number of words written in byte 1
+;;    e. one 4-byte block is written per word
+;;    f. Each block consists of:
+;;       i. the byte address of the word in the dictionary, if it is in the
+;;          dictionary, or 0 if it isn't;
+;;       ii. followed by a byte giving the number of letters in the word;
+;;       iii. and finally a byte giving the position in the text-buffer of
+;;            the first letter of the word.
+
+
 
 
 ;; BRANCH INSTRUCTIONS -----------------------------------------------------
