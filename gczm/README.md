@@ -197,6 +197,33 @@ operands and then so does `sinstruction-jx`. Same thing with `jl`. I
 need to review every instruction and ensure exactly one call to
 `retrieve-operands` (or `retrieve-check-operands`) is made.
 
+### Resolution
+
+As it turns out, I misinterpreted Spec 6.4.3 about what happens when
+you CALL a 0 address. "When the address 0 is called as a routine, nothing
+happens and the return value is false." I interpreted this as "you should
+return from the current routine with the value false," but what it actually
+means is that "you should store the value false into the store variable
+in the CALL instruction."
+
+So, that was causing the CALL instruction at 0x8DA7 (itself an unusual
+instruction in that it calls the address at the top of the stack) to
+return early from routine 0x8D92.
+
+In doing so, I think I figured some things out.
+
+Routine 0x8D92 prints an object in the room inventory.
+
+Routine 0x8EAA prints an entire room.
+
+My various object attribute and property routines seem to work properly.
+
+Implementing a complex interpreter against an unclear specification is
+a very difficult task. Debugging said interpreter is even harder.
+
+Anyway, at this point, Zork I now runs (seemingly properly) until the
+first SREAD instruction, with expected output.
+
 # Information
 
 ## `zork1.z3`

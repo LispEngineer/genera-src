@@ -33,11 +33,30 @@
 ;; Is debugging output on?
 (defparameter +debug+ t)
 
+;; Which instructions are we debugging
+(defparameter +debug-instrs+ nil)
+#|
+  '(insert_obj remove_obj print_obj
+    test_attr set_attr clear_attr
+    get_prop get_prop_addr get_next_prop get_prop_len
+    get_sibling get_child get_parent))
+|#
+
 ;; Writes to the output if debugging is on.
-;; All arguments are exactly the same as format.
-(defun dbg (stream string &rest values)
-  (when +debug+
-    (apply #'format stream string values)))
+;; The string and subsequent arguments are exactly the same as format.
+;; If obj is provided, it only prints debugging if that type
+;; of object is currently being debugged
+(defun dbg (stream obj string &rest values)
+  ;; Don't debug when debugging is off
+  (when (not +debug+)
+    (return-from dbg))
+  ;; Don't debug if our instruction isn't in the instruction list
+  (when (and obj +debug-instrs+
+             (eql 'decoded-instruction (type-of obj))
+             (not (null (decoded-instruction-opcode-info obj)))
+             (null (find (oci-name (decoded-instruction-opcode-info obj)) +debug-instrs+)))
+    (return-from dbg))
+  (apply #'format stream string values))
 
 
 ;; Globals -----------------------------------------------------
@@ -420,7 +439,7 @@
                                       (0 nil)
                                       (1 (mem-byte (1+ loc)))
                                       (otherwise (mem-word (1+ loc)))))))
-      ; (dbg t "Read property: ~A~%" r)
+      ; (dbg t nil "Read property: ~A~%" r)
       r)))
 
 ;; Loads an object from memory
@@ -471,7 +490,18 @@
            (= (zprop-id prop) propnum)))
     (let ((props (zobj-properties zo)))
       (find-if #'isprop props))))
-  
+
+;; Returns all attributes as a list of those which are set
+(defun zobj-attribs (zo)
+  (let ((attrnum 31)
+        (attrs (zobj-attributes zo))
+        (retval nil))
+    (loop
+       (when (nonzerop (logand #x00000001 attrs))
+         (push attrnum retval))
+       (decf attrnum)
+       (setf attrs (ash attrs -1))
+       (when (< attrnum 0) (return retval)))))
 
 ;; Gets the object table start location
 ;; Spec 12.1
@@ -495,7 +525,7 @@
                       ;; (* 2 prop)))
                       (* 2 (1- prop))))
          (def-val (mem-word prop-loc)))
-    (dbg t "Default property ~A: 0x~x~%" prop def-val)
+    (dbg t nil "Default property ~A: 0x~x~%" prop def-val)
     def-val))
 
 ;; Gets the base of the object tree. Spec 12.3.
@@ -588,7 +618,7 @@
          (tloc  (+ (object-tree-loc) (* (1- object-id) +object-tree-entry-size+)))
          (bloc  (+ tloc abyte))
          (bbit  (mod abit 8))) ; which bit in the byte
-    (dbg t "Attribute ~d is bit ~d of byte ~d~%" attribute bbit abyte)
+    (dbg t nil "Attribute ~d is bit ~d of byte ~d~%" attribute bbit abyte)
     (mem-byte-write bloc
      (logior (mem-byte bloc) ; "inclusive" or
              (ash 1 bbit)))))
@@ -635,7 +665,7 @@
       (pop (zmrs-stack (cur-zmrs)))
       (restart-case
           (progn
-            (dbg t "Warning: Stack underflow~%")
+            (dbg t nil "Warning: Stack underflow~%")
             (error 'stack-underflow :message "Stack empty"))
         (return-zero ()
           :report "Ignore, returning 0"
@@ -1473,11 +1503,11 @@
          ;; REMEMBER that this is a "word address" and hence must be doubled
          (z-char-str     (mem-string (* 2 loc-abv))))
     #| ; Debugging
-    (dbg t "Called (get-abbrev ~A ~A)~%" x y)
-    (dbg t "Abbrev table: ~x, entry num: ~A, abv entry loc: ~x~%"
+    (dbg t nil "Called (get-abbrev ~A ~A)~%" x y)
+    (dbg t nil "Abbrev table: ~x, entry num: ~A, abv entry loc: ~x~%"
             loc-abv-table abv-entry loc-abv-entry)
-    (dbg t "Abv loc: ~x~%" loc-abv)
-    (dbg t "Z-characters: ~A~%" z-char-str)
+    (dbg t nil "Abv loc: ~x~%" loc-abv)
+    (dbg t nil "Z-characters: ~A~%" z-char-str)
     |#
     (z-characters-to-string
      (break-zchar-string z-char-str) t))) ; = no abbreviations
@@ -1495,7 +1525,7 @@
         (aref locals which)
         (restart-case
             (progn
-              (dbg t "Error: Local ~A not available in ~A~%" which locals)
+              (dbg t nil "Error: Local ~A not available in ~A~%" which locals)
               (error 'missing-local-variable
                      :message (format nil "No such local variable: ~A" which)))
           (return-zero ()
@@ -1517,7 +1547,7 @@
         (setf (aref locals which) value)
         (restart-case
             (progn
-              (dbg t "Error: Cannot write ~A to unavailable local ~A in ~A~%"
+              (dbg t nil "Error: Cannot write ~A to unavailable local ~A in ~A~%"
                    value which locals)
               (error 'missing-local-variable
                      :message
@@ -1537,7 +1567,7 @@
         (mem-word (+ global-base (* 2 which)))
         (restart-case
             (progn
-              (dbg t "Error: No such global variable 0x~x~%" which)
+              (dbg t nil "Error: No such global variable 0x~x~%" which)
               (error 'missing-global-variable
                      :message (format nil "No such global variable: 0x~x" which)))
           (return-zero ()
@@ -1559,7 +1589,7 @@
         (mem-word-write (+ global-base (* 2 which)) value)
         (restart-case
             (progn
-              (dbg t "Error: No such global variable 0x~x to write 0x~x~%" which value)
+              (dbg t nil "Error: No such global variable 0x~x to write 0x~x~%" which value)
               (error 'missing-global-variable
                      :message (format nil "No such global variable: 0x~x to write 0x~x"
                                       which value)))
@@ -1644,14 +1674,14 @@
   ;; Check cache first
   (when (decoded-instruction-rop-is-cached% instr)
     (let ((retval (decoded-instruction-rop-cache% instr)))
-      (dbg t "Retrieved (cached) operands ~A ~A: ~A~%"
+      (dbg t instr "Retrieved (cached) operands ~A ~A: ~A~%"
            (decoded-instruction-operand-types instr)
            (decoded-instruction-operands      instr)
            retval)
       (return-from retrieve-operands retval)))
 
   ;; Load operands and cache them
-  (dbg t "Retrieving operands for ~A: ~A~%"
+  (dbg t instr "Retrieving operands for ~A: ~A~%"
        (decoded-instruction-operand-types instr)
        (decoded-instruction-operands      instr))
   ;; Loop through all operands and turn them into values
@@ -1665,7 +1695,7 @@
                 ((eql type 'const-large) opval)
                 ((eql type 'variable) (var-read opval)) ;; Can raise a condition
                 (t (raise-omitted-operand instr)))))) ;; Should never happen (!)
-    (dbg t "Retrieved and cached operands: ~A~%" retval)
+    (dbg t instr "Retrieved and cached operands: ~A~%" retval)
     (setf (decoded-instruction-rop-cache% instr) retval)
     (setf (decoded-instruction-rop-is-cached% instr) t)
     retval))
@@ -1733,6 +1763,7 @@
          (raddr (* 2 praddr))
          ;; Get the (up-to-three) arguments
          (arguments (cdr operands))
+         (result-var (decoded-instruction-store instr))
          ;; TODO: Check number of arguments is 0-3
          ;; TODO: Check that the memory address is fine
          ;; Get the number of locals for the routine
@@ -1752,19 +1783,26 @@
              collect (if a (car a) l)))
          ;; Create our next stack frame
          (newframe (new-zmrs)))
-    (dbg t "CALL: Routine address: 0x~x, # args: ~A, # locals ~A, routine start pc: 0x~x~%"
-            raddr (length arguments) numlocals r-pc)
-    (dbg t "CALL: Default locals: ~A~%" localdefaults)
-    (dbg t "CALL: Starting locals: ~A~%" locals)
+    
     ;; Call to packed address 0 should do nothing and just
-    ;; return false (0). Spec 6.4.3
+    ;; return false (0) into the result. Spec 6.4.3.
+    ;; This means we're not RETURNING from the current stack frame,
+    ;; merely putting a 0 into the store variable for this CALL instruction.
     (when (= praddr 0)
-      (return-from instruction-call
-        (sinstruction-ret instr 0)))
+      (dbg t instr "CALL: Called zero, storing 0 into VAR 0x~x~%" result-var)
+      (var-write result-var 0)
+      (advance-pc instr)
+      (return-from instruction-call (values t "CALL-0")))
+    
+    (dbg t instr
+         "CALL: Routine address: 0x~x, # args: ~A, # locals ~A, routine start pc: 0x~x~%"
+         raddr (length arguments) numlocals r-pc)
+    (dbg t instr "CALL: Default locals: ~A~%" localdefaults)
+    (dbg t instr "CALL: Starting locals: ~A~%" locals)
     ;; Set up our new stack frame
     (setf (zmrs-instr newframe) instr)
     (loop for l in locals do (vector-push-extend l (zmrs-locals newframe)))
-    ;(dbg t "CALL: New stack frame: ~A~%" newframe)
+    ;(dbg t instr "CALL: New stack frame: ~A~%" newframe)
     ;; Push our stack frame onto the call stack
     (push-call-stack newframe)
     ;; Update our PC to be at the new location
@@ -1782,7 +1820,7 @@
          (finst (zmrs-instr frame)) ; Our calling instruction
          (retdest (decoded-instruction-store finst))) ; Where to store return value
     ;; XXX: Returning from the last frame is an error
-    (dbg t "~A: Returning 0x~x into variable 0x~x (caller address 0x~x)~%"
+    (dbg t instr "~A: Returning 0x~x into variable 0x~x (caller address 0x~x)~%"
          (string-upcase (oci-name (decoded-instruction-opcode-info instr)))
          value retdest (decoded-instruction-memory-location finst))
     (var-write retdest value)
@@ -1839,7 +1877,7 @@
 ;; range of a normal 16-bit number
 (defun warn-16-bit-size (num)
   (when (or (< num -32768) (> num 32767))
-    (dbg t "Warning: Value outside of signed 16-bit range: ~A~%" num)))
+    (dbg t nil "Warning: Value outside of signed 16-bit range: ~A~%" num)))
 
 ;; ADD: Signed 16-bit addition (Spec p79, 15.3)
 ;; Signed info: Spec 2.2-2.3
@@ -1872,7 +1910,7 @@
     ;; Note: If we pop the stack with the read, we immediately re-push it
     ;; with the write, so it's all good.
     (var-write var incvarval)
-    (dbg t "INC: Incremented ~A (newval: ~A)~%"
+    (dbg t instr "INC: Incremented ~A (newval: ~A)~%"
          (disassemble-operand 'variable var) incvarval)
     (advance-pc instr)
     (values t "INC")))
@@ -1889,7 +1927,7 @@
          (dest (decoded-instruction-store instr)))
     (warn-16-bit-size result)
     (var-write dest unsigned-result)
-    (dbg t "~A: ~A op ~A = ~A (0x~x -> var 0x~x)~%"
+    (dbg t instr "~A: ~A op ~A = ~A (0x~x -> var 0x~x)~%"
          inst-name a b result unsigned-result dest)
     (advance-pc instr)
     (values t inst-name)))
@@ -1905,7 +1943,7 @@
          (dest (decoded-instruction-store instr)))
     (warn-16-bit-size result)
     (var-write dest result)
-    (dbg t "~A: ~A op ~A = ~A (-> var 0x~x)~%"
+    (dbg t instr "~A: ~A op ~A = ~A (-> var 0x~x)~%"
          inst-name a b result dest)
     (advance-pc instr)
     (values t inst-name)))
@@ -1918,7 +1956,7 @@
 ;; XXX: Do buffering
 (defun instruction-print (instr)
   (write-string (decoded-instruction-text-ascii instr) *z-output*)
-  (dbg t "PRINT: \"~A\"~%" (decoded-instruction-text-ascii instr))
+  (dbg t instr "PRINT: \"~A\"~%" (decoded-instruction-text-ascii instr))
   (advance-pc instr)
   (values t "PRINT"))
 
@@ -1927,7 +1965,7 @@
 ;; XXX: Do buffering (reset the buffering count)
 (defun instruction-new_line (instr)
   (write-char #\Newline *z-output*)
-  (dbg t "NEW_LINE~%")
+  (dbg t instr "NEW_LINE~%")
   (advance-pc instr)
   (values t "NEW_LINE"))
 
@@ -1942,7 +1980,7 @@
       (error 'invalid-operand-count :message
              (format nil "PRINT_NUM: Got ~A operands, expected 1" (length operands))))
     (format *z-output* "~d" (us-to-s (first operands) 16))
-    (dbg t "PRINT_NUM: 0x~X as ~d~%" (first operands) (us-to-s (first operands) 16))
+    (dbg t instr "PRINT_NUM: 0x~X as ~d~%" (first operands) (us-to-s (first operands) 16))
     (advance-pc instr)
     (values t "PRINT_NUM")))
 
@@ -1957,7 +1995,7 @@
       (error 'invalid-operand-count :message
              (format nil "PRINT_CHAR: Got ~A operands, expected 1" (length operands))))
     (write-char (code-char (first operands)) *z-output*)
-    (dbg t "PRINT_CHAR: 0x~X as ~A~%" (first operands) (code-char (first operands)))
+    (dbg t instr "PRINT_CHAR: 0x~X as ~A~%" (first operands) (code-char (first operands)))
     (advance-pc instr)
     (values t "PRINT_NUM")))
 
@@ -1970,7 +2008,7 @@
          (object-id (first operands))
          (object (load-object object-id)))
     (write-string (zobj-short-name object) *z-output*)
-    (dbg t "PRINT_OBJ: Object ~d as \"~A\"~%" object-id (zobj-short-name object))
+    (dbg t instr "PRINT_OBJ: Object ~d as \"~A\"~%" object-id (zobj-short-name object))
     (advance-pc instr)
     (values t "PRINT_OBJ")))
 
@@ -1986,7 +2024,7 @@
          (zchars (mem-string addr))
          (str    (z-characters-to-string (break-zchar-string zchars))))
     (write-string str *z-output*)
-    (dbg t "PRINT_PADDR: Packed address 0x~x as \"~A\"~%" paddr str)
+    (dbg t instr "PRINT_PADDR: Packed address 0x~x as \"~A\"~%" paddr str)
     (advance-pc instr)
     (values t "PRINT_PADDR")))
 
@@ -2085,7 +2123,7 @@
     ;; Note: If we pop the stack with the read, we immediately re-push it
     ;; with the write, so it's all good.
     (var-write var incvarval)
-    (dbg t "INC_CHK: Incremented ~A (newval: ~A) and tested against ~A~%"
+    (dbg t instr "INC_CHK: Incremented ~A (newval: ~A) and tested against ~A~%"
          (disassemble-operand 'variable var) incvarval value)
     ;; Now run the test
     (flet ((test-inc_chk (operands)
@@ -2120,7 +2158,7 @@
          (offset (decoded-instruction-branch-offset instr)) ; Signed (!!!)
          (inst-name (oci-name (decoded-instruction-opcode-info instr)))
          (result (funcall testfunc operands)))
-    (dbg t "~A: ~A if ~A to ~A: Result ~A~%" (string-upcase inst-name) operands
+    (dbg t instr "~A: ~A if ~A to ~A: Result ~A~%" (string-upcase inst-name) operands
          (if br-if "true" "false") offset (if result "true" "false"))
     (cond
       ;; Don't branch
@@ -2170,7 +2208,7 @@
                       (car op-types))))))
   (let* ((ml-dest (jump-destination instr)))
     ;; XXX: Check destination is within memory
-    (dbg t "JUMP: Jumping to 0x~4,'0x~%" ml-dest)
+    (dbg t instr "JUMP: Jumping to 0x~4,'0x~%" ml-dest)
     (set-pc ml-dest)))
 
 
@@ -2197,7 +2235,7 @@
            (array-index (second operands))
            (value (third operands))
            (ml-dest (+ array-base (* 2 array-index))))
-      (dbg t "STOREW: Writing 0x~x to 0x~x (as ~x[~x])~%"
+      (dbg t instr "STOREW: Writing 0x~x to 0x~x (as ~x[~x])~%"
            value ml-dest array-base array-index)
       (mem-word-write ml-dest value)
       (advance-pc instr)
@@ -2212,7 +2250,7 @@
       (error 'invalid-operand-count :message
              (format nil "STOREW: Got ~A operands, expected 2" (length operands))))
     (var-write (first operands) (second operands))
-    (dbg t "STORE: Wrote 0x~4,'0x to variable ~X~%" (second operands) (first operands))
+    (dbg t instr "STORE: Wrote 0x~4,'0x to variable ~X~%" (second operands) (first operands))
     (advance-pc instr)
     (values t "Stored value in variable")))
 
@@ -2236,7 +2274,7 @@
            (var-dest (decoded-instruction-store instr))
            (ml-source (+ array-base (* 2 array-index)))
            (value (mem-word ml-source)))
-      (dbg t "LOADW: Loaded 0x~x from 0x~x (as ~x[~x]) into VAR 0x~x~%"
+      (dbg t instr "LOADW: Loaded 0x~x from 0x~x (as ~x[~x]) into VAR 0x~x~%"
            value ml-source array-base array-index var-dest)
       (var-write var-dest value)
       (advance-pc instr)
@@ -2256,7 +2294,7 @@
            (var-dest (decoded-instruction-store instr))
            (ml-source (+ array-base (* array-index)))
            (value (mem-byte ml-source)))
-      (dbg t "LOADB: Loaded 0x~x from 0x~x (as ~x[~x]) into VAR 0x~x~%"
+      (dbg t instr "LOADB: Loaded 0x~x from 0x~x (as ~x[~x]) into VAR 0x~x~%"
            value ml-source array-base array-index var-dest)
       (var-write var-dest value)
       (advance-pc instr)
@@ -2271,7 +2309,7 @@
          (value (car operands)))
     (push-stack value)
     (advance-pc instr)
-    (dbg t "PUSH: ~A~%" value)
+    (dbg t instr "PUSH: ~A~%" value)
     (values t "Pushed")))
 
 ;; PULL value (Spec page 77, 93, 161)
@@ -2282,7 +2320,7 @@
          (value    (pop-stack)))
     (var-write variable value)
     (advance-pc instr)
-    (dbg t "PULL: ~A -> VAR 0x~x~%" value variable)
+    (dbg t instr "PULL: ~A -> VAR 0x~x~%" value variable)
     (values t "Pulled")))
 
 
@@ -2330,7 +2368,7 @@
       (if (= 1 (zprop-data-size prop))
           (mem-byte-write (1+ (zprop-mem-loc prop)) (logand value #xFF))
           (mem-word-write (1+ (zprop-mem-loc prop)) value))
-      (dbg t "PUT_PROP: Put ~4,'0X to object ~A property ~A~%"
+      (dbg t instr "PUT_PROP: Put ~4,'0X to object ~A property ~A~%"
            value obj-id prop-id)
       (advance-pc instr)
       (values t "PUT_PROP"))))
@@ -2401,7 +2439,7 @@
           ;; 3. Change the object's parent to have the object
           (zobj-set-sibling object (zobj-child dest))
           (zobj-set-child   dest   object-id)))
-    (dbg t "INSERT_OBJ: Moved object ~A to parent ~A~%" object-id dest-id)
+    (dbg t instr "INSERT_OBJ: Moved object ~A to parent ~A~%" object-id dest-id)
     (advance-pc instr)
     (values t "INSERT_OBJ")))
 
@@ -2413,7 +2451,7 @@
          (attribute (second operands)))
     (object-set-attribute object-id attribute)
     (advance-pc instr)
-    (dbg t "SET_ATTR: Set attribute ~d on object ~d~%" attribute object-id)
+    (dbg t instr "SET_ATTR: Set attribute ~d on object ~d~%" attribute object-id)
     (values t "SET_ATTR")))
 
 
@@ -2425,7 +2463,7 @@
          (parent-id (zobj-parent object)))
     (var-write (decoded-instruction-store instr) parent-id)
     (advance-pc instr)
-    (dbg t "GET_PARENT: Got parent ~d of object ~d stored into VAR 0x~x~%"
+    (dbg t instr "GET_PARENT: Got parent ~d of object ~d stored into VAR 0x~x~%"
          parent-id object-id (decoded-instruction-store instr))))
 
 ;; GET_CHILD object -> (result) ?(label) (Spec page 84)
@@ -2437,7 +2475,7 @@
          (object    (load-object object-id))
          (child-id  (zobj-child object))
          (result-v  (decoded-instruction-store instr)))
-    (dbg t "GET_CHILD: Got child ~d of object ~d stored into VAR 0x~x~%"
+    (dbg t instr "GET_CHILD: Got child ~d of object ~d stored into VAR 0x~x~%"
          child-id object-id result-v)
     (var-write result-v child-id)
     ;; This is a branch too, so let's do the branch test
@@ -2455,7 +2493,7 @@
          (object    (load-object object-id))
          (sib-id    (zobj-sibling object))
          (result-v  (decoded-instruction-store instr)))
-    (dbg t "GET_SIBLING: Got sibling ~d of object ~d stored into VAR 0x~x~%"
+    (dbg t instr "GET_SIBLING: Got sibling ~d of object ~d stored into VAR 0x~x~%"
          sib-id object-id result-v)
     (var-write result-v sib-id)
     ;; This is a branch too, so let's do the branch test
@@ -2493,7 +2531,7 @@
             ((zprop-data-val property)))))
     (var-write result-var prop-val)
     (advance-pc instr)
-    (dbg t "GET_PROP: Prop ~d of object ~d is 0x~x into VAR 0x~x~%"
+    (dbg t instr "GET_PROP: Prop ~d of object ~d is 0x~x into VAR 0x~x~%"
          property-id object-id prop-val result-var)
     (values t "GET_PROP")))
       
@@ -2544,7 +2582,7 @@
   (let* ((start-pc   (get-pc))
          (instr      (decode-instruction start-pc))
          (instr-func (find-instruction-function instr)))
-    (dbg t "Executing instruction: 0x~x: ~A~%" start-pc instr-func)
+    (dbg t instr "Executing instruction: 0x~x: ~A~%" start-pc instr-func)
     (funcall instr-func instr)))
     
 ;; This locates an instruction execution function for the
