@@ -273,7 +273,7 @@
       (read-sequence *z-mem* in)
       (close in))
     (not (not in)))) ; Convert result to t or nil
-      
+
 ;; Load an (unsigned) byte from memory
 ;; TODO: Make this safe for the actual memory size
 (defun mem-byte (loc)
@@ -335,7 +335,7 @@
   (let* ((summed-area (mem-slice +header-length+ (- (mh-file-len) +header-length+)))
          (sum (reduce #'+ summed-area)))
     (mod sum #x10000)))
-        
+
 ;; This gets a word at the specified location (MSB first),
 ;; strips off the top two bits, then turns it into a signed
 ;; number (from its 14-bit twos compliment representation).
@@ -511,7 +511,7 @@
 
 ;; Gets a default property value (word) (Spec 12.2)
 ;; Property defaults table starts at the object table location.
-;; Properties are numbered 1-31 
+;; Properties are numbered 1-31
 (defun get-property-default (prop)
   (when (or (< prop 1) (> prop 31))
     ;; XXX: Add restarts (return 0, return value)
@@ -692,11 +692,11 @@
     (if found
         (zdentry-addr found)
         0)))
-         
+
     ;;(flet ((is-e-str (str e)
     ;;         (equal str (zdentry-text e))))
     ;;  (find str zdes :test #'is-e-str))))
-         
+
 
 
 ;; Routine Frames ---------------------------------------------------------
@@ -799,9 +799,9 @@
     (values t (format nil "Loaded ~A release ~D serial ~A" filename rel serial))))
 
 
-           
+
 ;; Opcode Information ------------------------------------------------
-                  
+
 ;; Opcode information (name, branch, store) - Spec 14
 ;; Names are for human readability
 ;; anything that is nil is an invalid opcode in v3
@@ -814,7 +814,7 @@
 ;; TODO: Add these?
 ;;  number     ; Integer: The opcode number (calculated)
 ;;  count      ; Symbol: '0OP, '1OP, '2OP, 'VAR
-  
+
 ;; Easily construct an opcode information struct
 (defmacro oci-> (name store branch &optional text)
   `(make-oci
@@ -889,7 +889,7 @@
     (oci-> restart     nil nil) ; 7
     (oci-> ret_popped  nil nil) ; 8
     (oci-> pop         nil nil) ; 9
-    (oci-> quit        nil nil) ; A 
+    (oci-> quit        nil nil) ; A
     (oci-> new_line    nil nil) ; B
     (oci-> show_status nil nil) ; C
     (oci-> verify      nil t  ) ; D
@@ -1140,7 +1140,7 @@
         (when text-flag
           (format str "\"~A\"" text-ascii))
         (get-output-stream-string str)))))
-                               
+
 
 ;; Gets the specified bit of the specified byte
 ;; (Bit 0 = LSB, bit 7 = MSB)
@@ -1200,7 +1200,7 @@
     (when (oi-text (decoded-instruction-opcode-info retval))
       (decode-instruction-text retval))
     retval))
-           
+
 
 ;; Decode a long form instruction (Spec 4.3.2, 4.4.2)
 (defun di-decode-long (retval)
@@ -1860,7 +1860,7 @@
              collect (if a (car a) l)))
          ;; Create our next stack frame
          (newframe (new-zmrs)))
-    
+
     ;; Call to packed address 0 should do nothing and just
     ;; return false (0) into the result. Spec 6.4.3.
     ;; This means we're not RETURNING from the current stack frame,
@@ -1870,7 +1870,7 @@
       (var-write result-var 0)
       (advance-pc instr)
       (return-from instruction-call (values t "CALL-0")))
-    
+
     (dbg t instr
          "CALL: Routine address: 0x~x, # args: ~A, # locals ~A, routine start pc: 0x~x~%"
          raddr (length arguments) numlocals r-pc)
@@ -2192,7 +2192,7 @@
                   (attrib (second operands))
                   (obj    (load-object obj-id))
                   (shift-amt (- 31 attrib)))
-                   
+
              ;; Attribute 0 is the top bit but 31 is the bottom bit.
              (nonzerop
               (logand (zobj-attributes obj)
@@ -2249,7 +2249,7 @@
                   (b (us-to-s (second operands) 16)))
              (< a b))))
     (sinstruction-jx instr #'test-jl)))
-    
+
 ;; Implements all jump-if instructions by taking a test
 ;; function. The text function takes one argument, which is
 ;; the list of operands, and returns true if the test passes,
@@ -2292,7 +2292,7 @@
          (unsigned-offset (car operands))
          (signed-offset (us-to-s unsigned-offset 16)))
     (+ i-pc i-len signed-offset -2)))
-         
+
 
 ;; JUMP: Jump unconditionally to signed offset from current PC
 ;; (Spec, page 87, 161)
@@ -2429,7 +2429,7 @@
     (values t "Pulled")))
 
 
-  
+
 
 
 ;; OBJECT INSTRUCTIONS --------------------------------------------------
@@ -2507,7 +2507,7 @@
 ;; is probably a bug.
 ;;
 ;; Algorithm: (note that each of these steps needs to be broken down further)
-;; 0. 
+;; 0.
 ;; 1. Delink "object" from its parent
 ;;    a. If "object"'s parent's child is "object", then just set "object"'s
 ;;       parent's child to "object"'s sibling (i.e., it's the parent's first child)
@@ -2616,7 +2616,7 @@
 ;; unspecified.
 ;;
 ;; NOTE: This is not very efficient.
-(defun instruction-get_prop (instr)           
+(defun instruction-get_prop (instr)
   (let* ((operands    (retrieve-check-operands instr 2))
          (object-id   (first operands))
          (property-id (second operands))
@@ -2639,8 +2639,8 @@
     (dbg t instr "GET_PROP: Prop ~d of object ~d is 0x~x into VAR 0x~x~%"
          property-id object-id prop-val result-var)
     (values t "GET_PROP")))
-      
-    
+
+
 
 ;; META-INSTRUCTIONS ----------------------------------------------------
 
@@ -2689,7 +2689,7 @@
          (instr-func (find-instruction-function instr)))
     (dbg t instr "Executing instruction: 0x~x: ~A~%" start-pc instr-func)
     (funcall instr-func instr)))
-    
+
 ;; This locates an instruction execution function for the
 ;; decoded instruction. If the instruction is not implemented,
 ;; it returns a placeholder, and if the instruction is
@@ -2720,11 +2720,11 @@
            if-func
            ;; Not yet implemented
            #'sinstruction-nyi)))))
-     
+
 ;; Gets the function of a symbol or nil if none.
 ;; From Common Lisp Hyperspec... http://clhs.lisp.se/Body/f_symb_1.htm
 (defun symbol-function-or-nil (symbol)
-  (if (and (fboundp symbol) 
+  (if (and (fboundp symbol)
            (not (macro-function symbol))
            (not (special-operator-p symbol)))
       (symbol-function symbol)
