@@ -314,6 +314,31 @@
   ;; continuing for slen
   (map 'string #'code-char (mem-slice loc slen)))
 
+;; Writes an ASCII string to memory
+;; with the specified maximum length
+;; and terminated with a 0 byte.
+;; Spec page 95
+;; Note, it's not clear if maxlen includes the 0 byte or not,
+;; so I'm going to be safe and say it doesn't.
+;; FIXME: We may have an off-by-one error here on maxlen meaning
+;; a. maximum number of bytes written to loc total
+;; b. maximum number of text bytes written to loc (then plus 1 more for the 0 at the end)
+(defun mem-ascii-write (loc text maxlen)
+  (let* ((text-len   (length text))
+         (text-trunc (subseq text 0 (min (1- maxlen) text-len)))
+         (tt-len     (length text-trunc)))
+    (dbg t nil "maxlen: ~A, text-len: ~A, text-trunc: '~A', tt-len: ~A~%"
+         maxlen text-len text-trunc tt-len)
+    ;; Copy the ZSCII characters
+    (loop
+       for i from 0 below tt-len
+       for l = loc then (1+ l)
+       do
+         (dbg t nil "i: ~A, l: ~A~%" i l)
+         (setf (aref *z-mem* l) (char-code (aref text-trunc i))))
+    ;; Append the zero byte
+    (setf (aref *z-mem* (+ loc tt-len)) 0)))
+
 ;; Gets the serial number from the header as a string
 ;; mh = memory header
 (defun mh-serial-num ()
@@ -632,6 +657,7 @@
 ;; Dictionary header plus entries (Spec 13.2)
 (defstruct zdict
   word-seps    ; String of all the keyboard input codes usually ".,\""
+  wss          ; word-seps with space added
   entry-len    ; Byte length of each entry (4+ bytes in v3)
   num-entries  ; Number of entries in the dictionary
   entries      ; Array of zdentries
@@ -659,8 +685,10 @@
                               :initial-element (make-zdentry)))
          (entry-base (+ dict-loc 1 ws-len 1 2)) ; Where entries start
          (entry-len (mem-byte (+ dict-loc 1 ws-len)))
+         (word-seps (mem-ascii (1+ dict-loc) ws-len))
          (zd (make-zdict
-              :word-seps   (mem-ascii (1+ dict-loc) ws-len)
+              :word-seps   word-seps
+              :wss         (concatenate 'string " " word-seps)
               :entry-len   entry-len
               :num-entries num-entries
               :entries     entries)))
@@ -693,10 +721,19 @@
         (zdentry-addr found)
         0)))
 
-    ;;(flet ((is-e-str (str e)
-    ;;         (equal str (zdentry-text e))))
-    ;;  (find str zdes :test #'is-e-str))))
-
+;; Tokenizes the specified string by turning it into a list of
+;; lists of the following pieces of data:
+;; (dict-entry-loc token-len token-str-pos)
+(defun z-tokenize (str)
+  (let ((split (z-split (zdict-wss *zdict*) str)))
+    (flet ((find-token (split-piece)
+             (let ((token-str-pos (car split-piece))
+                   (token (cdr split-piece)))
+               (list (zdict-find token)
+                     (length token)
+                     token-str-pos))))
+      (map 'list #'find-token split))))
+                                 
 
 
 ;; Routine Frames ---------------------------------------------------------
@@ -1589,10 +1626,13 @@
     (z-characters-to-string
      (break-zchar-string z-char-str) t))) ; = no abbreviations
 
-;; We split the string at any of these characters,
+;; We split the string at any of these d- characters,
 ;; and return a list of the entire string, split up at
 ;; any of these characters.
+;; With thanks to split-sequence at:
+;; https://github.com/Publitechs/cl-utilities/blob/master/split-sequence.lisp
 (defun split-string (d- str)
+  "Split string 'str' at any of the characters in delimiter string 'd-', and return the entire list of all characters in 'str' in multiple strings"
    (let* ((len (length str))
           (d (map 'list #'identity d-)))
     (loop
@@ -1629,7 +1669,7 @@
 ;; Delims is a string of all should include a #\space as well as all the
 ;; z-machine word separators.
 ;; The string is downcased before splitting.
-(defun z-tokenize (delims str)
+(defun z-split (delims str)
   (remove-parsed-spaces
    (add-string-start-positions
     (split-string delims (string-downcase str)))))
@@ -2152,6 +2192,11 @@
 
 ;; INPUT INSTRUCTIONS ------------------------------------------------------
 
+;; Updates the status bar
+;; XXX: CODE ME
+(defun update-status-bar ()
+  )
+
 ;; SREAD: baddr1 baddr2 (zmach06e.pdf 8.9, Spec p94-96)
 ;; SREAD: text parse
 ;; 1. Show/refresh/paint the status bar
@@ -2174,7 +2219,57 @@
 ;;       ii. followed by a byte giving the number of letters in the word;
 ;;       iii. and finally a byte giving the position in the text-buffer of
 ;;            the first letter of the word.
-
+;;
+;; NOTE: This initial version will just read a line of input from the
+;; standard input. A future version will return a special code that
+;; tells the interpreter's executor that an SREAD instruction needs
+;; input, and that the continuation function should be called after
+;; that input has been obtained (with the input). This will allow
+;; the interpreter to return control to CLIM for input, and then CLIM
+;; to return control to the interpreter once the input is obtained.
+;;
+(defun instruction-sread (instr)
+  (let* ((operands (retrieve-check-operands instr 2))
+         (text-len-loc (first operands))     ; Location of max # of input chars byte
+         (text-body-loc (1+ text-len-loc))   ; Where to write the input text (ZSCII) nul-term
+         (parse-max-loc (second operands))   ; Number of parsed tokens allowed (4 bytes each)
+         (parse-len-loc (1+ parse-max-loc))   ; Where we write the # of parsed tokens
+         (parse-base-loc (1+ parse-len-loc))  ; First parsed token loc
+         (text-max (mem-byte (first operands))) ; Maximum text length to store
+         (parse-max (mem-byte parse-max-loc))   ; Maximum parsed entries to store
+         (text)
+         (text-trunc)
+         (tokenized))
+    ;; Update our status bar
+    (update-status-bar)
+    ;; Do our input
+    (setf text (read-line))
+    ;; Truncate our input for tokenization
+    ;; FIXME: This may have an off by one or two error on the text-max use
+    (setf text-trunc (subseq text 0 (min (length text) (1- text-max))))
+    ;; Store our downcased input at the location, 0-character terminated
+    (mem-ascii-write text-body-loc (string-downcase text-trunc) text-max)
+    ;; Parse and tokenize our string
+    (setf tokenized (z-tokenize text-trunc))
+    ;; And write the tokens to memory in the parse buffer
+    (mem-byte-write parse-len-loc (min parse-max (length tokenized)))
+    (loop
+       for pn from 0 below parse-max
+       for token in tokenized
+       do
+       ;; Write a token
+         (mem-word-write (+ parse-base-loc (* 4 pn))   (first token))
+         (mem-byte-write (+ parse-base-loc (* 4 pn) 2) (second token))
+         (mem-byte-write (+ parse-base-loc (* 4 pn) 3) (third token)))
+    ;; And that's all...?
+    (dbg t instr "SREAD: text-max: ~d, parse-max ~d~%" text-max parse-max)
+    (dbg t instr "SREAD: Read trunc '~A'~%" text-trunc)
+    (dbg t instr "SREAD: Tokenization: ~A~%" tokenized)
+    (advance-pc instr)
+    (values t "SREAD")))
+    
+    
+    
 
 
 
