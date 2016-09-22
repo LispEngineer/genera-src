@@ -2377,8 +2377,37 @@
              (> incvarval value)))
       (sinstruction-jx instr #'test-inc_chk))))
 
+;; DEC_CHK (variable) value ?(label) - Spec p 83
+;; Increment a variable and branch if now is less than the given value
+;; Page 161: In the seven opcodes that take indirect variable references
+;; (inc, dec, inc_chk, dec_chk, load, store, pull), an indirect reference
+;; to the stack pointer does not push or pull the top item of the stack -
+;; it is read or written in place.
+(defun instruction-dec_chk (instr)
+  ;; XXX: Check # of operands
+  (let* ((operands (retrieve-operands instr))
+         ;; FIXME: These local variable names suck
+         (var (first operands))
+         (value (us-to-s (second operands) 16))
+         (varval (var-read var))
+         (svarval (us-to-s varval 16))
+         (decvarval (1- svarval)))
+    ;; Do the decrement
+    ;; Note: If we pop the stack with the read, we immediately re-push it
+    ;; with the write, so it's all good.
+    (var-write var (s-to-us-16 decvarval))
+    (dbg t instr "DEC_CHK: Decremented ~A (old: ~A, new: ~A) and tested against ~A~%"
+         (disassemble-operand 'variable var) svarval decvarval value)
+    ;; Now run the test
+    (flet ((test-dec_chk (operands)
+             (declare (ignore operands))
+             ;; We ignore the operands and just return the test
+             ;; of our captured variables.
+             (< decvarval value)))
+      (sinstruction-jx instr #'test-dec_chk))))
 
-;; JL a b ?(label) - Spec page 87
+
+;; Jl a b ?(label) - Spec page 87
 ;; Jump if a < b (using a signed 16-bit comparison).
 (defun instruction-jl (instr)
   ;; FIXME: Ugly - incorporate the op # check into sinstruction-jx?
