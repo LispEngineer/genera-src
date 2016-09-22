@@ -1589,6 +1589,50 @@
     (z-characters-to-string
      (break-zchar-string z-char-str) t))) ; = no abbreviations
 
+;; We split the string at any of these characters,
+;; and return a list of the entire string, split up at
+;; any of these characters.
+(defun split-string (d- str)
+   (let* ((len (length str))
+          (d (map 'list #'identity d-)))
+    (loop
+       for left = 0 then (+ right 1)
+       for right = (min (or (position-if (lambda (c) (member c d)) str :start left)
+                            len)
+                        len)
+       unless (= left right)
+       collect (subseq str left right) into subseqs
+       unless (= right len)
+       collect (subseq str right (if (< right len) (1+ right) right)) into subseqs
+       until (>= right len)
+       finally (return subseqs))))
+
+;; We take a list of strings (that represents a single string that was split up)
+;; and turn them into an association list with the car being the starting position
+;; in the whole string and the cdr being that part of the string.
+(defun add-string-start-positions (sl) ; string-list
+  (let ((l 0)) ; Our length so far
+    (flet ((position-adder (s)
+             (let ((retval (cons l s)))
+               (incf l (length s))
+               retval)))
+      (map 'list #'position-adder sl))))
+
+;; This removes spaces from lists of the form add-string-start-positions makes.
+(defun remove-parsed-spaces (sl) ; string-list
+  (remove-if
+   (lambda (as) (equal (cdr as) " "))
+   sl))
+
+;; This parses a string into an association list of components and their
+;; positions in the start of the original string.
+;; Delims is a string of all should include a #\space as well as all the
+;; z-machine word separators.
+;; The string is downcased before splitting.
+(defun z-tokenize (delims str)
+  (remove-parsed-spaces
+   (add-string-start-positions
+    (split-string delims (string-downcase str)))))
 
 ;; Variable Handling --------------------------------------------
 
