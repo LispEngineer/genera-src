@@ -2050,6 +2050,11 @@
 (defun instruction-sub (instr)
   (sinstruction-math instr #'-))
 
+;; MUL: Signed 16-bit multiplication (Spec p89, 15.3)
+;; Signed info: Spec 2.2-2.3
+(defun instruction-mul (instr)
+  (sinstruction-math instr #'*))
+
 ;; AND: Bitwise AND. (Spec p79)
 (defun instruction-and (instr)
   (sinstruction-math-unsigned instr #'logand))
@@ -2306,6 +2311,17 @@
              (every (lambda (b) (= (car operands) b)) (cdr operands))))))
     (sinstruction-jx instr #'test-je)))
 
+;; TEST bitmap flags: Spec page 102
+;; Jump if all of the flags in bitmap are set (i.e. if bitmap & flags == flags
+(defun instruction-test (instr)
+  (flet ((test-test (operands)
+           (let ((bitmap (first operands))
+                 (flags (second operands)))
+             (= (logand bitmap flags) flags))))
+    (let ((operands (retrieve-check-operands instr 2)))
+      (declare (ignore operands)) ; We just check the #
+      (sinstruction-jx instr #'test-test))))
+
 ;; JZ: Jump if the argument is zero. (Spec page 87)
 ;; SEE sinstruction-jz for more details.
 (defun instruction-jz (instr)
@@ -2417,6 +2433,17 @@
                   (b (us-to-s (second operands) 16)))
              (< a b))))
     (sinstruction-jx instr #'test-jl)))
+
+;; jg a b ?(label) - Spec page 87
+;; Jump if a > b (using a signed 16-bit comparison).
+(defun instruction-jg (instr)
+  ;; FIXME: Ugly - incorporate the op # check into sinstruction-jx?
+  (retrieve-check-operands instr 2) ; Discard result, just check for 2 operands
+  (flet ((test-jg (operands)
+           (let* ((a (us-to-s (first  operands) 16))
+                  (b (us-to-s (second operands) 16)))
+             (> a b))))
+    (sinstruction-jx instr #'test-jg)))
 
 ;; Implements all jump-if instructions by taking a test
 ;; function. The text function takes one argument, which is
