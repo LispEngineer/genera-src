@@ -397,7 +397,7 @@ ANY).
 
 But the bug about the mailbox is still there. More later.
 
-## Later
+### Later
 
 The first difference now between Pretzil and GCZM/ZMI is now at instruction
 0x6A69, where Pretzil's operand is 0x1C4D and ZMI is 0x1C4C. Off by one again.
@@ -434,7 +434,38 @@ not the actual propery. Fix that and...
 Opening the small mailbox reveals a leaflet.
 ```
 
-Boom. Fixed. Thank you Pretzil.
+Boom. Fixed. Thank you Pretzil. Yet another defect (or lack of clarity, in any event)
+caused by poor specs.
+
+## Another one: smell hands
+
+```text
+ 6d2c:  52 01 12 03             GET_PROP_ADDR   L00,#12 -> L02
+ 6d30:  a4 03 00                GET_PROP_LEN    L02 -> -(SP)
+ 6d33:  57 00 02 00             DIV             (SP)+,#02 -> -(SP)
+```
+
+Pretzil: (6D2C (A0 12)) (6D30 (1A40)) (6D33 (4 2))
+  GCZM:    (6D2C (A0 12)) (6D30 (1A40)) (6D33 (3 2))
+
+```text
+160. Attributes: 13, 19
+     Parent object: 180  Sibling object:   0  Child object: 161
+     Property address: 1a38
+         Description: "small mailbox"
+          Properties:
+              [18] 45 3f 3d 20 
+              [17] 6e 94 
+              [16] f4 
+              [10] 00 0a 
+```
+
+Okay, the clear problem here is that `GET_PROP_ADDR` is now returning the
+address of the DATA of the property, so the LENGTH of that property is
+at the previous byte.
+
+Of course, this means that the fix of the previous bug caused this one. :)
+
 
 # Misc Notes
 

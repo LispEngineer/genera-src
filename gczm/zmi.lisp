@@ -3066,11 +3066,15 @@
 ;; to have its number of objects or number of properties per object be changed.
 ;; But, for now, we're definitely not checking anything about addresses and are
 ;; simply returning the byte at the specified location.
+;;
+;; NOTE: The address provided to this instruction is the address of the first byte
+;; of the property's DATA. The size of the property, therefore, is the byte previous.
+;; Sigh. Why is this stuff not documented anywhere?
 (defun instruction-get_prop_len (instr)
   (let* ((operands (retrieve-check-operands instr 1))
          (prop-addr (first operands))
          (result-var (decoded-instruction-store instr))
-         (prop-size (mem-byte prop-addr)) ; Property size byte
+         (prop-size (mem-byte (1- prop-addr))) ; Property size byte
          ;; See load-property
          ;; Size of the property data is in the top 3 bits, PLUS ONE
          (retval (1+ (ash prop-size -5))))
