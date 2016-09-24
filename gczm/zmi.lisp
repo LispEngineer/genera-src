@@ -2059,7 +2059,7 @@
 (defun instruction-and (instr)
   (sinstruction-math-unsigned instr #'logand))
 
-;; INC (variable) value ?(label) - Spec page 86
+;; INC (variable) value - Spec page 86
 ;; Increment variable by 1. (This is signed, so -1 increments to 0.)
 ;; See page 77 for notes on the variable (which is encoded as a small constant).
 ;; Page 161: In the seven opcodes that take indirect variable references
@@ -2080,6 +2080,28 @@
          (disassemble-operand 'variable var) incvarval)
     (advance-pc instr)
     (values t "INC")))
+
+;; DEC (variable) value - Spec page 83
+;; Decrement variable by 1. This is signed, so 0 decrements to -1.
+;; See page 77 for notes on the variable (which is encoded as a small constant).
+;; Page 161: In the seven opcodes that take indirect variable references
+;; (inc, dec, inc_chk, dec_chk, load, store, pull), an indirect reference
+;; to the stack pointer does not push or pull the top item of the stack -
+;; it is read or written in place.
+(defun instruction-dec (instr)
+  (let* ((operands (retrieve-check-operands instr 1))
+         ;; FIXME: These local variable names suck
+         (var (first operands))
+         (varval (var-read var))
+         (decvarval (logand #xFFFF (1- varval)))) ; SIGNED
+    ;; Do the increment
+    ;; Note: If we pop the stack with the read, we immediately re-push it
+    ;; with the write, so it's all good.
+    (var-write var decvarval)
+    (dbg t instr "DEC: Decremented ~A (newval: ~A)~%"
+         (disassemble-operand 'variable var) decvarval)
+    (advance-pc instr)
+    (values t "DEC")))
 
 ;; Generalize math instruction. Takes a function and implements
 ;; the rest of the instruction.
@@ -2114,6 +2136,37 @@
     (advance-pc instr)
     (values t inst-name)))
 
+;; RANDOM range -> (result)
+;; Spec 2.4, remarks thereafter, page 94
+;; If range is positive, returns a uniformly random number between 1 and range.
+;; If range is negative, the random number generator is seeded to that value and
+;; the return value is 0. Most interpreters consider giving 0 as range illegal
+;; (because they attempt a division with remainder by the range), but correct
+;; behaviour is to reseed the generator in as random a way as the interpreter
+;; can (e.g. by using the time in milliseconds).
+;; (Some version 3 games, such as 'Enchanter' release 29, had a debugging verb
+;; #random such that typing, say, #random 14 caused a call of random with -14.)
+(defun instruction-random (instr)
+  (let* ((operands (retrieve-check-operands instr 1))
+         (dest (decoded-instruction-store instr))
+         (range (first operands))
+         (mode 'random) ; random or predictable - future use
+         (result 0))
+    (cond
+      ((> range 0)
+       ;; XXX: CODE ME: Use a random or predictable setup
+       (setf result (1+ (random range))))
+      ((= range 0)
+       ;; XXX: CODE ME: Reset random state to randomized value
+       )
+      (t ; < range 0
+       ;; XXX: CODE ME: Set random state seed to known value and switch to
+       ;; predictable mode
+       ))
+    (dbg t instr "RANDOM ~d -> 0x~x, result: ~d, mode: ~A~%" range dest result mode)
+    (var-write dest result)
+    (advance-pc instr)
+    (values t (format nil "RANDOM ~a" mode))))
 
 ;; OUTPUT INSTRUCTIONS -----------------------------------------------------
 
@@ -2540,6 +2593,23 @@
       (mem-word-write ml-dest value)
       (advance-pc instr)
       (values t "Stored word"))))
+
+;; STOREB (Spec page 102)
+;; Operands: array byte-index value
+;; array->byte-index = value, i.e. stores the given value in the byte
+;;; at address array+byte-index (which must lie in dynamic memory).
+;; XXX: Enforce memory restriction
+(defun instruction-storeb (instr)
+  (let* ((operands (retrieve-check-operands instr 3))
+         (array-base (first operands))
+         (array-index (second operands))
+         (value (third operands))
+         (ml-dest (+ array-base array-index)))
+    (dbg t instr "STOREB: Writing 0x~x to 0x~x (as ~x[~x])~%"
+         value ml-dest array-base array-index)
+    (mem-byte-write ml-dest value)
+    (advance-pc instr)
+    (values t "Stored byte")))
 
 ;; STORE (variable) value (Spec page 102)
 ;; Set the variable referenced by the first operand to the specified value
