@@ -744,7 +744,10 @@
                    (token (cdr split-piece)))
                (list (zdict-find token)
                      (length token)
-                     token-str-pos))))
+                     ;; SUPER IMPORTANT NOTE:
+                     ;; The z-machine seems to think the first byte in buffer is 1, not 0!!
+                     ;; If we count from zero, it shows the wrong bytes.
+                     (1+ token-str-pos)))))
       (map 'list #'find-token split))))
                                  
 
@@ -2289,7 +2292,8 @@
 ;;          dictionary, or 0 if it isn't;
 ;;       ii. followed by a byte giving the number of letters in the word;
 ;;       iii. and finally a byte giving the position in the text-buffer of
-;;            the first letter of the word.
+;;            the first letter of the word. IMPORTANT NOTE: This seems to
+;;            count from 1, though (so weird)
 ;;
 ;; NOTE: This initial version will just read a line of input from the
 ;; standard input. A future version will return a special code that
