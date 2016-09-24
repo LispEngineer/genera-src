@@ -648,6 +648,19 @@
      (logior (mem-byte bloc) ; "inclusive" or
              (ash 1 bbit)))))
 
+;; Clears the specified attribute (bit) on the specified object.
+;; Spec 12.3.1
+;; TODO: Integrate object-set/clear-attribute
+(defun object-clear-attribute (object-id attribute)
+  (let* ((abit  (- 31 attribute))
+         (abyte (floor attribute 8)) ; which byte the attribute is in
+         (tloc  (+ (object-tree-loc) (* (1- object-id) +object-tree-entry-size+)))
+         (bloc  (+ tloc abyte))
+         (bbit  (mod abit 8))) ; which bit in the byte
+    (dbg t nil "Attribute ~d is bit ~d of byte ~d~%" attribute bbit abyte)
+    (mem-byte-write bloc
+                    (logand (lognot (ash 1 bbit))
+                            (mem-byte bloc)))))
 
 ;; Dictionary -------------------------------------------------------------
 
@@ -2815,6 +2828,7 @@
 
 
 ;; SET_ATTR object-id attribute (Spec page 99)
+;; XXX: Check attribute number
 (defun instruction-set_attr (instr)
   (let* ((operands (retrieve-check-operands instr 2))
          (object-id (first operands))
@@ -2823,6 +2837,18 @@
     (advance-pc instr)
     (dbg t instr "SET_ATTR: Set attribute ~d on object ~d~%" attribute object-id)
     (values t "SET_ATTR")))
+
+;; CLEAR_ATTR object-id attribute (Spec page 82)
+;; Make object not have the attribute numbered attribute
+;; XXX: Check attribute number
+(defun instruction-clear_attr (instr)
+  (let* ((operands (retrieve-check-operands instr 2))
+         (object-id (first operands))
+         (attribute (second operands)))
+    (object-clear-attribute object-id attribute)
+    (advance-pc instr)
+    (dbg t instr "CLEAR_ATTR: Clear attribute ~d on object ~d~%" attribute object-id)
+    (values t "CLEAR_ATTR")))
 
 
 ;; GET_PARENT object -> (result) (Spec page 85)
