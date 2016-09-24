@@ -224,6 +224,45 @@ a very difficult task. Debugging said interpreter is even harder.
 Anyway, at this point, Zork I now runs (seemingly properly) until the
 first SREAD instruction, with expected output.
 
+## commit 8f9baf593c31223e27bcd7de1bbe01603abe2d9c
+
+There's definitely another bug in the interpreter. We can run the game and get
+input, but if we try to open the mailbox in the first room, it tells us there
+is no mailbox, and also gives us warnings because it's attempting to access
+information about object 0. (I added the warnings because I was not sure if
+it was legal to query object 0 when this first happened.)
+
+```text
+ZMI> (trace-run-until 'asdfasdf nil nil)
+ZORK I: The Great Underground Empire
+Copyright (c) 1981, 1982, 1983 Infocom, Inc. All rights reserved.
+ZORK is a registered trademark of Infocom, Inc.
+Revision 88 / Serial number 840726
+
+West of House
+You are standing in an open field west of a white house, with a boarded front door.
+There is a small mailbox here.
+
+>open mailbox
+[Warning: TEST_ATTR on Object 0 at 0x6D25]
+[Warning: GET_PROP_ADDR on Object 0 at 0x6D2C]
+[Warning: TEST_ATTR on Object 0 at 0x6D25]
+[Warning: GET_PROP_ADDR on Object 0 at 0x6D2C]
+You can't see any mailbox here!
+```
+
+Now, if I were Neo, maybe there wouldn't be a mailbox, but in my real world, I
+expect the Z-Machine to respond:
+
+```text
+Opening the small mailbox reveals a leaflet.                                   
+```
+
+(Proper response courtesy of 
+[ifiction.org](http://www.ifiction.org/games/playz.php?cat=2&game=3&mode=html).
+Solution available from [archive.org](https://web.archive.org/web/20030211015946/http://www.wurb.com/if/game/987).)
+
+
 # Misc Notes
 
 From `nyef` in `#clim`: It turns out that if you hardcode the random number
