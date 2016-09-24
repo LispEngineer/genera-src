@@ -2074,6 +2074,16 @@
 (defun instruction-rfalse (instr)
   (sinstruction-ret instr 0))
 
+;; QUIT: (Spec page 94)
+;; Exit the game immediately. (Any "Are you sure?" question must be
+;; asked by the game, not the interpreter.) It is not legal to return
+;; from the main routine (that is, from where execution first begins)
+;; and this must be used instead.
+(defun instruction-quit (instr)
+  (advance-pc instr)
+  (dbg t instr "QUIT~%")
+  (values nil "QUIT"))
+
 
 ;; MATH INSTRUCTIONS ------------------------------------------------------------
 
@@ -2936,7 +2946,8 @@
     (var-write (decoded-instruction-store instr) parent-id)
     (advance-pc instr)
     (dbg t instr "GET_PARENT: Got parent ~d of object ~d stored into VAR 0x~x~%"
-         parent-id object-id (decoded-instruction-store instr))))
+         parent-id object-id (decoded-instruction-store instr))
+    (values t "GET_PARENT")))
 
 ;; GET_CHILD object -> (result) ?(label) (Spec page 84)
 ;; Get first object contained in given object, branching if this exists,
@@ -3210,7 +3221,9 @@
 
 ;; Runs the program with tracing until we get to a specified instruction
 (defun trace-run-until (inst-name &optional (show-disassembly t) (show-debug nil))
-  (let ((+debug+ show-debug))
+  (let ((+debug+ show-debug)
+        (retval nil)
+        (msg nil))
     (loop
        (handler-case
            (let* ((next-instr (decode-instruction *z-pc*))
@@ -3221,7 +3234,10 @@
              (when (eql inst-name name-instr)
                (format t "~%Ending due to instruction found: ~A~%" name-instr)
                (return))
-             (run-next-instruction))
+             (multiple-value-setq (retval msg) (run-next-instruction))
+             (when (null retval)
+               (format t "~%Ending due to failed instruction: ~A~%" msg)
+               (return)))
          (error (e)
            (progn
              (format t "~%Ending due to condition: ~A~%" e)
