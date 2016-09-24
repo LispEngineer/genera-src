@@ -83,6 +83,14 @@
 ;; (starts at location given by +ml-initial-pc+)
 (defvar *z-pc* 0)
 
+;; A log of all the instructions we run, in reverse order
+(defvar *pc-log* nil)
+
+(defun save-pc-log (fn)
+  (with-open-file (s fn :direction :output :if-exists :supersede)
+    (write (reverse *pc-log*) :stream s)
+    t))
+
 ;; Z-Machine Stack of 2-byte words (Spec 6.3)
 ;; TODO: Code me
 ;; Writing to variable 0x00 pushes a value on the stack
@@ -855,6 +863,7 @@
     (initialize-call-stack)
     ;; Set the initial Program Counter (Spec 5.5)
     (set-pc init-pc)
+    (setf *pc-log* nil) ; And clear our log of PCs
     ;; Set the initial flags (Spec 11.1) (p52 of zmach06.pdf)
     ;; Status line NOT available: header byte 1 bit 4            0
     ;; Screen-splitting available: header byte 1 bit 5           0
@@ -3045,7 +3054,10 @@
   (let* ((operands (retrieve-check-operands instr 1))
          (prop-addr (first operands))
          (result-var (decoded-instruction-store instr))
-         (retval (mem-byte prop-addr)))
+         (prop-size (mem-byte prop-addr))
+         ;; See load-property
+         ;; Size of the property data is in the top 3 bits, PLUS ONE
+         (retval (1+ (ash prop-size -5))))
     (var-write result-var retval)
     (advance-pc instr)
     (dbg t instr "GET_PROP_LEN: Len of prop at loc 0x~4,'0x is ~d -> 0x~2,'0x~%"
@@ -3098,7 +3110,9 @@
   (let* ((start-pc   (get-pc))
          (instr      (decode-instruction start-pc))
          (instr-func (find-instruction-function instr)))
+    #+(or)
     (dbg t instr "Executing instruction: 0x~x: ~A~%" start-pc instr-func)
+    (push start-pc *pc-log*)
     (funcall instr-func instr)))
 
 ;; This locates an instruction execution function for the

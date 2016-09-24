@@ -262,6 +262,75 @@ Opening the small mailbox reveals a leaflet.
 [ifiction.org](http://www.ifiction.org/games/playz.php?cat=2&game=3&mode=html).
 Solution available from [archive.org](https://web.archive.org/web/20030211015946/http://www.wurb.com/if/game/987).)
 
+## Idea
+
+So, I had the idea that I could use another Z-machine and log which instructions
+it runs, and compare them to the instructions I run. Pretzil is another CL
+implementation, and with only a few changes it is simple to make run without
+CLIM. I added a *pc-log* which is just a list with the instruction addresses
+being run (in reverse order, cause `push` is fast).
+
+Then, I added the same to GCZM.
+
+Now, I know the instruction address lists diverge at instruction 27716 (decimal):
+
+```
+ZMI> (disassemble-instr
+      (decode-instruction 27716))
+"6C44: INC_CHK         L03,L02 [FALSE] 6C3C "
+```
+
+My code is taking the branch to 0x6C3C, while Pretzil is not and continuing on
+to 27721. Fortunately, this is also the first time this PC is seen in either of
+the two programs.
+
+So, clearly, L03 and L02 are different in Pretzil and GCZM.
+
+In mine, the values of L03 and L02 are 4 and 24. In Pretzil, I re-enabled
+the featured-out operand logging for just that instruction address and
+its arguments are `Addr: 6C44, instr: 25, args #(4 0)`. So, L02 is getting
+the wrong value somewhere. 
+
+L02 is set from the CALL at 0x6D3B, where it was the top of stack
+from the previous routine.
+
+```
+6D2C: GET_PROP_ADDR   L00,#12 -> L02 
+Retrieved and cached operands: (181 18)
+GET_PROP_ADDR: Prop 18 of object 181 is at 0x1C4C into VAR 0x3
+6D30: GET_PROP_LEN    L02 -> -(SP) 
+Retrieved and cached operands: (7244)
+GET_PROP_LEN: Len of prop at loc 0x1C4C is 50 -> 0x00
+6D33: DIV             (SP)+,#02 -> -(SP) 
+DIV: 50 op 2 = 25 (0x19 -> var 0x0)
+6D37: SUB             (SP)+,#01 -> -(SP) 
+SUB: 25 op 1 = 24 (0x18 -> var 0x0)
+6D3B: CALL            6C22 G5A,L02,(SP)+ -> -(SP) 
+Retrieved and cached operands: (13841 17727 7244 24)
+```
+
+So, it seems that the `GET_PROP_LEN` is getting an unlikely
+propery length, probably because `GET_PROP_ADDR` is giving
+us an incorrect property address. `infodump -f` shows us:
+
+```
+181. Attributes: 14, 23
+     Parent object: 180  Sibling object: 160  Child object:   0
+     Property address: 1c47
+         Description: "door"
+          Properties:
+              [18] 3f 9d 
+              [17] 6d 57 
+              [16] c9 ca 
+```
+
+So, after looking around my object, it seems that `GET_PROP_LEN`
+is wrong. It's not a simple "load byte from memory at location X"
+because that's not how that byte is encoded. :) Oops!
+
+However, the game still says `You can't see any mailbox here!`
+so we still have work to do.
+
 
 # Misc Notes
 
