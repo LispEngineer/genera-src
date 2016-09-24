@@ -174,6 +174,11 @@
 
 
 ;; Conditions -------------------------------------------------------------
+;; Spec, Appendix A ("Error Messages")
+
+;; TODO: Add a Z-machine Call Frame Stack Backtrace with these
+;; (per Spec Appendix A page 111 point 7), which would be very
+;; interesting to see.
 
 
 ;; Read a new value from the user when doing a restart
@@ -244,6 +249,13 @@
   (:report (lambda (condition stream)
 	     (format stream "Invalid object: ~A" (message condition)))))
 
+;; Division by zero. Let's have a different condition so we can
+;; differentiate the z-machine code /0 by a real Lisp /0
+(define-condition z-division-by-zero (error)
+  ((message :initarg :message :reader message))
+  ;; Below required by Genera
+  (:report (lambda (condition stream)
+	     (format stream "Division by zero: ~A" (message condition)))))
 
 ;; Program Counter --------------------------------------------------------
 
@@ -406,6 +418,11 @@
 ;; See: zmach06e.pdf Chapter 3.4
 ;; See: Spec Chapter 12
 
+;; Per zmach06e.pdf Chapter 3.5:
+;; 'object number 0' is often used to mean 'no such object exists.'
+;; this 'object' is unlike all others: it has no name, no attributes,
+;; and no properties.
+
 ;; NOTE CONVENTION:
 ;;    obj- takes an object ID
 ;; object- takes an object ID
@@ -420,6 +437,7 @@
   data-size       ; How many (actual data bytes)
   data-val        ; The byte or word size data
   data-vec        ; The data as a vector of bytes
+  ; data-loc      ; Memory location of this property's data
   )
 
 ;; A structure which holds information about an object
@@ -2071,6 +2089,27 @@
 (defun instruction-mul (instr)
   (sinstruction-math instr #'*))
 
+;; DIV a b -> (result) - Spec p83, 2.2.1, 2.3.1, p16 remarks
+;; Signed 16-bit division. Division by zero should halt the interpreter
+;; with a suitable error message.
+;; Examples:
+;; -11 /  2 -> -5
+;; -11 / -2 ->  5
+;;  11 / -2 -> -5
+;; This corresponds to the Common Lisp TRUNCATE instruction
+;; Ref: http://www.lispworks.com/documentation/HyperSpec/Body/f_floorc.htm
+(defun instruction-div (instr)
+  (let* ((operands (retrieve-check-operands instr 2))
+         (divisor (second operands)))
+    ;; Check for division by zero before it happens
+    (when (= 0 divisor)
+      ;; XXX: Add some restarts
+      (error 'z-division-by-zero :message
+             (format nil "0x~4,0X: DIV ~d ~d"
+                     (decoded-instruction-memory-location instr)
+                     (first operands) divisor)))
+    (sinstruction-math instr #'truncate)))
+
 ;; AND: Bitwise AND. (Spec p79)
 (defun instruction-and (instr)
   (sinstruction-math-unsigned instr #'logand))
@@ -2203,6 +2242,17 @@
   (dbg t instr "NEW_LINE~%")
   (advance-pc instr)
   (values t "NEW_LINE"))
+
+;; PRINT_RET (Spec page 92)
+;; Print the quoted (literal) Z-encoded string, then print a new-line and
+;; then return true (i.e., 1).
+;; XXX: This initial implementation only outputs to *z-output*
+;; XXX: Do buffering
+(defun instruction-print_ret (instr)
+  (dbg t instr "PRINT_RET: \"~A\"~%" (decoded-instruction-text-ascii instr))
+  (write-string (decoded-instruction-text-ascii instr) *z-output*)
+  (write-char #\Newline *z-output*)
+  (sinstruction-ret instr 1))
 
 ;; PRINT_NUM (Spec page 92)
 ;; XXX: This initial implementation only outputs to *z-output*
@@ -2410,17 +2460,27 @@
 
 ;; TEST_ATTR: Branch if object has attribute. (Spec page 103)
 ;; Operands: object attribute
+;; NOTE: There's either a bug in my interpreter, or ZORK1 is trying
+;; to do a TEST_ATTR #7 on Object ID 0. Let's have a special check
+;; for Object ID 0 (no attributes), but also log a message when that
+;; happens for now while we decide FIXME: if this should stand.
 (defun instruction-test_attr (instr)
   ;; XXX: Check # of operands for exactly 2
   (flet ((test-test_attr (operands)
            (let* ((obj-id (first operands))
                   (attrib (second operands))
-                  (obj    (load-object obj-id))
+                  (o-attr ; The attributes of the specified object
+                   (if (= 0 obj-id)
+                       (progn
+                         (format t "[Warning: TEST_ATTR on Object 0 at 0x~4,'0x]~%"
+                                 (decoded-instruction-memory-location instr))
+                         0)
+                       (zobj-attributes (load-object obj-id))))
                   (shift-amt (- 31 attrib)))
 
              ;; Attribute 0 is the top bit but 31 is the bottom bit.
              (nonzerop
-              (logand (zobj-attributes obj)
+              (logand o-attr
                       (ash 1 shift-amt))))))
     (sinstruction-jx instr #'test-test_attr)))
 
@@ -2935,6 +2995,62 @@
          property-id object-id prop-val result-var)
     (values t "GET_PROP")))
 
+;; GET_PROP_ADDR object property -> (result) - Spec page 85
+;; Get the byte address (in dynamic memory) of the property data for the
+;; given object's property. This returns 0 if the object doesn't have
+;; the property.
+;;
+;; NOTE: There's either a bug in my interpreter, or ZORK1 is trying
+;; to do a GET_PROP_ADDR on Object ID 0 for property 0x12. Let's have a special check
+;; for Object ID 0 (no attributes), but also log a message when that
+;; happens for now while we decide FIXME: if this should stand.
+;;
+;; NOTE: This is not very efficient.
+(defun instruction-get_prop_addr (instr)
+  (let* ((operands    (retrieve-check-operands instr 2))
+         (object-id   (first operands))
+         (property-id (second operands))
+         (object      (if (zerop object-id)
+                          (progn
+                            (format t "[Warning: GET_PROP_ADDR on Object 0 at 0x~4,'0x]~%"
+                                    (decoded-instruction-memory-location instr))
+                            nil)
+                          (load-object object-id)))
+         (property    (if (null object) nil
+                          (zobj-prop object property-id)))
+         ;; Wish CL was lazy like Haskell sometimes
+         (result-var   (decoded-instruction-store instr))
+         (retval
+          (if property
+              (zprop-mem-loc property)
+              0)))
+    (var-write result-var retval)
+    (advance-pc instr)
+    (dbg t instr "GET_PROP_ADDR: Prop ~d of object ~d is at 0x~4,'0x into VAR 0x~x~%"
+         property-id object-id retval result-var)
+    (values t "GET_PROP_ADDR")))
+
+;; GET_PROP_LEN prop-addr -> (result) - Spec page 85
+;; Get length of property data (in bytes) for the given object's property.
+;; It is illegal to try to find the property length of a property which does
+;; not exist for the given object, and an interpreter should halt with an error
+;; message (if it can efficiently check this condition).
+;;
+;; FIXME: We can definitely prepare a list of all known object property addresses,
+;; so we could potentially check this, since the object table doesn't seem to be able
+;; to have its number of objects or number of properties per object be changed.
+;; But, for now, we're definitely not checking anything about addresses and are
+;; simply returning the byte at the specified location.
+(defun instruction-get_prop_len (instr)
+  (let* ((operands (retrieve-check-operands instr 1))
+         (prop-addr (first operands))
+         (result-var (decoded-instruction-store instr))
+         (retval (mem-byte prop-addr)))
+    (var-write result-var retval)
+    (advance-pc instr)
+    (dbg t instr "GET_PROP_LEN: Len of prop at loc 0x~4,'0x is ~d -> 0x~2,'0x~%"
+         prop-addr retval result-var)
+    (values t "GET_PROP_LEN")))
 
 
 ;; META-INSTRUCTIONS ----------------------------------------------------
