@@ -2333,6 +2333,20 @@
     (advance-pc instr)
     (values t "PRINT_PADDR")))
 
+;; PRINT_ADDR paddr (Spec page 91)
+;; Print the (Z-encoded) string at the given byte address.
+;; XXX: This initial implementation only outputs to *z-output*
+;; XXX: Do buffering (reset the buffering count)
+(defun instruction-print_addr (instr)
+  (let* ((operands (retrieve-check-operands instr 1))
+         (addr   (first operands))
+         (zchars (mem-string addr))
+         (str    (z-characters-to-string (break-zchar-string zchars))))
+    (write-string str *z-output*)
+    (dbg t instr "PRINT_ADDR: Address 0x~x as \"~A\"~%" addr str)
+    (advance-pc instr)
+    (values t "PRINT_ADDR")))
+
 
 ;; INPUT INSTRUCTIONS ------------------------------------------------------
 
@@ -2769,6 +2783,18 @@
       (advance-pc instr)
       (values t "Loaded byte"))))
 
+;; LOAD (variable) -> (result) - Spec page 87
+;; The value of the variable referred to by the operand is stored in the result.
+(defun instruction-load (instr)
+  (let* ((operands (retrieve-check-operands instr 1))
+         (var-src  (first operands))
+         (var-dest (decoded-instruction-store instr)))
+    (var-write var-dest (var-read var-src))
+    (dbg t instr "LOAD: Copied variable 0x~x to variable 0x~x~%" var-src var-dest)
+    (advance-pc instr)
+    (values t "LOAD")))
+                    
+
 
 ;; PUSH value (Spec page 93)
 ;; "Pushes a value onto the game stack."
@@ -3017,6 +3043,52 @@
     (dbg t instr "GET_PROP: Prop ~d of object ~d is 0x~x into VAR 0x~x~%"
          property-id object-id prop-val result-var)
     (values t "GET_PROP")))
+
+;; GET_NEXT_PROP object property -> (result) - Spec page 85
+;; Gives the number of the next property provided by the quoted object. This
+;; may be zero, indicating the end of the property list; if called with zero,
+;; it gives the first property number present. It is illegal to try to find the
+;; next property of a property which does not exist, and an interpreter should
+;; halt with an error message (if it can efficiently check this condition).
+;;
+;; NOTE: Not efficient.
+(defun instruction-get_next_prop (instr)
+  (let* ((operands    (retrieve-check-operands instr 2))
+         (object-id   (first operands))
+         (property-id (second operands))
+         (object      (load-object object-id))
+         ;; Find our property in the list of properties, as the
+         ;; car of a list of properties
+         (property    (member-if (lambda (x) (= property-id (zprop-id x)))
+                                 (zobj-properties object)))
+         ;; Wish CL was lazy like Haskell sometimes
+         (result-var  (decoded-instruction-store instr))
+         (next-id     0))
+    (when (and (null property) (nonzerop property-id))
+      ;; We are being asked for a non-existent property
+      ;; XXX: Add a restart-case that allows use of property-def
+      (error 'invalid-property :message
+             (format nil "Cannot get non-existent property ~d from obj ~d~%"
+                     property-id object-id)))
+    (setf next-id
+          (cond
+            ((and (zerop property-id) (zobj-properties object))
+             ;; Get first property ID, cause we have a property
+             (zprop-id (car (zobj-properties object))))
+            ((zerop property-id)
+             ;; No properties, so zero meaning no next property too
+             0)
+            ((null (cdr property))
+             ;; No next property, so zero
+             0)
+            (t
+             ;; Get property ID of next property
+             (zprop-id (cadr property))))) ; (car (cdr property))
+    (var-write result-var next-id)
+    (advance-pc instr)
+    (dbg t instr "GET_NEXT_PROP: Next prop ~d of object ~d is 0x~x into VAR 0x~x~%"
+         property-id object-id next-id result-var)
+    (values t "GET_NEXT_PROP")))
 
 ;; GET_PROP_ADDR object property -> (result) - Spec page 85
 ;; Get the byte address (in dynamic memory) of the property data for the

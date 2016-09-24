@@ -472,6 +472,25 @@ Of course, this means that the fix of the previous bug caused this one. :)
 From `nyef` in `#clim`: It turns out that if you hardcode the random number
 generator to return some constant, you can't get past the dwarf.
 
+# All Instructions
+
+```lisp
+ZMI> (defun flatten (l)
+  (cond ((null l) nil)
+        ((atom (car l)) (cons (car l) (flatten (cdr l))))
+        (t (append (flatten (car l)) (flatten (cdr l))))))
+FLATTEN
+ZMI> (map 'list #'oci-name (remove-if #'null (flatten (map 'list (lambda (x) (map 'list #'identity x)) (map 'list #'cdr +opcodes+)))))
+(JE JL JG |DEC_CHK| INC_CHK JIN TEST OR AND TEST_ATTR SET_ATTR CLEAR_ATTR STORE
+ INSERT_OBJ LOADW LOADB GET_PROP GET_PROP_ADDR GET_NEXT_PROP |ADD| SUB MUL DIV
+ MOD JZ GET_SIBLING GET_CHILD GET_PARENT GET_PROP_LEN INC |DEC| PRINT_ADDR
+ REMOVE_OBJ PRINT_OBJ RET JUMP PRINT_PADDR LOAD NOT RTRUE RFALSE PRINT
+ PRINT_RET NOP SAVE RESTORE RESTART RET_POPPED POP QUIT NEW_LINE SHOW_STATUS
+ VERIFY CALL STOREW STOREB PUT_PROP SREAD PRINT_CHAR PRINT_NUM RANDOM PUSH PULL
+ SPLIT_WINDOW SET_WINDOW OUTPUT_STREAM INPUT_STREAM SOUND_EFFECT)
+```
+
+
 # Information
 
 ## `zork1.z3`
