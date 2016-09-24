@@ -331,6 +331,71 @@ because that's not how that byte is encoded. :) Oops!
 However, the game still says `You can't see any mailbox here!`
 so we still have work to do.
 
+## Continued investigation
+
+Another look through the PC logs shows that the instruction traces
+diverge at 0x6C40. Actually, it's the second 0x6C40.
+
+```text
+ZMI> (disassemble-instr (decode-instruction #x6C40))
+"6C40: JE              L00,(SP)+ [TRUE] RET(TRUE) "
+```
+
+Pretzil does not take this branch (continuing on to 0x6D43) while
+GCZM does take it and continues at 0x6C44.
+
+GCZM:
+```text
+6C40: JE              L00,(SP)+ [TRUE] RET(TRUE) 
+Retrieving operands for (VARIABLE VARIABLE): (1 0)
+Retrieved and cached operands: (453F 7245)
+JE: (453F 7245) if true to 1: Result false
+```
+
+Pretzil: (after enabling logging for instruction 6C40 -
+note that the args are in decimal vs above in hex)
+```
+>open mailbox
+Addr: 6C40, instr: 61, args #(17727 16285)
+Addr: 6C40, instr: 61, args #(17727 17727)
+Opening the small mailbox reveals a leaflet.
+```
+
+(0x453F = 17727) so t he second argument, the top of stack,
+is what differs. Let's trace the top of stack backwards in GCZM.
+
+GCZM:
+```text
+6C3C: LOADW           L01,L03 -> -(SP) 
+Retrieving operands for (VARIABLE VARIABLE): (2 4)
+Retrieved and cached operands: (1A3F 0)
+LOADW: Loaded 0x7245 from 0x1A3F (as 1A3F[0]) into VAR 0x0
+6C40: JE              L00,(SP)+ [TRUE] RET(TRUE) 
+```
+
+Pretzil: (decimal)
+```text
+>open mailbox
+Addr: 6C3C, instr: 6F, args #(7245 0)
+Addr: 6C40, instr: 61, args #(17727 16285)
+Addr: 6C3C, instr: 6F, args #(6720 0)
+Addr: 6C40, instr: 61, args #(17727 17727)
+Opening the small mailbox reveals a leaflet.
+```
+
+0x1A3F == 6719, so there's an off by one error here...! Looking at the previous
+0x6C3C it is also off by one. (0x1C4C == 7244)
+
+Local 1 is being set by a call at 0x6D3B to the global G5A.
+
+Searching backwards for writes to G5A, the only obvious one is at 
+0x66AD.
+
+I extended the PC logging to include operands. I found a latent bug
+in my JE implementation (was matching ALL operands to the first, not
+ANY).
+
+But the bug about the mailbox is still there. More later.
 
 # Misc Notes
 

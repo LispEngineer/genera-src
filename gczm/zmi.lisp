@@ -88,8 +88,9 @@
 
 (defun save-pc-log (fn)
   (with-open-file (s fn :direction :output :if-exists :supersede)
-    (write (reverse *pc-log*) :stream s)
-    t))
+    (let ((*print-base* 16))
+      (write (reverse *pc-log*) :stream s)
+      t)))
 
 ;; Z-Machine Stack of 2-byte words (Spec 6.3)
 ;; TODO: Code me
@@ -2416,9 +2417,11 @@
   (or (and result branch-if)
       (and (not result) (not branch-if))))
 
-;; JE: Check if all args are equal to the first one (or there are no args).
+;; JE a b [c] [d]: (Spec page 86)
+;; Jump if a is equal to any of the subsequent operands.
+;; (Thus @je a never jumps and @je a b jumps if a = b.)
 ;; Errors if there is exactly one arg
-;; (Spec page 86, 161)
+;;
 ;; Per page 161:
 ;; je can take between 2 and 4 operands. je with just 1 operand is not permitted.
 ;; Per page 86:
@@ -2437,7 +2440,7 @@
                (return-true  () :report "Consider it equal" t)
                (return-false () :report "Consider it unequal" nil)))
             (t
-             (every (lambda (b) (= (car operands) b)) (cdr operands))))))
+             (some (lambda (b) (= (car operands) b)) (cdr operands))))))
     (sinstruction-jx instr #'test-je)))
 
 ;; TEST bitmap flags: Spec page 102
@@ -3054,7 +3057,7 @@
   (let* ((operands (retrieve-check-operands instr 1))
          (prop-addr (first operands))
          (result-var (decoded-instruction-store instr))
-         (prop-size (mem-byte prop-addr))
+         (prop-size (mem-byte prop-addr)) ; Property size byte
          ;; See load-property
          ;; Size of the property data is in the top 3 bits, PLUS ONE
          (retval (1+ (ash prop-size -5))))
@@ -3112,7 +3115,7 @@
          (instr-func (find-instruction-function instr)))
     #+(or)
     (dbg t instr "Executing instruction: 0x~x: ~A~%" start-pc instr-func)
-    (push start-pc *pc-log*)
+    (push (list start-pc (retrieve-operands instr)) *pc-log*)
     (funcall instr-func instr)))
 
 ;; This locates an instruction execution function for the
