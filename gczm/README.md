@@ -397,6 +397,45 @@ ANY).
 
 But the bug about the mailbox is still there. More later.
 
+## Later
+
+The first difference now between Pretzil and GCZM/ZMI is now at instruction
+0x6A69, where Pretzil's operand is 0x1C4D and ZMI is 0x1C4C. Off by one again.
+
+```text
+ZMI> (disassemble-instr (decode-instruction #x6A69))
+"6A69: JZ              (SP)+ [TRUE] 6A7D "
+```
+
+Disassembly courtesy of txd:
+
+```text
+ 6a65:  52 01 12 00             GET_PROP_ADDR   L00,#12 -> -(SP)
+ 6a69:  a0 00 d3                JZ              (SP)+ [TRUE] 6a7d
+```
+
+So, clearly, `GET_PROP_ADDR` is not working. Operands for that are
+0xB5 0x12 (decimal: 181 18). We have the Object 181 shown up there from
+`infodump`, so let's figure it out...
+
+```lisp
+ZMI> (let ((a #x1c47)) (map 'list (lambda (x) (let ((ao a)) (incf a) (list ao x))) (mem-slice #x1c47 20)))
+((1C47 2) (1C48 26) (1C49 94) (1C4A DC) (1C4B A5) (1C4C 32) (1C4D 3F) (1C4E 9D)
+ (1C4F 31) (1C50 6D) (1C51 57) (1C52 30) (1C53 C9) (1C54 CA) (1C55 0) (1C56 5)
+ (1C57 1E) (1C58 86) (1C59 5D) (1C5A 2A))
+```
+
+The data of property 18 is 0x3F9D according to `infodump`, which is clearly at 
+0x1C4D. So, my `GET_PROP_ADDR` is returning the location of the SIZE/PROP# byte,
+not the actual propery. Fix that and...
+
+```text
+>open mailbox
+Opening the small mailbox reveals a leaflet.
+```
+
+Boom. Fixed. Thank you Pretzil.
+
 # Misc Notes
 
 From `nyef` in `#clim`: It turns out that if you hardcode the random number

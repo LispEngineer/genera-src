@@ -3034,7 +3034,9 @@
          (result-var   (decoded-instruction-store instr))
          (retval
           (if property
-              (zprop-mem-loc property)
+              ;; The memory location is of the size/ID byte, so the actual
+              ;; data is the next byte.
+              (1+ (zprop-mem-loc property))
               0)))
     (var-write result-var retval)
     (advance-pc instr)
