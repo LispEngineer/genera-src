@@ -2155,7 +2155,7 @@
                      (first operands) divisor)))
     (sinstruction-math instr
                        (lambda (x y)
-                         (second (multiple-value-list (truncate x y)))))))
+                         (nth-value 1 (truncate x y))))))
 
 
 ;; AND: Bitwise AND. (Spec p79)
