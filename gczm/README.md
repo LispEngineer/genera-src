@@ -505,6 +505,14 @@ ZMI> (map 'list #'oci-name (remove-if #'null (flatten (map 'list (lambda (x) (ma
  "INSTRUCTION-SOUND_EFFECT")
 ```
 
+The remaining ones used by Zork 1 are:
+
+* SAVE
+* RESTORE
+* RESTART
+* VERIFY
+
+
 # Information
 
 ## `zork1.z3`
