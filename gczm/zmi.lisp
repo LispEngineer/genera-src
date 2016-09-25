@@ -140,7 +140,11 @@
 (defparameter +ml-loc-obj+       #x0A) ; 2 Location of object table
 (defparameter +ml-loc-globals+   #x0C) ; 2 Location of global variables table
 (defparameter +ml-loc-static+    #x0E) ; 2 Base of static memory
-(defparameter +ml-flags-2+       #x10) ; 1 Flags 2 (bits 0-1 only in v3)
+;; NOTE: Flags 2 is word (2-byte) sized and only bits 1 and 2 have
+;; any meaning in V3:
+;; 0: transcript (store transcript when on)
+;; 1: "Game sets to force printing in fixed-width font." 
+(defparameter +ml-flags-2+       #x10) ; 2 Flags 2 (bits 0-1 only in v3)
 (defparameter +ml-loc-abbrev+    #x18) ; 2 Location of abbreviations table
 (defparameter +ml-file-len+      #x1A) ;   Length of file /2 (Spec 11.1.6)
 (defparameter +ml-file-cksum+    #x1C) ;   Checksum of file
@@ -2130,9 +2134,48 @@
                      (first operands) divisor)))
     (sinstruction-math instr #'truncate)))
 
+;; MOD a b -> (result) - Spec p88, p16
+;; Examples:
+;; -13 %  5 = -3
+;;  13 % -5 =  3
+;; -13 % -5 = -3
+;; These examples are accurately handled by the second return
+;; value of the Common Lisp TRUNCATE function.
+;; FIXME: Combine with instruction-div for code reuse.
+;; NOTE: This appears exactly twice in one routine in Zork 1.
+(defun instruction-mod (instr)
+  (let* ((operands (retrieve-check-operands instr 2))
+         (divisor (second operands)))
+    ;; Check for division by zero before it happens
+    (when (= 0 divisor)
+      ;; XXX: Add some restarts
+      (error 'z-division-by-zero :message
+             (format nil "0x~4,0X: MOD ~d ~d"
+                     (decoded-instruction-memory-location instr)
+                     (first operands) divisor)))
+    (sinstruction-math instr
+                       (lambda (x y)
+                         (second (multiple-value-list (truncate x y)))))))
+
+
 ;; AND: Bitwise AND. (Spec p79)
 (defun instruction-and (instr)
   (sinstruction-math-unsigned instr #'logand))
+
+;; OR: Bitwise OR. (Spec p90)
+;; In Zork 1, this is used in exactly one place,
+;; in the "script" game command for starting/ending
+;; a transcript. In that case, it sets
+;; bit 1 of Flags 2 using this (and "unscript" uses the AND
+;; above to clear it).
+(defun instruction-or (instr)
+  (sinstruction-math-unsigned instr #'logior))
+
+
+;; NOT value -> (result): Bitwise NOT. (Spec p89) - v1-4 only
+;; NOTE: This is never used in Zork 1.
+;; This must flip all the 16 bits in the value.
+
 
 ;; INC (variable) value - Spec page 86
 ;; Increment variable by 1. (This is signed, so -1 increments to 0.)
@@ -2937,6 +2980,20 @@
     (dbg t instr "INSERT_OBJ: Moved object ~A to parent ~A~%" object-id dest-id)
     (advance-pc instr)
     (values t "INSERT_OBJ")))
+
+;; REMOVE_OBJ object-id (Spec page 96)
+;; Detach the object from its parent, so that it no longer has any
+;; parent. (Its children remain in its possession.)
+;; NOTE: This is essentially just the first step of INSERT_OBJ.
+;; NOTE: In Zork 1, this instruction appears exactly once.
+(defun instruction-remove_obj (instr)
+  (let* ((operands (retrieve-check-operands instr 1))
+         (object-id (first operands)))
+    ;; XXX: Validate that the objects are within range 0-255
+    (object-remove object-id)
+    (dbg t instr "REMOVE_OBJ: Moved object ~A to top level~%" object-id)
+    (advance-pc instr)
+    (values t "REMOVE_OBJ")))
 
 
 ;; SET_ATTR object-id attribute (Spec page 99)

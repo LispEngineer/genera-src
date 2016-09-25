@@ -490,6 +490,20 @@ ZMI> (map 'list #'oci-name (remove-if #'null (flatten (map 'list (lambda (x) (ma
  SPLIT_WINDOW SET_WINDOW OUTPUT_STREAM INPUT_STREAM SOUND_EFFECT)
 ```
 
+## Unimplemented instructions
+
+```lisp
+(setq *print-right-margin* 72)
+(remove-if (lambda(x) (find-symbol x)) (map 'list (lambda (x) (string-upcase (format nil "instruction-~A" x))) (map 'list #'oci-name (remove-if #'null (flatten (map 'list (lambda (x) (map 'list #'identity x)) (map 'list #'cdr +opcodes+)))))))
+
+("INSTRUCTION-OR" "INSTRUCTION-MOD" "INSTRUCTION-REMOVE_OBJ"
+ "INSTRUCTION-NOT" "INSTRUCTION-NOP" "INSTRUCTION-SAVE"
+ "INSTRUCTION-RESTORE" "INSTRUCTION-RESTART" "INSTRUCTION-POP"
+ "INSTRUCTION-SHOW_STATUS" "INSTRUCTION-VERIFY"
+ "INSTRUCTION-SPLIT_WINDOW" "INSTRUCTION-SET_WINDOW"
+ "INSTRUCTION-OUTPUT_STREAM" "INSTRUCTION-INPUT_STREAM"
+ "INSTRUCTION-SOUND_EFFECT")
+```
 
 # Information
 
