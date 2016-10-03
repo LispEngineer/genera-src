@@ -841,6 +841,9 @@
 
 ;; Story File Load/Initialization -----------------------------------------
 
+;; The last loaded story file, so we can reload it at a restart.
+(defvar *last-story-file* nil)
+
 ;; Loads a story file and resets all state of the Z-M to be able to
 ;; immediately start executing the story. Returns t on success
 ;; and has a second return with an error message.
@@ -881,6 +884,7 @@
     ;; Parse the dictionary into *zdict* for later use
     (parse-zdict)
     ;; Success
+    (setf *last-story-file* filename)
     (values t (format nil "Loaded ~A release ~D serial ~A" filename rel serial))))
 
 
@@ -3241,6 +3245,24 @@
   (dbg t instr "RESTORE: Ignored, no branch")
   (values t "RESTORE (ignored)"))
 
+
+;; RESTART - Spec page 97
+;; Restart the game. (Any "Are you sure?" question must be asked by the game,
+;; not the interpreter.) The only pieces of information surviving from the
+;; previous state are the "transcribing to printer" bit (bit 0 of 'Flags 2'
+;; in the header, at address $10) and the "use fixed pitch font" bit (bit 1
+;; of 'Flags 2').
+;;
+;; In particular, changing the program start address before a restart will
+;; not have the effect of restarting from this new address.
+;;
+;; FIXME: FULLY IMPLEMENT the saving of the two above flags
+(defun instruction-restart (instr)
+  (multiple-value-bind (success msg)
+      (load-story-file *last-story-file*)
+    (unless success
+      (advance-pc instr))
+    (values t msg)))
 
 ;; META-INSTRUCTIONS ----------------------------------------------------
 
