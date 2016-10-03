@@ -512,6 +512,13 @@ The remaining ones used by Zork 1 are:
 * RESTART
 * VERIFY
 
+## Incompletely implemented instructions
+
+* SAVE
+* RESTORE
+
+
+
 
 # Information
 

@@ -3214,6 +3214,34 @@
     (values t "GET_PROP_LEN")))
 
 
+
+;; SAVE/RESTORE INSTRUCTIONS --------------------------------------------
+
+;; SAVE ?(label) - Spec page 98
+;; On Versions 3 and 4, attempts to save the game (all questions about
+;; filenames are asked by in- terpreters) and branches if successful.
+;;
+;; NOTE: This is unimplemented and just steps to the next instruction.
+;; FIXME: IMPLEMENT ME
+(defun instruction-save (instr)
+  (advance-pc instr)
+  (dbg t instr "SAVE: Ignored, no branch")
+  (values t "SAVE (ignored)"))
+
+
+;; RESTORE ?(label) - Spec page 97
+;; See save. In Version 3, the branch is never actually made, since either
+;; the game has successfully picked up again from where it was saved, or
+;; it failed to load the save game file.
+;;
+;; NOTE: This is unimplemented and just steps to the next instruction.
+;; FIXME: IMPLEMENT ME
+(defun instruction-restore (instr)
+  (advance-pc instr)
+  (dbg t instr "RESTORE: Ignored, no branch")
+  (values t "RESTORE (ignored)"))
+
+
 ;; META-INSTRUCTIONS ----------------------------------------------------
 
 ;; No instruction provided (should never happen)
