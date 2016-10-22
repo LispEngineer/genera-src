@@ -20,13 +20,24 @@
 (defpackage :zmi
   (:use :common-lisp))
 
-#+Genera
-(defpackage :zmi
-  ;; See: ftp://ftp.ai.sri.com/pub/mailing-lists/slug/930331/msg00112.html
-  (:use future-common-lisp conditions))
+;#+Genera
+;(defpackage :zmi
+;  ;; See: ftp://ftp.ai.sri.com/pub/mailing-lists/slug/930331/msg00112.html
+;  (:use future-common-lisp conditions))
 
 (in-package :zmi)
 
+;; GENERA NOTES
+;;
+;; For some unknown reason, "lambda" is not interpreted properly
+;; in the code with the package definition above. It seems to require
+;; the use of LISP:LAMBDA instead of just plain "lambda," even though
+;; FUTURE-COMMON-LISP definitely has LAMBDA in it.
+;;
+;; So, when you load this file, you need to do:
+;;   Use the definition of LISP:LAMBDA? --- and hit P for permanently
+;;
+;; Other places in the source code use the construct #'(lambda ...)
 
 ;; Debugging ---------------------------------------------------
 
@@ -286,6 +297,17 @@
 
 ;; Memory -----------------------------------------------------------------
 
+#+Genera
+(defun read-sequence-genera (ary in)
+  (let ((pos 0)
+	(b))
+    (loop
+      ;; Load  bytes one at a time until we run into EOF and get nil
+      (setf b (read-byte in nil nil))
+      (unless b (return))
+      (setf (aref ary pos) b)
+      (incf pos))))
+
 ;; Loads a story file into the memory vector
 ;; Returns nil on failure
 (defun load-file-to-memory (filename)
@@ -295,7 +317,11 @@
       (setf *z-mem*
             (adjust-array *z-mem* +z-mem-length+
                           :fill-pointer (file-length in)))
+      ;; Genera does not have a read-sequence.
+      #-Genera
       (read-sequence *z-mem* in)
+      #+Genera
+      (read-sequence-genera *z-mem* in)
       (close in))
     (not (not in)))) ; Convert result to t or nil
 
@@ -1253,6 +1279,10 @@
 (defun decode-instruction (mloc)
   (let ((retval (make-decoded-instruction))
         (first  (mem-byte mloc)))
+    ;; Set our operand cache up (nothing cached)
+    (setf (decoded-instruction-rop-cache%     retval) nil)
+    (setf (decoded-instruction-rop-is-cached% retval) nil)
+    ;; Decode ...
     (setf (decoded-instruction-memory-location retval) mloc)
     (setf (decoded-instruction-first-byte      retval) first)
     ;; We start with length 1 byte, and add more as necessary
