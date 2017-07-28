@@ -2479,6 +2479,7 @@
     ;; Update our status bar
     (update-status-bar)
     ;; Do our input
+    (finish-output) ; Necessary on PocketCHIP Debian 8
     (setf text (read-line))
     ;; Truncate our input for tokenization
     ;; FIXME: This may have an off by one or two error on the text-max use
@@ -2956,15 +2957,15 @@
 ;; legally have parent zero.)
 ;;
 ;; From zmach06e.pdf page 41:
-;; remove_obj obj — 1OP:$9
+;; remove_obj obj - 1OP:$9
 ;; Remove obj from its current location in the object tree; all its children move with it.
 ;;   The given object is removed from between its siblings (closing the sibling chain
-;; again), and is changed to have no parent and no siblings. If obj has no parent –
-;; and therefore no siblings – nothing happens.
+;; again), and is changed to have no parent and no siblings. If obj has no parent -
+;; and therefore no siblings - nothing happens.
 ;;
-;; insert_obj obj1 obj2 — 2OP:$E
+;; insert_obj obj1 obj2 - 2OP:$E
 ;; Remove obj1 from its current location in the object tree, and insert it
-;; as the first child of obj 2, before all other children. All obj1’s children move with it.
+;; as the first child of obj 2, before all other children. All obj1's children move with it.
 ;;  Object obj1 is first removed from its current location, as with remove_obj obj1.
 ;; It is then made the (first) child of obj2, with the formerly first child as its
 ;; (next) sibling.
@@ -3413,6 +3414,7 @@
 (defun debug-run ()
   (format t "~A~%" (disassemble-instr (decode-instruction *z-pc*)))
   (format t "[N]ext, [Q]uit: ")
+  (finish-output) ; Necessary on PocketCHIP Debian 8
   (let ((cmd (read-line)))
     (when (string-equal cmd "q")
       (return-from debug-run nil))
@@ -3423,6 +3425,7 @@
           (format t "~%Ending due to condition: ~A~%" e)
           (return-from debug-run nil))))
     (format t "[N]ext, [Q]uit: ")
+    (finish-output) ; Necessary on PocketCHIP Debian 8
     (setf cmd (read-line))
     (when (string-equal cmd "q")
       (return-from debug-run nil))
